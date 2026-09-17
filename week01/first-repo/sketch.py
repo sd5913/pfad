@@ -24,28 +24,36 @@ import random
 # The knobs. These are yours. Change them, run again, look, commit.
 # ---------------------------------------------------------------------------
 
-COLS = 12            # squares across
-ROWS = 22            # squares down — the chaos builds over this many rows
+COLS = 12            # hexagons across
+ROWS = 22            # hexagons down — the chaos builds over this many rows
 SEED = 5913          # any integer. Same seed = same image, every time, forever.
-CHAOS = 1.0           # how fast order collapses. 0 = perfect grid. 2 = rubble.
-SQUARE = 40          # size of one square, in svg units
+CHAOS = 1           # how fast order collapses. 0 = perfect grid. 2 = rubble.
+SQUARE = 40          # size of one hexagon, in svg units
 MARGIN = 60          # breathing room around the grid
 STROKE = "#111111"   # line colour
 BACKGROUND = "#faf8f4"
-STROKE_WIDTH = 1.4
+STROKE_WIDTH = 3
 
-OUTPUT = "sketch.svg"
+OUTPUT = "sketch2.svg"
 
 # ---------------------------------------------------------------------------
 # The drawing.
 # ---------------------------------------------------------------------------
 
 
-def square(x, y, size, angle_deg, dx, dy):
-    """One square, rotated about its own centre and nudged off its grid slot."""
+def hexagon(x, y, size, angle_deg, dx, dy):
+    """One hexagon, rotated about its own centre and nudged off its grid slot."""
     cx, cy = x + size / 2, y + size / 2
+    radius = size / 2
+    points = []
+    for i in range(6):
+        angle = math.radians(90 + i * 60)
+        px = cx + radius * math.cos(angle)
+        py = cy + radius * math.sin(angle)
+        points.append(f"{px:.2f},{py:.2f}")
+    points_str = " ".join(points)
     return (
-        f'  <rect x="{x:.2f}" y="{y:.2f}" width="{size}" height="{size}" '
+        f'  <polygon points="{points_str}" '
         f'transform="translate({dx:.2f} {dy:.2f}) '
         f'rotate({angle_deg:.2f} {cx:.2f} {cy:.2f})" />'
     )
@@ -56,20 +64,22 @@ def draw():
     parts = []
 
     for row in range(ROWS):
-        # Disorder grows with depth. Squaring it keeps the top calm and lets the
+        # Disorder grows with depth. Hexagons keep the top calm and let the
         # bottom really come apart — the whole point of the piece.
         damage = CHAOS * (row / ROWS) ** 2
 
         for col in range(COLS):
-            x = MARGIN + col * SQUARE
-            y = MARGIN + row * SQUARE
+            x = MARGIN + col * SQUARE * 0.9
+            y = MARGIN + row * SQUARE * 0.75
+            if row % 2:
+                x += SQUARE * 0.45
             angle = rng.uniform(-1, 1) * damage * 45
             dx = rng.uniform(-1, 1) * damage * SQUARE * 0.5
             dy = rng.uniform(-1, 1) * damage * SQUARE * 0.5
-            parts.append(square(x, y, SQUARE, angle, dx, dy))
+            parts.append(hexagon(x, y, SQUARE, angle, dx, dy))
 
-    width = COLS * SQUARE + MARGIN * 2
-    height = ROWS * SQUARE + MARGIN * 2
+    width = COLS * SQUARE * 0.9 + SQUARE + MARGIN * 2
+    height = ROWS * SQUARE * 0.75 + SQUARE + MARGIN * 2
 
     return "\n".join(
         [
@@ -87,5 +97,5 @@ def draw():
 if __name__ == "__main__":
     with open(OUTPUT, "w", encoding="utf-8") as f:
         f.write(draw())
-    print(f"wrote {OUTPUT} — {COLS}x{ROWS} squares, seed {SEED}, chaos {CHAOS}")
+    print(f"wrote {OUTPUT} — {COLS}x{ROWS} hexagons, seed {SEED}, chaos {CHAOS}")
     print("open it in a browser, then change a number and run me again")
