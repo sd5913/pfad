@@ -6,6 +6,7 @@ const PIANO_KEYS = [
   ['7', 'B4', 493.88], ['8', 'C5', 523.25],
 ];
 let pianoContext = null, pianoVoices = [], pianoLast = null, pianoToken = 0;
+let pianoAnalyser = null, pianoSignal = 0, pianoStatus = 'Ready. Click a key to start audio.';
 function pianoNoteHz(key) { return PIANO_KEYS.find(note => note[0] === String(key).toLowerCase())?.[2] || null; }
 function setup() { createCanvas(PIANO_W, PIANO_H); textFont('monospace'); }
 function draw() {
@@ -22,33 +23,51 @@ function draw() {
   fill('#102b30'); textSize(27);
   text(pianoLast ? `${pianoLast[1]}  =  ${pianoLast[2].toFixed(2)} Hz` : 'Which note would be an octave above C4?', 42, 510);
   fill('#b74423'); rect(930, 490, 220, 70, 6); fill('#fff'); text('STOP', 995, 535);
-  fill('#34545a'); textSize(18); text('Short, quiet notes. Escape, Stop, or leaving the slide silences them.', 42, 585);
+  if (pianoAnalyser) {
+    const samples = new Float32Array(pianoAnalyser.fftSize);
+    pianoAnalyser.getFloatTimeDomainData(samples);
+    const rms = Math.sqrt(samples.reduce((sum, value) => sum + value * value, 0) / samples.length);
+    pianoSignal = Math.max(pianoSignal, rms);
+  }
+  fill('#34545a'); textSize(18);
+  text(pianoStatus + (pianoContext ? ' | engine: ' + pianoContext.state : ''), 42, 580);
+  text('Measured signal peak RMS: ' + pianoSignal.toFixed(4) + ' | Escape / STOP silences playback.', 42, 607);
 }
 async function pianoPlay(key) {
   const note = PIANO_KEYS.find(item => item[0] === String(key).toLowerCase());
   if (!note) return;
   const token = pianoToken;
   try {
-    if (!pianoContext) pianoContext = new (window.AudioContext || window.webkitAudioContext)();
+    pianoStatus = 'Starting audio...';
+    if (!pianoContext) {
+      pianoContext = new (window.AudioContext || window.webkitAudioContext)();
+      pianoAnalyser = pianoContext.createAnalyser();
+      pianoAnalyser.fftSize = 1024;
+      pianoAnalyser.connect(pianoContext.destination);
+    }
     const ctx = pianoContext;
+    pianoStatus = 'Requesting playback; if stuck, check browser Sound permission.';
     await ctx.resume();
     if (token !== pianoToken || ctx !== pianoContext) return;
+    if (ctx.state !== 'running') { pianoStatus = 'Audio blocked: click again or allow Sound in site settings.'; return; }
+    pianoStatus = 'Playing a short note';
+    pianoSignal = 0;
     const osc = ctx.createOscillator(), gain = ctx.createGain(), now = ctx.currentTime;
     osc.type = 'sine'; osc.frequency.value = note[2];
     gain.gain.setValueAtTime(0, now);
     gain.gain.linearRampToValueAtTime(0.025, now + 0.015);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
-    osc.connect(gain); gain.connect(ctx.destination);
+    osc.connect(gain); gain.connect(pianoAnalyser);
     osc.onended = () => { pianoVoices = pianoVoices.filter(voice => voice !== osc); };
     pianoVoices.push(osc); osc.start(now); osc.stop(now + 0.57);
     if (pianoVoices.length > 4) { try { pianoVoices.shift().stop(); } catch (_) {} }
     pianoLast = note;
-  } catch (error) { console.warn('Piano audio unavailable', error); stopAudio(); }
+  } catch (error) { console.warn('Piano audio unavailable', error); stopAudio(); pianoStatus = 'Audio error: ' + error.name + ': ' + error.message; }
 }
 function stopAudio() {
   pianoToken++;
   for (const voice of pianoVoices) { try { voice.stop(); } catch (_) {} }
-  pianoVoices = []; pianoLast = null;
+  pianoVoices = []; pianoLast = null; pianoAnalyser = null; pianoStatus = 'Stopped.';
   if (pianoContext) { pianoContext.close(); pianoContext = null; }
 }
 function mousePressed() {

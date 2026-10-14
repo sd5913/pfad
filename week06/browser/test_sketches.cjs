@@ -40,3 +40,29 @@ assert.equal(surface.window.week06VoiceSurface.getState().rows, 0);
 const surfaceCode = fs.readFileSync(path.join(__dirname, 'voice_surface.js'), 'utf8');
 assert.match(surfaceCode, /createGraphics\(V_W, V_H\)/, 'WEBGL labels need a 2D overlay');
 console.log('piano, harmonics, and voice surface: silent load, mapping, validation, idle microphone');
+
+async function testPianoPlayback() {
+  const p = load('piano');
+  const connections = [];
+  let started = 0, closed = 0;
+  const analyser = {fftSize:0, connect(target) {connections.push(['analyser', target]);}};
+  const destination = {};
+  p.window.AudioContext = class {
+    constructor() {this.state = 'suspended'; this.currentTime = 0; this.destination = destination;}
+    createAnalyser() {return analyser;}
+    async resume() {this.state = 'running';}
+    createOscillator() {return {frequency:{value:0}, connect(target) {connections.push(['oscillator', target]);}, start() {started++;}, stop() {}};}
+    createGain() {return {gain:{setValueAtTime(){},linearRampToValueAtTime(){},exponentialRampToValueAtTime(){}},connect(target){connections.push(['gain',target]);}};}
+    async close() {closed++; this.state = 'closed';}
+  };
+  await p.context.pianoPlay('1');
+  assert.equal(started, 1);
+  assert.equal(p.window.week06Piano.isRunning(), true);
+  assert.equal(connections.find(c => c[0] === 'analyser')[1], destination);
+  assert.equal(connections.find(c => c[0] === 'gain')[1], analyser);
+  p.window.week06Piano.stopAudio();
+  assert.equal(p.window.week06Piano.isRunning(), false);
+  assert.equal(closed, 1);
+  console.log('piano playback: resumed context, connected output graph, bounded voice and Stop');
+}
+testPianoPlayback().catch(error => { console.error(error); process.exitCode = 1; });
