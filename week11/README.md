@@ -23,3 +23,9 @@ If you have Node.js installed, `node --test week11/browser/control.test.cjs` fro
 ## Other paths, not prerequisites
 
 The historical Week 11 materials survey Orange, Blender, TouchDesigner, NDI/OSC and a networked game. An optional Blender demonstration would require a prepared disposable scene: changing `Cube.scale` in `bpy` does not render on its own. The [2025 Week 11 README](https://github.com/sd5913/pfad/blob/2025/week11/README.md) and [OSC example](https://github.com/sd5913/pfad/blob/2025/week11/osc_demo.py) are references, not setup steps for this practical. Keep private files and footage out of demonstrations.
+
+## Verification scope
+
+Independent verification (21 October 2026): both mapping tests passed with Node 24.19.0 on Linux x86_64. These tests check mapping logic; they do not independently certify the browser's timer, canvas rendering or physical creative-tool integration.
+
+The PR workflow checks every available Week 8–12 companion on an Ubuntu 24.04 runner, including the real local MCP smoke when Week 12 is present. It does not deploy or publish the course.
