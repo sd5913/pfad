@@ -110,3 +110,9 @@ what an object or a saved record is.
 - Proposed adaptation: the two-object trace and fictional records simplify the
   source material in line with the current focus on accessible classes.
 - The optional retrieval exercise needs no downloads or separate service.
+
+## Verification scope
+
+Independent verification (21 October 2026): all three tests passed on Linux x86_64 with Python 3.12.14, including separate-process save/reload and broken-reference failure. Windows execution has not been independently checked.
+
+The PR workflow checks every available Week 8–12 companion on an Ubuntu 24.04 runner, including the real local MCP smoke when Week 12 is present. It does not deploy or publish the course.
