@@ -118,3 +118,9 @@ better project design than an agent choosing an action.
   this activity. The errata warns against binding tools to a dead event loop
   through repeated `asyncio.run()` calls; the live client uses one session and
   one async lifecycle.
+
+## Verification scope
+
+Independent verification (21 October 2026): five standard-library tests and the real local MCP stdio discovery/call passed on Linux x86_64, Python 3.12.14 and uv 0.12.23. The MCP call returned 7; the other proposals were rejected before dispatch. The resolved upstream pydantic-settings 2.16.1 emitted a nonfatal lifespan forward-reference warning on stderr; the successful check does not hide that warning. Windows execution and a model-selected tool call have not been independently checked.
+
+The PR workflow checks every available Week 8–12 companion on an Ubuntu 24.04 runner, including the real local MCP smoke when Week 12 is present. It does not deploy or publish the course.
