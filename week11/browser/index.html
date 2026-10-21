@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>One number, one canvas | SD5913 Week 11</title>
+  <style>
+    :root { --ink: #162b30; --paper: #f6f0df; --teal: #105b58; --orange: #bd421d; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: radial-gradient(circle at 85% 0%, #fbd9b0, transparent 38%), var(--paper); font: 1.05rem/1.5 Georgia, serif; }
+    main { max-width: 980px; margin: auto; padding: 2rem clamp(1rem, 4vw, 3rem) 4rem; }
+    .eyebrow, label, button, output, .steps { font-family: 'Trebuchet MS', sans-serif; }
+    .eyebrow { color: var(--teal); font-weight: bold; letter-spacing: .1em; text-transform: uppercase; }
+    h1 { font-size: clamp(2.5rem, 8vw, 5rem); line-height: 1; letter-spacing: -.04em; margin: .4rem 0 1rem; }
+    .lede { max-width: 65ch; }
+    .steps { display: flex; flex-wrap: wrap; gap: .5rem; padding: 0; list-style: none; font-size: .9rem; }
+    .steps li { padding: .35rem .75rem; border: 1px solid var(--teal); border-radius: 2rem; }
+    form { display: flex; flex-wrap: wrap; align-items: end; gap: .8rem; margin: 1.8rem 0 1rem; }
+    label { display: grid; gap: .3rem; font-weight: bold; }
+    input, button { font: inherit; min-height: 2.8rem; border: 2px solid var(--ink); border-radius: .3rem; }
+    input { width: 9rem; padding: .25rem .6rem; background: #fff; }
+    button { padding: .35rem .9rem; color: white; background: var(--teal); cursor: pointer; }
+    button.stop { background: var(--ink); }
+    :focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+    .stage { border: 3px solid var(--ink); background: #142c37; }
+    canvas { display: block; width: 100%; height: auto; }
+    .readout { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem; padding: .75rem 1rem; background: #fff; font-family: 'Trebuchet MS', sans-serif; }
+    .readout output { font-size: 1.4rem; font-weight: bold; }
+    #status { min-height: 1.5em; }
+    a { color: var(--teal); }
+    @media (max-width: 500px) { form button { flex: 1; } }
+  </style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">SD5913 / Week 11 / Thu 19 Nov 2026</p>
+  <h1>One number.<br>One response.</h1>
+  <p class="lede">A no-install creative-tool rehearsal. You are the sender: enter a number and press <strong>Send value</strong>. The browser is the receiver: it turns that number into the opacity of an orange shape. This is <strong>one page, not OSC or two connected programs</strong>.</p>
+  <ol class="steps"><li>Sender: number</li><li>Boundary: Send value</li><li>Receiver: canvas opacity</li><li>Stop: reset to 0%</li></ol>
+  <form id="control" novalidate>
+    <label for="value">Control value (0 to 1)
+      <input id="value" name="value" type="number" step="any" value="0.50" required inputmode="decimal" aria-describedby="hint">
+    </label>
+    <button type="submit">Send value</button>
+    <button type="button" class="stop" id="stop">Stop / reset</button>
+  </form>
+  <p id="hint">Try 0.25, 0.75, 3 (clamped to 1), or clear the field (missing input). After 3 seconds without a new send, the artwork resets.</p>
+  <div class="stage"><canvas id="art" width="800" height="400" aria-hidden="true"></canvas></div>
+  <div class="readout"><output id="result" for="value">Opacity: 0%</output><span id="status" role="status" aria-live="polite">Stopped: safe blank state.</span></div>
+  <p>Draw the four steps on paper. Predict what 0.75 shows, then send it. Change the mapping in <code>control.js</code> (for example, reverse it) and compare. Press Stop, clear the input, or wait three seconds: does the visual return to the safe state? The text readout gives the same result without relying on colour.</p>
+  <p><a href="../README.md">Full exercise and paper-only fallback</a></p>
+</main>
+<script src="control.js"></script>
+</body>
+</html>

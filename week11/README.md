@@ -1,55 +1,25 @@
 # Week 11 — connect one control to one creative tool
 
-> **Planning draft for 2026.** The supplied Week 11 slides cover Orange,
-> Blender, TouchDesigner, NDI/OSC and a networked game. Choose one small
-> practical path, not a compulsory installation tour of all five.
+**Thu 19 Nov 2026.** Follow one numeric input into a mapped visual response, then test what happens when it stops. No account, camera, audio permission, NDI, network port, Blender, Orange or TouchDesigner is needed.
 
-## Proposed activity if the integration path is retained
+## Run the browser practical
 
-Send one simple control value to a prepared creative-tool example.
+1. Open [`browser/index.html`](browser/index.html) directly in a modern browser (double-click the file, or drag it into a tab). It also works offline; do not start a web server. If you cloned the repo, the path is `pfad/week11/browser/index.html`.
+2. Before pressing **Send value**, sketch `number (sender) -> Send value (boundary) -> canvas (receiver) -> orange shape`. Predict the output for `0.75`. Then send it: the orange shape has **75% opacity**, and the text readout says `Opacity: 75%`.
+3. Try `0.25` (25%), `3` (clamped to 100%) and an empty input (reset to 0%). Each send replaces the previous value. The shape's opacity, not its size, changes.
+4. Press **Stop / reset**: output returns to 0%. Send again and do nothing for three seconds: no new value arrives, so the receiver resets to 0%. Clearing the field also resets immediately. A silent sender is different from explicitly sending `0`.
+5. In `browser/control.js`, change `mapOpacity` to reverse the response, e.g. replace `number` with `1 - number` inside the clamp. Reload the page and predict how `0.25` changes. Restore the original mapping if sharing a computer.
 
-1. Name the sender, receiver and value. Predict which visible or audible
-   property should change.
-2. Use a synthetic value first, without a camera or NDI setup.
-3. Change the range or mapping and compare the result.
-4. Stop sending. Decide what the receiver should do with a stale or absent
-   value.
-5. Explain the mapping and demonstrate a safe reset.
+The button crossing is a **simulated sender/receiver boundary inside one browser page**, not OSC, an external tool connection or a claim that two programs communicate. The browser Canvas is the actual creative surface: the value really changes its drawing. `mapOpacity` checks for a finite number, clamps it to 0–1 and converts it to a percentage. Wrong or missing input resets to 0. There is no automatic live input: press Send for each update. The page starts stopped, is silent and opens no ports. The displayed text duplicates the visual result for students who cannot distinguish the shape or its colour.
 
-**Working evidence:** a labelled input/output sketch and one successful mapping,
-plus what happens when updates stop. No additional assessed submission is set.
+Optional teacher extension only: on a **separately prepared and tested** local OSC receiver, use the same `0..1 -> 0..100%` mapping and explicitly implement validation and a stale-update reset. The browser page does not send or receive OSC and cannot verify the external tool's behaviour. Do not install or depend on that receiver for this exercise; camera/NDI are not an entry point.
 
-## Setup and fallback
+## Paper-only route
 
-A printed message/value trace can replace the live connection. Use only a
-prepared, tested receiver already available in the classroom. Do not require
-students to buy or sign up for a creative application.
+Draw four boxes: `sender: 0.75 -> message: value 0.75 -> receiver: clamp then multiply by 100 -> picture: 75% opacity`. Repeat for `0.25 -> 25%`, `3 -> 100%`, and `"oops" -> 0%` (invalid). Cross out the sender-to-receiver arrow, wait three imagined seconds, and draw a blank shape with `0%` beside it. Compare your predictions with a partner. The sketch, one mapping and the missing-update decision are informal working evidence, **not a new assessed submission**.
 
-Keep connections local and sound low. Camera/NDI are optional extensions, not
-the entry point. Do not send camera footage or open network ports as a default.
-Exact software versions, launch steps and shutdown behaviour still need
-verification before release.
+If you have Node.js installed, `node --test week11/browser/control.test.cjs` from the repo root checks the arithmetic and invalid input; Node is not needed to run the artwork.
 
-## Alternative practical: one Blender change
+## Other paths, not prerequisites
 
-On a prepared copy of the archive's Blender scene, identify an object, its
-attributes and the camera. Predict the result of changing one camera position,
-then compare two renders. Work in a disposable scene: the old script clears
-objects before importing a model. No generated asset, GPU model or paid service
-is required. This is an alternative to OSC, not an additional requirement.
-
-Begin with a short team check-in: what works, what blocks you, and what can
-someone else try? The old tutorial uses this alongside the tool examples.
-
-## Sources and release checklist
-
-- Historical: [2025 Week 11 README](https://github.com/sd5913/pfad/blob/2025/week11/README.md),
-  [OSC example](https://github.com/sd5913/pfad/blob/2025/week11/osc_demo.py),
-  and [2025 index](https://github.com/sd5913/pfad/blob/2025/README.md).
-- Supplied “SD5913 - PFAD - Week 11.pdf”: Orange pp18–30; Blender
-  pp31–39 and pp67–68; TouchDesigner pp40–44; NDI/OSC pp45–55;
-  team check-in p63; game integration pp56–60 and pp74–77. Visual review
-  confirms the code and workflow screenshots. Advanced asyncio is not core.
-- Activities are proposed small adaptations of these sources.
-- Pending: choice of tool/focus, tested synthetic-input path,
-  tested receiver, stale-data behaviour and no-install fallback.
+The historical Week 11 materials survey Orange, Blender, TouchDesigner, NDI/OSC and a networked game. An optional Blender demonstration would require a prepared disposable scene: changing `Cube.scale` in `bpy` does not render on its own. The [2025 Week 11 README](https://github.com/sd5913/pfad/blob/2025/week11/README.md) and [OSC example](https://github.com/sd5913/pfad/blob/2025/week11/osc_demo.py) are references, not setup steps for this practical. Keep private files and footage out of demonstrations.
