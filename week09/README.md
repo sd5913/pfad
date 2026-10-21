@@ -137,3 +137,9 @@ newline-framed replies on one connection, reconnects, runs the example client,
 stops the server, and checks that the client reports failure rather than a
 fake reply. It uses only the Python standard library and leaves no listener
 running. No class submission or deadline is attached to this practical.
+
+## Verification scope
+
+Independent verification (21 October 2026): the local loopback smoke test passed on Linux x86_64 with Python 3.12.14, including ordered replies, reconnect, stopped-server failure and process cleanup. Windows execution has not been independently checked.
+
+The PR workflow checks every available Week 8–12 companion on an Ubuntu 24.04 runner, including the real local MCP smoke when Week 12 is present. It does not deploy or publish the course.
