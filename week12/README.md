@@ -22,6 +22,13 @@ Start with prepared text examples rather than a live agent.
 **Working evidence:** one labelled call/result trace and a failure case.
 This is a proposed practice exercise, not a new assessed deliverable.
 
+## Who does what?
+
+The AI host application contains an MCP client. The client connects to an MCP
+server that exposes the addition tool. The model proposes a call; the
+application mediates execution and permissions. MCP standardizes the exchange,
+not automatic trust or safety. Keep these boundaries visible in the trace.
+
 ## Small live practical, after preflight
 
 Prepare one local MCP server exposing only a pure addition function. First
@@ -32,6 +39,12 @@ filesystem, network, image-generation or account tools. Keep a
 human decision before any paid generation, external send or file overwrite.
 A static trace is the core fallback; no account, paid API or new model download
 is required.
+
+Local stdio and remote Streamable HTTP require different setup. For this small
+practical, select and preflight one local path; do not silently switch transports.
+Pin the protocol/SDK versions before adding commands or code. Version-specific
+discovery features and SDK APIs are not part of this handout until checked.
+Advanced asyncio is not required for the core addition trace.
 
 Do not copy the archived event-loop setup: the
 [errata](https://github.com/sd5913/pfad/blob/2025/ERRATA.md) records tools bound to
@@ -44,6 +57,11 @@ Ask whether a tool-using agent adds a necessary interaction. A direct button
 calling a known function may be clearer. AI need not be inside the product.
 
 ## Sources and release checklist
+
+- Current primary references, checked **21 October 2026**: MCP
+  [architecture](https://modelcontextprotocol.io/docs/2026-07-28/learn/architecture)
+  and [server concepts](https://modelcontextprotocol.io/docs/2026-07-28/learn/server-concepts)
+  (2026-07-28 documentation).
 
 - Historical: [2025 Week 12](https://github.com/sd5913/pfad/tree/2025/week12),
   [index](https://github.com/sd5913/pfad/blob/2025/README.md) and
