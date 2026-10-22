@@ -18,7 +18,7 @@ runs, so expect it to grow week by week — `git pull` before each class.
 3. **Read [`assignments/01-why-are-we-here.md`](assignments/01-why-are-we-here.md).**
    Your first assignment is due at the end of week 2. Before you submit, run
    [the check](assignments/check.py) inside your repo — it tells you what is missing.
-4. **For the current lesson, go to [Week 10: classes, objects and saved data](week10/README.md).**
+4. **For the current lesson, go to [Week 7: from an idea to one interaction](week07/README.md).**
    The [weekly content index](#weekly-content) links to the same material.
 
 ```bash
@@ -105,6 +105,7 @@ can show people. Treat them accordingly.
 | 04 | [One control, one clear response — Streamlit, browser events, FastAPI and a test](week04/README.md) |
 | 05 | [Images, frames and representations — 8 October 2026](week05/README.md) |
 | 06 | [Sound, music and speech — WAV samples, browser instruments and a local voice bot](week06/README.md) |
+| 07 | [From an idea to one interaction — 22 October 2026](week07/README.md) |
 | 10 | [Classes, objects and saved data — Thu 12 Nov 2026](week10/README.md) |
 
 More lands each week.
