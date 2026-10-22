@@ -11,6 +11,7 @@
 python_modules/
 pylock.toml
 node_modules/
+week08/*.task
 
 # editor / os noise
 .DS_Store
