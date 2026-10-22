@@ -60,19 +60,40 @@ an explicit disconnect; `green` uses a **new** connection. Sending bytes
 alone would not prove that the other program processed them: here each
 `received` line is printed only after the matching reply arrives.
 
-## Make failure visible; reconnect yourself
+## Interrupt an open connection
 
-In terminal A, press **Ctrl+C**. The server prints `Stopped`. Run the **same**
-client command in terminal B again:
+Keep terminal A (the server) running. In terminal B, use the pause option:
+
+```bash
+python3 week09/echo_client.py --pause-before-blue
+```
+
+Wait for `received: red` and the `Pause after red` prompt. The client has **not
+sent blue yet**. In terminal A, press **Ctrl+C** to stop the server. Only then
+press Enter in B. You should see `sent: blue`, followed by `No reply` on
+stderr and a nonzero exit, with **no** `received: blue` or `green`. The
+connection that carried red has closed; the client does not quietly create a
+new one to finish blue. Depending on timing and operating system, the error
+details in parentheses can differ.
+
+What should a person see while waiting, after the failure, and when they
+choose to retry? Draw these three screen states. For this controlled exercise
+we know blue was not sent *before* we stopped the server; in a real
+unanswered in-flight request, a missing reply alone cannot tell us whether
+the server processed it. Do not automatically repeat actions that could have
+side effects.
+
+## Make connection failure visible; reconnect yourself
+
+With the server stopped, run the ordinary client command in terminal B again:
 
 ```bash
 python3 week09/echo_client.py
 ```
 
 Expect `No reply` on stderr and a nonzero exit status, **not** a successful
-`received` line. A stopped server refuses the connection. If a server instead
-disappears *after* a send, a missing reply does not tell you whether that
-message was processed. Never display the last reply as if it were new.
+`received` line. A stopped server refuses a new connection. Never display the
+last reply as if it were new.
 
 Start terminal A again with `python3 week09/echo_server.py`, then rerun
 terminal B with `python3 week09/echo_client.py`. This creates new connections;
@@ -134,12 +155,13 @@ python3 -m unittest discover -s week09 -p 'test_*.py'
 
 This starts a server on a free **loopback** port, verifies two ordered
 newline-framed replies on one connection, reconnects, runs the example client,
-stops the server, and checks that the client reports failure rather than a
-fake reply. It uses only the Python standard library and leaves no listener
-running. No class submission or deadline is attached to this practical.
+pauses after red and stops the server before blue, and checks both interrupted
+and refused connections report failure rather than a fake reply. It uses only
+the Python standard library and leaves no listener running. No class
+submission or deadline is attached to this practical.
 
 ## Verification scope
 
-Independent verification (21 October 2026): the local loopback smoke test passed on Linux x86_64 with Python 3.12.14, including ordered replies, reconnect, stopped-server failure and process cleanup. Windows execution has not been independently checked.
+Independent verification (21 October 2026): the original local loopback smoke test passed on Linux x86_64 with Python 3.12.14, including ordered replies, reconnect, stopped-server failure and process cleanup. The paused disconnect exercise was added later; see the current PR checks for its result. Windows execution has not been independently checked.
 
 The PR workflow checks every available Week 8–12 companion on an Ubuntu 24.04 runner, including the real local MCP smoke when Week 12 is present. It does not deploy or publish the course.

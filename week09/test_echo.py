@@ -1,5 +1,6 @@
 """Local smoke test: python -m unittest discover -s week09 -p 'test_*.py'."""
 
+import os
 import re
 import signal
 import socket
@@ -52,8 +53,30 @@ class EchoSmokeTest(unittest.TestCase):
             self.assertLess(client.stdout.index("received: blue"), client.stdout.index("received: green"))
             self.assertIn("reconnected", client.stdout)
 
-            server.send_signal(signal.SIGINT)
-            self.assertEqual(server.wait(timeout=5), 0, server.stderr.read())
+            paused = subprocess.Popen(
+                [sys.executable, "-u", str(HERE / "echo_client.py"),
+                 "--port", str(port), "--pause-before-blue"],
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True,
+            )
+            try:
+                with DefaultSelector() as selector:
+                    selector.register(paused.stdout, EVENT_READ)
+                    output = b""
+                    while b"received: red\n" not in output:
+                        self.assertTrue(selector.select(timeout=5), "paused client did not receive red")
+                        output += os.read(paused.stdout.fileno(), 4096)
+                server.send_signal(signal.SIGINT)
+                self.assertEqual(server.wait(timeout=5), 0, server.stderr.read())
+                remaining, errors = paused.communicate(input="\n", timeout=8)
+                self.assertNotEqual(paused.returncode, 0)
+                self.assertIn("No reply", errors)
+                self.assertNotIn("received: blue", output.decode() + remaining)
+            finally:
+                if paused.poll() is None:
+                    paused.kill()
+                    paused.communicate(timeout=5)
+
             failed = subprocess.run(
                 [sys.executable, str(HERE / "echo_client.py"), "--port", str(port)],
                 capture_output=True, text=True, timeout=8,
