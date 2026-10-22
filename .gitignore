@@ -24,3 +24,6 @@ week02/spec/*.svg
 # week 3 — the web page currents_web.py writes; a Pages workflow makes it fresh on every push
 week03/site/
 week03/data/cache/
+
+# Week 10 — fictional disposable JSON created by the companion commands
+week10/out/

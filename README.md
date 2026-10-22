@@ -106,5 +106,6 @@ can show people. Treat them accordingly.
 | 05 | [Images, frames and representations — 8 October 2026](week05/README.md) |
 | 06 | [Sound, music and speech — WAV samples, browser instruments and a local voice bot](week06/README.md) |
 | 07 | [From an idea to one interaction — 22 October 2026](week07/README.md) |
+| 10 | [Classes, objects and saved data — Thu 12 Nov 2026](week10/README.md) |
 
 More lands each week.
