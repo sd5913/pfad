@@ -52,6 +52,10 @@ check the example automatically, run:
 python -m unittest discover -s week10 -p 'test_*.py'
 ```
 
+The example checks that IDs are unique within each collection and that every
+artwork's `exhibition_id` exists. JSON itself performs neither check. The
+script is a small teaching example, not a database or a general file validator.
+
 ## Activity 1: describe a thing in your project
 
 Choose a player, artwork, note or other simple thing, not a real user account.
@@ -113,6 +117,6 @@ what an object or a saved record is.
 
 ## Verification scope
 
-Independent verification (21 October 2026): all three tests passed on Linux x86_64 with Python 3.12.14, including separate-process save/reload and broken-reference failure. Windows execution has not been independently checked.
+Independent verification (22 October 2026): all four tests passed on Linux x86_64 with Python 3.12.14, including separate-process save/reload, broken-reference failure and duplicate-ID rejection. Windows execution has not been independently checked.
 
 The PR workflow checks every available Week 8–12 companion on an Ubuntu 24.04 runner, including the real local MCP smoke when Week 12 is present. It does not deploy or publish the course.

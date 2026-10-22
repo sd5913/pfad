@@ -25,6 +25,16 @@ def record_for(artwork):
     }
 
 
+def unique_ids(records, kind):
+    ids = set()
+    for record in records:
+        identifier = record["id"]
+        if identifier in ids:
+            raise ValueError(f"Duplicate {kind} ID {identifier}")
+        ids.add(identifier)
+    return ids
+
+
 def save(path, broken_link=False):
     amber = Artwork("a1", "Amber", 2, "e1")
     blue = Artwork("a2", "Blue", 7, "e99" if broken_link else "e1")
@@ -47,7 +57,8 @@ def load(path):
     with path.open(encoding="utf-8") as source:
         data = json.load(source)
 
-    exhibition_ids = {record["id"] for record in data["exhibitions"]}
+    exhibition_ids = unique_ids(data["exhibitions"], "exhibition")
+    unique_ids(data["artworks"], "artwork")
     artworks = [
         Artwork(record["id"], record["title"], record["views"], record["exhibition_id"])
         for record in data["artworks"]

@@ -52,6 +52,24 @@ class ArtworkTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("Unresolved exhibition_id e99 for artwork a2", result.stderr)
 
+    def test_duplicate_ids_are_not_valid_relationship_targets(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "duplicates.json"
+            self.assertEqual(self.run_demo("save", path).returncode, 0)
+            data = json.loads(path.read_text(encoding="utf-8"))
+            data["artworks"][1]["id"] = "a1"
+            path.write_text(json.dumps(data), encoding="utf-8")
+            result = self.run_demo("load", path)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Duplicate artwork ID a1", result.stderr)
+
+            data["artworks"][1]["id"] = "a2"
+            data["exhibitions"].append({"id": "e1", "name": "Other"})
+            path.write_text(json.dumps(data), encoding="utf-8")
+            result = self.run_demo("load", path)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Duplicate exhibition ID e1", result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()
