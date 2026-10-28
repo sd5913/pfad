@@ -67,10 +67,37 @@ async function position(page, x) {
     await a.getByRole('button', { name: 'Try invalid x = 101', exact: true }).click();
     await a.waitForFunction(() => document.querySelector('#outcome').textContent.includes('Rejected'));
     assert.equal(await b.locator('#snapshot').getAttribute('data-revision'), revision);
+    // Delay delivery of actual server results at the client boundary; keep the real transport/state path.
+    await a.evaluate(() => {
+      const receive = socket.onmessage;
+      window.delayedResults = [];
+      socket.onmessage = event => {
+        const result = JSON.parse(event.data);
+        if (result.type === 'ack' || result.type === 'rejected') window.delayedResults.push(event);
+        else receive(event);
+      };
+      window.releaseResult = () => receive(window.delayedResults.shift());
+      window.restoreResults = () => { socket.onmessage = receive; };
+    });
+    await a.getByRole('button', { name: 'Try invalid x = 101', exact: true }).click();
+    await a.waitForFunction(() => window.delayedResults.length === 1);
+    await a.waitForFunction(() => document.querySelector('#outcome').textContent.includes('Unknown'));
+    await position(a, 35);
+    await a.getByRole('button', { name: 'Send WebSocket', exact: true }).click();
+    await state(b, 35);
+    await a.waitForFunction(() => window.delayedResults.length === 2);
+    const waitingForB = await a.locator('#outcome').textContent();
+    assert.match(waitingForB, /Waiting for acknowledgement/);
+    await a.evaluate(() => window.releaseResult());
+    assert.equal(await a.locator('#outcome').textContent(), waitingForB);
+    await a.waitForFunction(() => document.querySelector('#outcome').textContent.includes('Unknown'));
+    await a.evaluate(() => window.releaseResult());
+    await a.waitForFunction(() => document.querySelector('#outcome').textContent.includes('Acknowledged late'));
+    await a.evaluate(() => window.restoreResults());
     await a.getByRole('button', { name: 'Disconnect', exact: true }).click();
     await a.waitForFunction(() => document.querySelector('#connection').textContent.includes('Disconnected'));
     await a.getByRole('button', { name: 'Connect', exact: true }).click();
-    await state(a, 80);
+    await state(a, 35);
     await position(a, 73);
     await a.getByRole('button', { name: 'Send, ignore replies, disconnect', exact: true }).click();
     await a.waitForFunction(() => document.querySelector('#outcome').textContent.includes('Unknown'));
@@ -88,11 +115,18 @@ async function position(page, x) {
     await b.waitForFunction(() => document.querySelector('#connection').textContent.includes('Disconnected'));
     assert.equal(await b.getByRole('button', { name: 'Send WebSocket', exact: true }).isDisabled(), true);
     await startServer();
+    await b.getByRole('button', { name: 'Read HTTP snapshot', exact: true }).click();
+    await state(b, 50);
+    assert.equal(await b.locator('#snapshot').getAttribute('data-revision'), '0');
+    assert.match(await b.locator('#connection').textContent(), /Disconnected.*HTTP snapshot/);
+    assert.equal(await b.getByRole('button', { name: 'Send WebSocket', exact: true }).isDisabled(), true);
+    if (destination) await b.screenshot({ path: path.join(destination, 'http-only-restart-recovery.png'), fullPage: true });
     await b.getByRole('button', { name: 'Connect', exact: true }).click();
+    await b.waitForFunction(() => document.querySelector('#connection').textContent === 'Connected');
     await state(b, 50);
     assert.equal(await b.locator('#snapshot').getAttribute('data-revision'), '0');
     assert.deepEqual(pageErrors, []);
-    console.log('PASS: two browser clients, HTTP/WS shared state, rejection, disconnect/reconnect, unknown ack, stopped-server UI and RAM reset');
+    console.log('PASS: two browser clients, HTTP/WS state, correlated delayed results, late ack, disconnect/reconnect, unknown ack, stopped-server UI and HTTP-only restart recovery');
   } finally {
     if (context) await context.tracing.stop(destination ? { path: path.join(destination, 'trace.zip') } : {});
     if (browser) await browser.close();

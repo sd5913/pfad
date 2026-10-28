@@ -103,6 +103,9 @@ state, then acknowledges the sender. On a newly started server:
 The ID matches a receipt to an action; revision orders server changes. This
 demo **does not store IDs to deduplicate retries**. `set_x` assigns an absolute
 position; retrying a command such as `add_score` would need a different decision.
+Rejections echo a usable action ID too. A delayed result for an earlier action
+must not finish a different action that is still waiting. An unidentifiable
+message error is logged without pretending to resolve a named action.
 
 Inspect `apply()` and `snapshot()` in [scene.py](scene.py), then trace the
 action through `updates()` in [server.py](server.py) and the browser's `show()`.
@@ -212,9 +215,12 @@ Restore the original rules first; keep both clients connected.
 4. **Stopped server:** Ctrl+C in terminal A. Both tabs become Disconnected;
    WebSocket send controls disable. An HTTP snapshot cannot reach the stopped
    listener. The last known scene remains visible with that label.
-5. **Recover:** rerun `uv run python server.py`; Connect both tabs. Expect
-   x = 50, revision 0. New connections do not restore the old process's memory.
-   Week 10 asks what should persist.
+5. **Recover:** rerun `uv run python server.py`. Before reconnecting B, press
+   **Read HTTP snapshot** there. Expect x = 50, revision 0, while the label
+   still says Disconnected and identifies the HTTP snapshot. This reads current
+   state once; it does not open a continuing connection or resend an action.
+   Then Connect both tabs for live updates. New connections do not restore the
+   old process's memory. Week 10 asks what should persist.
 
 The ignore-replies demonstration removes one client observation; it does not
 claim the network dropped a packet. In a real unanswered action the server
@@ -298,16 +304,24 @@ Dependency targets are current upstream releases verified through GitHub on
 **websockets 17.3** (19 October), on Python 3.13. Exact transitive lock capture
 and latest-pin runtime acceptance await normal-network CI.
 
-Linux x86_64 / Python **3.13.16** preparation: four rule and four actual
+Linux x86_64 / Python **3.13.16** preparation: four rule and five actual
 in-memory ASGI checks pass with cached FastAPI **0.142.2**, Starlette **1.7.0**,
 uvicorn **0.54.0**, websockets **17.2**, Pydantic **2.10.6**. This is not
 latest-pin acceptance. The authoring host forbids sockets, so both live suites
-explicitly skip there. JavaScript syntax checks pass. Real two-browser behavior,
+explicitly skip there. Nine deterministic checks of the production JavaScript
+pass with controlled browser boundaries, and syntax checks pass. Real two-browser behavior,
 desktop/mobile appearance, default-port coexistence with the presenter, and
 Windows/macOS execution still need the separate live checks.
 
-Maintainers: [check_browser.cjs](check_browser.cjs) owns server startup, shutdown
-and restart on 8009; do not start another server for it. With Playwright 1.56.1
+Maintainers: `node test_browser_state.cjs` executes the production inline
+JavaScript with controlled DOM/network/timer boundaries. It checks delayed
+results and safe manual refresh, but does not prove browser layout or networking.
+Manual HTTP reads while disconnected accept the newest fresh response if no
+newer state or connection intervened. Older overlapping responses cannot roll
+back a newer observation; revision order is still enforced for the live stream.
+
+[check_browser.cjs](check_browser.cjs) owns server startup, shutdown
+and restart on 8009; do not start another server for it. With Playwright 1.64.1
 and Chromium installed, `node check_browser.cjs` checks two pages and recovery.
 `WEEK09_PYTHON` selects this folder's Python; `WEEK09_SCREENSHOT_DIR` optionally
 retains desktop/mobile screenshots and a browser trace. These are prepared

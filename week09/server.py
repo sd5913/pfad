@@ -14,6 +14,15 @@ from scene import Scene
 HERE = Path(__file__).resolve().parent
 
 
+def rejection(error, message=None):
+    response = {"type": "rejected", "error": str(error)}
+    if isinstance(message, dict):
+        message_id = message.get("id")
+        if isinstance(message_id, str) and 1 <= len(message_id) <= 48:
+            response["id"] = message_id
+    return response
+
+
 def create_app():
     app = FastAPI()
     scene = Scene()
@@ -45,7 +54,7 @@ def create_app():
             try:
                 ack = scene.apply(message)
             except ValueError as error:
-                return JSONResponse({"type": "rejected", "error": str(error)}, status_code=422)
+                return JSONResponse(rejection(error, message), status_code=422)
             await broadcast()
             return ack
 
@@ -60,6 +69,7 @@ def create_app():
                 incoming = await client.receive()
                 if incoming["type"] == "websocket.disconnect":
                     break
+                message = None
                 try:
                     if "text" not in incoming:
                         raise ValueError("Send a JSON text message, not binary.")
@@ -70,7 +80,7 @@ def create_app():
                         await broadcast()
                         await client.send_json(ack)
                 except (ValueError, UnicodeError) as error:
-                    await client.send_json({"type": "rejected", "error": str(error)})
+                    await client.send_json(rejection(error, message))
         except (WebSocketDisconnect, RuntimeError, OSError):
             pass
         finally:

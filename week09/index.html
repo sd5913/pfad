@@ -73,7 +73,8 @@
 </main>
 <script>
   const el = id => document.getElementById(id);
-  let socket = null, pending = null, ignoreReplies = false, unresolvedId = null, lastRevision = -1;
+  let socket = null, channel = null, pending = null, latestActionId = null, unresolvedId = null;
+  let lastRevision = -1, observation = 0, manualRead = 0;
   const trace = [];
   function log(label, value = '') {
     trace.push(`${label} ${typeof value === 'string' ? value : JSON.stringify(value)}`);
@@ -87,47 +88,62 @@
     for (const id of ['send-ws', 'invalid', 'uncertain']) el(id).disabled = !open || !!pending;
     el('send-http').disabled = !!pending;
   }
-  function finish(text) {
-    if (pending) clearTimeout(pending.timer);
+  function finish(request, text) {
+    if (pending !== request) return;
+    clearTimeout(request.timer);
     pending = null;
     el('outcome').textContent = text;
     buttons();
   }
-  function unknown() {
-    if (pending) {
-      unresolvedId = pending.id;
-      finish(`Unknown: no acknowledgement observed for ${pending.id}. Inspect the scene after reconnecting. Do not assume success or failure; no automatic resend.`);
-    }
+  function unknown(request) {
+    if (pending !== request) return;
+    unresolvedId = request.id;
+    finish(request, `Unknown: no acknowledgement observed for ${request.id}. Inspect the scene after reconnecting. Do not assume success or failure; no automatic resend.`);
   }
-  function show(message) {
+  function show(message, originatingId = null) {
     log('received', message);
     if (message.type === 'state') {
       if (message.revision < lastRevision) { log('ignored older snapshot'); return; }
       lastRevision = message.revision;
+      observation += 1;
       el('ball').style.left = `${message.x}%`;
       el('snapshot').textContent = `x = ${message.x} / revision ${message.revision}`;
       el('snapshot').dataset.x = message.x;
       el('snapshot').dataset.revision = message.revision;
-    } else if (message.type === 'ack' && message.id === pending?.id) {
-      finish(`Acknowledged ${message.id} at revision ${message.revision}.`);
-    } else if (message.type === 'ack' && message.id === unresolvedId) {
-      unresolvedId = null;
-      el('outcome').textContent = `Acknowledged late: ${message.id} at revision ${message.revision}.`;
-    } else if (message.type === 'rejected' && pending) {
-      finish(`Rejected: ${message.error} Shared state stays unchanged.`);
+    } else if (message.type === 'ack' || message.type === 'rejected') {
+      if (typeof message.id !== 'string' || (originatingId && message.id !== originatingId)) {
+        log('uncorrelated result', 'No action was settled.'); return;
+      }
+      const text = message.type === 'ack'
+        ? `Acknowledged ${message.id} at revision ${message.revision}.`
+        : `Rejected ${message.id}: ${message.error} That action did not change shared state.`;
+      if (message.id === pending?.id) finish(pending, text);
+      else if (!pending && message.id === latestActionId && message.id === unresolvedId) {
+        unresolvedId = null;
+        el('outcome').textContent = message.type === 'ack'
+          ? `Acknowledged late: ${message.id} at revision ${message.revision}.`
+          : `Rejected late: ${message.id}: ${message.error} That action did not change shared state.`;
+      }
     }
   }
   function connect() {
     if (socket && socket.readyState < WebSocket.CLOSING) return;
-    ignoreReplies = false;
     el('connection').textContent = 'Connecting';
     socket = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/ws`);
-    socket.onopen = () => { lastRevision = -1; el('connection').textContent = 'Connected'; log('connection open'); buttons(); };
-    socket.onmessage = event => { if (!ignoreReplies) show(JSON.parse(event.data)); };
-    socket.onerror = () => log('connection error', 'Check server terminal and address.');
+    const current = { socket, ignoreReplies: false };
+    channel = current;
+    socket.onopen = () => {
+      if (channel !== current) return;
+      lastRevision = -1; el('connection').textContent = 'Connected'; log('connection open'); buttons();
+    };
+    socket.onmessage = event => {
+      if (channel === current && !current.ignoreReplies) show(JSON.parse(event.data));
+    };
+    socket.onerror = () => { if (channel === current) log('connection error', 'Check server terminal and address.'); };
     socket.onclose = () => {
+      if (channel !== current) return;
       el('connection').textContent = 'Disconnected - display is last known';
-      if (pending?.transport === 'ws') unknown();
+      if (pending?.transport === 'ws' && pending.channel === current) unknown(pending);
       log('connection closed', 'Use Connect to get a fresh snapshot.'); buttons();
     };
     buttons();
@@ -135,24 +151,27 @@
   async function send(transport, invalid = false, disconnect = false) {
     if (pending) return;
     const message = { id: crypto.randomUUID(), action: 'set_x', x: invalid ? 101 : Number(el('position').value) };
-    pending = { id: message.id, transport, timer: setTimeout(unknown, 3000) };
+    const request = { id: message.id, transport, channel };
+    request.timer = setTimeout(() => unknown(request), 3000);
+    pending = request;
+    latestActionId = request.id;
     el('outcome').textContent = `Waiting for acknowledgement: ${message.id}`;
     log(`sent ${transport}`, message); buttons();
     if (transport === 'ws') {
       try {
         socket.send(JSON.stringify(message));
         if (disconnect) {
-          ignoreReplies = true;
+          request.channel.ignoreReplies = true;
           log('demo', 'Deliberately ignoring replies before closing.');
           socket.close();
         }
-      } catch { unknown(); }
+      } catch { unknown(request); }
     } else {
       try {
         const response = await fetch('/action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(message), signal: AbortSignal.timeout(3000) });
         const result = await response.json();
-        log(`HTTP ${response.status}`); show(result);
-      } catch { unknown(); }
+        log(`HTTP ${response.status}`); show(result, request.id);
+      } catch { unknown(request); }
     }
   }
   el('connect').onclick = connect;
@@ -162,10 +181,19 @@
   el('invalid').onclick = () => send('ws', true);
   el('uncertain').onclick = () => send('ws', false, true);
   el('read-http').onclick = async () => {
+    const read = ++manualRead, atStart = observation, readChannel = channel;
     try {
-      const response = await fetch('/state', { signal: AbortSignal.timeout(3000) });
+      const response = await fetch('/state', { cache: 'no-store', signal: AbortSignal.timeout(3000) });
       if (!response.ok) throw new Error();
-      log(`HTTP ${response.status}`); show(await response.json());
+      const snapshot = await response.json();
+      if (read !== manualRead || atStart !== observation || channel !== readChannel) {
+        log('ignored overtaken HTTP snapshot'); return;
+      }
+      // A fresh manual read can recover reset RAM without reopening WebSocket.
+      const disconnected = !socket || socket.readyState >= WebSocket.CLOSING;
+      if (disconnected) lastRevision = -1;
+      log(`HTTP ${response.status}`); show(snapshot);
+      if (disconnected) el('connection').textContent = 'Disconnected - HTTP snapshot just read';
     } catch { log('HTTP read failed', 'Check the server and port; displayed position may be stale.'); }
   };
   el('position').oninput = () => { el('chosen').textContent = el('position').value; };

@@ -123,6 +123,21 @@ class ASGIRouteTests(unittest.TestCase):
         self.assertEqual(self.http("/missing")[0], 404)
         self.assertEqual(self.http("/state"), (200, {"type": "state", "x": 50, "revision": 0}))
 
+    def test_rejections_echo_only_recoverable_valid_ids_on_both_transports(self):
+        payload = b'{"id":"invalid-action","action":"set_x","x":101}'
+        code, response = self.http("/action", payload)
+        self.assertEqual(code, 422)
+        self.assertEqual(response.get("id"), "invalid-action")
+        client = self.websocket()
+        client.messages()
+        client.feed({"type": "websocket.receive", "text": payload.decode()})
+        self.assertEqual(client.messages()[0].get("id"), "invalid-action")
+        for data in (b"{broken", b"[]", b'{"id":42}', b'{"id":""}'):
+            with self.subTest(data=data):
+                self.assertNotIn("id", self.http("/action", data)[1])
+                client.feed({"type": "websocket.receive", "text": data.decode()})
+                self.assertNotIn("id", client.messages()[0])
+
 
 if __name__ == "__main__":
     unittest.main()
