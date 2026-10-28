@@ -1,0 +1,20 @@
+[project]
+name = "pfad-week10"
+version = "0.1.0"
+description = "Persistent conversations and a source-backed handbook bot"
+requires-python = ">=3.12"
+dependencies = ["peewee==4.5.3"]
+
+[project.optional-dependencies]
+encoder = ["torch==2.14.1", "transformers==5.19.0"]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", extra = "encoder", marker = "platform_system != 'Darwin'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
