@@ -1,31 +1,302 @@
-# Week 11 — connect one control to one creative tool
+# Week 11: Python controls a creative application
 
-**Thu 19 Nov 2026.** Follow one numeric input into a mapped visual response, then test what happens when it stops. No account, camera, audio permission, NDI, network port, Blender, Orange or TouchDesigner is needed.
+**Thursday 19 November 2026.** Complete **one** application path: the Godot
+tiny world or the Blender scene/render alternative. Inspect a real application,
+make a purposeful change, trace an MCP request and verify the result. This is
+a separate 120-minute tutorial; no ClassPoint account or paid model is needed.
 
-## Run the browser practical
+By the end you should distinguish source files, running application state,
+a tool request and the observed result. Explain why a successful tool response
+alone does not prove that an artwork is correct.
 
-1. Open [`browser/index.html`](browser/index.html) directly in a modern browser (double-click the file, or drag it into a tab). It also works offline; do not start a web server. If you cloned the repo, the path is `pfad/week11/browser/index.html`.
-2. Before pressing **Send value**, sketch `number (sender) -> Send value (boundary) -> canvas (receiver) -> orange shape`. Predict the output for `0.75`. Then send it: the orange shape has **75% opacity**, and the text readout says `Opacity: 75%`.
-3. Try `0.25` (25%), `3` (clamped to 100%) and an empty input (reset to 0%). Each send replaces the previous value. The shape's opacity, not its size, changes.
-4. Press **Stop / reset**: output returns to 0%. Send again and do nothing for three seconds: no new value arrives, so the receiver resets to 0%. Clearing the field also resets immediately. A silent sender is different from explicitly sending `0`.
-5. In `browser/control.js`, change `mapOpacity` to reverse the response, e.g. replace `number` with `1 - number` inside the clamp. Reload the page and predict how `0.25` changes. Restore the original mapping if sharing a computer.
+## Route and prerequisites
 
-The button crossing is a **simulated sender/receiver boundary inside one browser page**, not OSC, an external tool connection or a claim that two programs communicate. The browser Canvas is the actual creative surface: the value really changes its drawing. `mapOpacity` checks for a finite number, clamps it to 0–1 and converts it to a percentage. Wrong or missing input resets to 0. There is no automatic live input: press Send for each update. The page starts stopped, is silent and opens no ports. The displayed text duplicates the visual result for students who cannot distinguish the shape or its colour.
+| Minutes | Activity |
+| --- | --- |
+| 0-15 | Set up one application and inspect the supplied scene |
+| 15-35 | Inspect/change through the direct application API |
+| 35-55 | Trace a real MCP request and check its application effect |
+| 55-65 | Break |
+| 65-85 | Make a purposeful change and run/render the result |
+| 85-100 | Trigger a failure, diagnose it and recover |
+| 100-120 | Playtest-and-feedback tutor review/project support |
 
-Optional teacher extension only: on a **separately prepared and tested** local OSC receiver, use the same `0..1 -> 0..100%` mapping and explicitly implement validation and a stale-update reset. The browser page does not send or receive OSC and cannot verify the external tool's behaviour. Do not install or depend on that receiver for this exercise; camera/NDI are not an entry point.
+Use a current standard Godot editor or Blender, [uv](https://docs.astral.sh/uv/),
+and a desktop that can display the application or its output image. The latest
+installed versions checked on 29 October were **Godot 4.7.2** and **Blender 5.2.3
+LTS** on Linux x86_64. Use the latest stable release; rerun the checks if it
+changes. Both have Windows and macOS builds, but this exercise has **not** been
+rehearsed there. Choose standard Godot, not .NET. No export templates are needed
+to play/record in Godot. No dedicated GPU, camera, microphone or model is required.
 
-## Paper-only route
+The community Godot bridge additionally needs **Node.js 26** and npm (tested
+26.12.1); first installation needs internet. The Blender course adapter needs
+only Python and Blender. `bpy` runs inside Blender's Python, not uv's Python.
+Do not install `bpy` into this weekly environment.
 
-Draw four boxes: `sender: 0.75 -> message: value 0.75 -> receiver: clamp then multiply by 100 -> picture: 75% opacity`. Repeat for `0.25 -> 25%`, `3 -> 100%`, and `"oops" -> 0%` (invalid). Cross out the sender-to-receiver arrow, wait three imagined seconds, and draw a blank shape with `0%` beside it. Compare your predictions with a partner. The sketch, one mapping and the missing-update decision are informal working evidence, **not a new assessed submission**.
+From the PFAD repository root:
 
-If you have Node.js installed, `node --test week11/browser/control.test.cjs` from the repo root checks the arithmetic and invalid input; Node is not needed to run the artwork.
+```bash
+cd week11
+uv run python -m unittest test_world test_mcp_transport
+```
 
-## Other paths, not prerequisites
+Keep this directory for all commands. uv uses its separate environment and
+lockfile. Godot must be named `godot`/`godot4` on PATH, or set `GODOT_PATH` to
+its full executable path. In Bash/zsh: `export GODOT_PATH='/path/to/Godot'`.
+In PowerShell: `$env:GODOT_PATH = 'C:/Tools/Godot/Godot.exe'`.
+Check Blender with `blender --version`; add its executable directory to PATH
+if missing. On macOS this is commonly
+`/Applications/Blender.app/Contents/MacOS/`.
 
-The historical Week 11 materials survey Orange, Blender, TouchDesigner, NDI/OSC and a networked game. An optional Blender demonstration would require a prepared disposable scene: changing `Cube.scale` in `bpy` does not render on its own. The [2025 Week 11 README](https://github.com/sd5913/pfad/blob/2025/week11/README.md) and [OSC example](https://github.com/sd5913/pfad/blob/2025/week11/osc_demo.py) are references, not setup steps for this practical. Keep private files and footage out of demonstrations.
+If you cannot reach a first application result by minute 15, join a prepared
+partner machine running your chosen path. Open this same `week11` directory,
+take turns operating, and retain your own changed configuration or `.blend`,
+check/inspection result and image/playtest note. A recording helps orientation
+but does not replace making and checking your own change.
 
-## Verification scope
+## Godot path: three lights and an exit
 
-Independent verification (21 October 2026): both mapping tests passed with Node 24.19.0 on Linux x86_64. These tests check mapping logic; they do not independently certify the browser's timer, canvas rendering or physical creative-tool integration.
+### 0-35: inspect, predict, run and change
 
-The PR workflow checks every available Week 8–12 companion on an Ubuntu 24.04 runner, including the real local MCP smoke when Week 12 is present. It does not deploy or publish the course.
+Open [world.py](world.py), [godot/world.gd](godot/world.gd) and
+[godot/world.json](godot/world.json). Python validates a configuration file and
+starts a **separate Godot process**. GDScript implements the world inside
+Godot. This is not Python running natively inside the game engine.
+
+```bash
+uv run python world.py inspect
+uv run python world.py check
+uv run python world.py play
+```
+
+File inspection reports `file_state_only: true`. The real engine check must
+report `passed: true`, three collected lights and `won_by_180_frames: true`.
+In the window, move with arrow keys. The exit begins locked: collect all three
+yellow lights, then reach the exit on the right. Close the window to stop.
+
+Predict: if movement speed halves, can playback still win within three seconds?
+Inspect `advance()`: `speed * delta` is distance moved during one time step.
+The same behavior serves play, deterministic replay and checks.
+
+```bash
+uv run python world.py set speed 360
+uv run python world.py check
+uv run python world.py play
+```
+
+Observe faster movement and compare `ticks` in `.output/check.json`. The check
+runs 180 steps at 1/60 second; this is simulated time, not a wall-clock benchmark
+or a keyboard test. It does not judge whether the game is fun. The window loads
+config at startup: close and restart after edits.
+
+### 35-55: a real community MCP bridge
+
+[Coding-Solo/godot-mcp](https://github.com/Coding-Solo/godot-mcp) is third-party,
+not an official Godot feature. Setup fetches source commit
+`1209744fad78f3998f98c7394fd0f6ef50da5281` (version 0.1.1) and its MIT license
+into ignored `.tools/`. The course updates its declared MCP SDK 0.6 to the
+**tested 1.30.0** runtime. Node 26 executes the TypeScript directly.
+
+```bash
+uv run python setup_bridge.py
+uv run python mcp_client.py list
+uv run python mcp_client.py demo
+```
+
+Setup needs GitHub/npm access. The source/runtime combination was checked
+using already available package artifacts; a fresh network install remains
+unverified. If setup fails, continue direct application work and pair with a
+prepared bridge machine. Do not label an unexecuted request a successful tool run.
+
+`demo` initializes MCP, inspects the actual project, creates `godot/probe.tscn`,
+adds a `Marker` Node2D, requests project launch, reads debug output, requests
+stop and closes stdio. Inspect the saved scene. The server's “project started”
+text is an acknowledgement: look at the actual window/debug output before
+claiming it ran correctly. This is **human-directed execution**, not a model
+choosing actions autonomously.
+
+Trace this request in [mcp_client.py](mcp_client.py):
+
+```json
+{"method":"tools/call","params":{"name":"add_node","arguments":{"projectPath":"ABSOLUTE/PATH/TO/week11/godot","scenePath":"probe.tscn","parentNodePath":".","nodeType":"Label","nodeName":"Caption","properties":{"text":"THREE LIGHTS"}}}}
+```
+
+Replace the absolute project path, then call the same tool:
+
+```bash
+uv run python mcp_client.py add_node '{"projectPath":"ABSOLUTE/PATH/TO/week11/godot","scenePath":"probe.tscn","parentNodePath":".","nodeType":"Label","nodeName":"Caption","properties":{"text":"THREE LIGHTS"}}'
+```
+
+PowerShell argument quoting varies: edit the `calls` list inside `mcp_client.py`
+instead and run `demo`. Open `probe.tscn` in Godot and inspect Caption's text.
+The saved Label/property were checked in the real engine; visual preview needs
+your desktop. This does not update an editor window showing another scene.
+The community server invokes Godot CLI/bundled GDScript; it is not a general
+live-editor remote control.
+
+### 55-85: break, then make a purposeful change
+
+Keep the full 55-65 break. Choose a quicker route, smaller pickups or a later
+exit. Change exactly one setting and explain the design tradeoff:
+
+```bash
+uv run python world.py set pickup_radius 16
+uv run python world.py check
+uv run python world.py play
+```
+
+Check both behavior and appearance. Allowed settings: `speed` 60-480,
+`pickup_radius` 8-48, `exit_x` 720-880. These are course choices, not Godot API
+limits. Inspect `BOUNDS` and `update_config()`; bad input is rejected before
+writing, rather than silently clamped.
+
+### 85-100: diagnose and recover
+
+```bash
+uv run python world.py set speed 120
+uv run python world.py check
+```
+
+Expect failure: after 180 steps, x is near 440 and only two lights are collected.
+The engine ran but missed the declared time budget. Read the fields before
+changing anything. Decide a better value, explain why and rerun:
+
+```bash
+uv run python world.py set speed 300
+uv run python world.py set pickup_radius 24
+uv run python world.py check
+```
+
+The checked default recovers: three lights, x=840, success at tick 152.
+Try `uv run python world.py set exit_x 2000`: rejection must preserve the old
+config. For a missing-node experiment, set the MCP parent to `MissingParent`,
+read the error and restore `.`. Transport success and useful app results differ.
+
+Missing engine: check `GODOT_PATH`. Wrong project: compare the absolute path
+with `inspect`. Script error: read stderr and undo the last small edit.
+Graphics failure: use a prepared partner machine. A headless check cannot
+establish that the artwork is displayed.
+
+## Blender alternative: a sculpture and checked renders
+
+### 0-35: use the actual Python API
+
+The script builds a disposable scene: Sculpture cube, floor, camera and light.
+It clears objects only in its new background process and never loads your
+personal `.blend` files.
+
+```bash
+blender --background --factory-startup -noaudio --python-exit-code 1 --python blender_scene.py -- --scale 1
+blender --background --factory-startup -noaudio --python-exit-code 1 --python blender_scene.py -- --scale 1.5
+```
+
+Open `.output/blender/sculpture-1.png` and `sculpture-1.5.png`. Compare apparent
+size and shadow with the same camera. Inspect `.output/blender/inspect.json`
+and open `sculpture.blend`. The `before` scale is `[1,1,1]`; `after` must match
+the request. Assignment changes scene data; `save_as_mainfile()` saves it;
+`bpy.ops.render.render(write_still=True)` produces the image. Three operations,
+three separate results.
+
+Read [blender_scene.py](blender_scene.py): `bpy.data.objects.get()` finds the
+named object, `target.scale` is a vector property, and the camera uses
+`to_track_quat('-Z', 'Y')` to aim at a target. CPU Cycles renders 640x480 with
+eight samples. Predict what changes if you move the camera rather than the cube.
+
+### 35-55: application work through MCP
+
+```bash
+uv run python mcp_client.py --blender list
+uv run python mcp_client.py --blender render_scene '{"scale":1.25}'
+uv run python mcp_client.py --blender inspect_scene
+```
+
+[blender_tools.py](blender_tools.py) is a **course-owned bounded MCP stdio
+adapter** using the official Blender CLI and our Python script. It is not the
+third-party Blender MCP add-on. Its two tools render the supplied scene at
+scale 0.5-2 and inspect the last saved result. Inspect actual PNG/`.blend` after
+the response. The background process must also exit: an existing image alone
+cannot prove clean shutdown. `isError: true` means failure even if an older PNG exists.
+
+The wider [MCP for Blender](https://github.com/ahujasid/blender-mcp), by Siddharth
+Ahuja, is now packaged as `mcp-for-blender` 2.2.6. Its Python MCP server connects
+to an add-on inside live Blender over localhost TCP (default 9876). Its
+`execute_blender_code` is broader than the supplied adapter. Current source
+and license were read, but **that live bridge has not passed runtime acceptance
+here**. It is an optional prepared demo, not a prerequisite. No paid asset
+generation or telemetry service is needed for our local scene.
+
+### 55-100: break, compose, fail and recover
+
+Keep the 55-65 break. Change the camera from `(7, -9, 6)` to `(9, -7, 6)`.
+Predict which faces become more visible, render at 1.25 and compare images.
+Restore the camera before sharing. This retains the archive's systematic
+camera-variant idea without AI-generated models or a large dataset.
+
+```bash
+blender --background --factory-startup -noaudio --python-exit-code 1 --python blender_scene.py -- --target MissingObject
+```
+
+Expect nonzero exit and `Missing object: MissingObject; use Sculpture`.
+An earlier PNG is not the failed run's output. Remove the bad target and
+rerender. A tool call with scale 5 must return `isError: true` before launch.
+
+If managed-machine settings/cache writes fail, use the course adapter: it
+redirects those paths into `.output`. If a render exists but shutdown hangs,
+stop with Ctrl+C, preserve the error and ask the tutor. Do not repeat launches
+indefinitely. The saved scene still allows inspection while shutdown is diagnosed.
+
+## 100-120: tutor review and project support
+
+Show one purposeful change, an actual application result and failure/recovery.
+Explain which process owns each operation and whether inspection reads a file
+or live state. Retain your own scene/config, check/inspection and image/playtest
+note. These are practice evidence, not a new upload or grade. Use remaining
+time for the scheduled **19 November** tutor discussion: what works, feedback,
+a blocker and the team's next testable step.
+
+The group project remains **40%**; **25% idea / 50% code / 25% execution**, due
+**6 December 2026, 23:59 HKT**. Use a shared public `sd5913`-owned repository
+with teammate Write access. GitHub Projects is recommended; an equivalent
+accessible progress record is valid. Follow Canvas submission instructions.
+These tools inspire projects; they are not mandatory features or a defence.
+
+## Next week and extensions
+
+Week 12 uses Godot. Blender-only students receive first-time Godot setup and
+orientation at minutes 0-20, then join a prepared partner machine if the
+baseline still fails. You do not need both applications today.
+
+Optional `uv run python world.py capture` uses official Godot Movie Maker,
+120 frames at 30fps, then FFmpeg to write `.output/world.mp4`. It needs a
+working graphical renderer plus FFmpeg/ffprobe; no verified clip is claimed
+here. The three-second check and four-second recording serve different jobs.
+
+[The archive](https://github.com/sd5913/pfad/tree/2025/week11) includes
+TouchDesigner, OSC/handtracking, NDI and a networked game. OSC carries addressed
+control messages; NDI transports audio/video. An OSC send does not prove a
+receiver used it, just as a tool acknowledgement does not prove the scene is
+correct. Week 9 supplies the network/vision-message bridge. These are optional
+creative extensions, not more installations. Orange/t-SNE/matrix projection
+requirements were removed by instructor decision; Week 10 keeps the handbook
+embedding/retriever knowledge path.
+
+## Sources and verification limits
+
+Checked 29 October 2026 through current documentation and primary sources:
+[Blender API](https://docs.blender.org/api/current/),
+[Godot CLI](https://docs.godotengine.org/en/stable/tutorials/editor/command_line_tutorial.html),
+[Movie Maker](https://docs.godotengine.org/en/stable/tutorials/animation/creating_movies.html),
+[Coding-Solo source](https://github.com/Coding-Solo/godot-mcp/tree/1209744fad78f3998f98c7394fd0f6ef50da5281),
+[MCP for Blender](https://github.com/ahujasid/blender-mcp/tree/8782963ba87a4c90482198bd7c7e17219ac3a0f7).
+Godot is MIT-licensed; Blender is GPL-licensed; both community bridges and MCP
+SDK are MIT-licensed. Geometry is original course code; no downloaded assets.
+
+Verified: Godot 4.7.2 actual headless behavior and slow-speed failure/recovery;
+community MCP discovery/project metadata/create/add-node/stop protocol;
+Blender 5.2.3 real CPU-rendered PNG/scene visually inspected; local stdio
+validation/discovery checks. Outstanding: fresh bridge installation, Blender
+shutdown under the restricted host, live third-party Blender bridge, graphical
+Godot play/capture, Windows/macOS and classroom rehearsal. A tool launch
+response, headless check or trace does not close those gaps. The old `browser/`
+exercise remains a historical simulation and is not the core practical.
