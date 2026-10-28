@@ -15,6 +15,14 @@ HERE = Path(__file__).resolve().parent
 
 
 class EchoSmokeTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        try:
+            with socket.socket():
+                pass
+        except PermissionError as error:
+            raise unittest.SkipTest(f"TCP check blocked by host socket policy: {error}")
+
     def test_messages_reconnect_and_stopped_server(self):
         server = subprocess.Popen(
             [sys.executable, "-u", str(HERE / "echo_server.py"), "--port", "0"],
@@ -38,6 +46,9 @@ class EchoSmokeTest(unittest.TestCase):
                 with connection.makefile("rb") as replies:
                     self.assertEqual(replies.readline(), b"red\n")
                     self.assertEqual(replies.readline(), b"blue\n")
+                    connection.sendall(b"or")
+                    connection.sendall(b"ange\n")
+                    self.assertEqual(replies.readline(), b"orange\n")
             with socket.create_connection(("127.0.0.1", port), timeout=3) as connection:
                 connection.settimeout(3)
                 connection.sendall(b"green\n")

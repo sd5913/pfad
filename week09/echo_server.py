@@ -6,7 +6,7 @@ import sys
 
 
 HOST = "127.0.0.1"  # Loopback only: never accept connections from other computers.
-DEFAULT_PORT = 8765
+DEFAULT_PORT = 8010
 MAX_LINE = 256
 
 

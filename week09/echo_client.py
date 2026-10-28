@@ -6,7 +6,7 @@ import sys
 
 
 HOST = "127.0.0.1"
-DEFAULT_PORT = 8765
+DEFAULT_PORT = 8010
 
 
 def send_and_check(connection, reply_lines, text):

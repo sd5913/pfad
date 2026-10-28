@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shared scene | PFAD Week 9</title>
+<style>
+  :root { --paper:#faf8f4; --ink:#202124; --muted:#56554f; --accent:#bd421a; --line:#c7c2b8; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font:20px/1.5 Georgia,serif; }
+  main { max-width:1100px; margin:0 auto; padding:48px 28px; }
+  h1 { margin:0 0 12px; font-size:clamp(2.5rem,6vw,5rem); line-height:1.04; font-weight:normal; letter-spacing:-.03em; }
+  h2 { margin:32px 0 12px; font-size:1.6rem; }
+  p { max-width:70ch; margin:12px 0; }
+  button,input { font:inherit; accent-color:var(--accent); }
+  button { min-height:46px; padding:8px 16px; background:transparent; color:var(--ink); border:1px solid var(--ink); border-radius:4px; cursor:pointer; }
+  button:hover { background:#e8e2d7; }
+  button:disabled { opacity:.45; cursor:default; }
+  button.primary { color:white; background:var(--accent); border-color:var(--accent); }
+  button:focus-visible,input:focus-visible { outline:3px solid var(--accent); outline-offset:4px; }
+  ::selection { color:white; background:var(--accent); }
+  input { caret-color:var(--accent); }
+  code,pre,output { font-family:ui-monospace,monospace; font-variant-numeric:tabular-nums; }
+  code { font-size:.85em; }
+  .row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:18px 0; }
+  .status { border-top:1px solid var(--line); margin-top:28px; padding-top:18px; }
+  #connection { margin-right:auto; }
+  #court { position:relative; height:200px; margin:24px 0 10px; border:1px solid var(--line); background:linear-gradient(0deg,#e9e2d6,transparent 60%); }
+  #rail { position:absolute; inset:95px 24px auto; height:2px; background:var(--ink); }
+  #ball { position:absolute; width:38px; height:38px; top:-18px; left:50%; transform:translateX(-50%); border-radius:50%; background:var(--accent); }
+  #snapshot { font-size:1rem; color:var(--muted); }
+  #position { flex:1; min-width:140px; max-width:420px; min-height:44px; }
+  #chosen { min-width:3ch; }
+  #outcome { min-height:3em; margin:22px 0; }
+  details { border-top:1px solid var(--line); padding-top:18px; margin-top:28px; }
+  summary { cursor:pointer; }
+  pre { max-height:250px; overflow:auto; white-space:pre-wrap; overflow-wrap:anywhere; padding:18px; background:white; font-size:.85rem; scrollbar-color:var(--muted) white; }
+  .small { font-size:1rem; color:var(--muted); }
+  @media(max-width:600px) { main { padding:28px 18px; } .row button { flex-grow:1; } #connection { width:100%; } }
+</style>
+<main>
+  <h1>One scene. Two views.</h1>
+  <p>Open this address in a second tab. Send a position here and watch both views.
+     Python owns the shared position; each tab draws the latest state it receives.</p>
+  <div class="row status">
+    <strong id="connection" role="status">Connecting</strong>
+    <button id="connect">Connect</button><button id="disconnect">Disconnect</button>
+  </div>
+  <div id="court" aria-hidden="true"><div id="rail"><div id="ball"></div></div></div>
+  <output id="snapshot" data-x="" data-revision="" aria-live="polite">Waiting for first server snapshot</output>
+  <div class="row">
+    <label for="position">New position</label>
+    <input id="position" type="range" min="0" max="100" step="1" value="50">
+    <output id="chosen" for="position">50</output>
+  </div>
+  <div class="row">
+    <button id="send-ws" class="primary">Send WebSocket</button>
+    <button id="send-http">Send HTTP</button>
+    <button id="read-http">Read HTTP snapshot</button>
+  </div>
+  <p id="outcome" role="status">No action sent. A snapshot shows current state; an acknowledgement confirms a named action.</p>
+  <details open>
+    <summary>Try a failure</summary>
+    <p class="small">Invalid input must leave the state unchanged. The disconnect demo deliberately ignores replies after sending. Another tab may still see the change; this tab must show Unknown.</p>
+    <div class="row">
+      <button id="invalid">Try invalid x = 101</button>
+      <button id="uncertain">Send, ignore replies, disconnect</button>
+    </div>
+    <p class="small">After a disconnect, Connect opens a new connection and reads a fresh snapshot. It does not resend your action. Restarting the server resets its memory to x = 50, revision 0.</p>
+  </details>
+  <h2>Message trace</h2>
+  <pre id="trace" aria-label="Recent sent and received messages">No messages yet.</pre>
+  <p class="small">Local teaching demo, one server process. HTTP: <code>GET /state</code> and <code>POST /action</code>. Continuing updates: <code>/ws</code>. No accounts or saved history.</p>
+</main>
+<script>
+  const el = id => document.getElementById(id);
+  let socket = null, pending = null, ignoreReplies = false, unresolvedId = null, lastRevision = -1;
+  const trace = [];
+  function log(label, value = '') {
+    trace.push(`${label} ${typeof value === 'string' ? value : JSON.stringify(value)}`);
+    el('trace').textContent = trace.slice(-20).join('\n');
+  }
+  function buttons() {
+    const open = socket?.readyState === WebSocket.OPEN;
+    const connecting = socket?.readyState === WebSocket.CONNECTING;
+    el('connect').disabled = open || connecting;
+    el('disconnect').disabled = !open && !connecting;
+    for (const id of ['send-ws', 'invalid', 'uncertain']) el(id).disabled = !open || !!pending;
+    el('send-http').disabled = !!pending;
+  }
+  function finish(text) {
+    if (pending) clearTimeout(pending.timer);
+    pending = null;
+    el('outcome').textContent = text;
+    buttons();
+  }
+  function unknown() {
+    if (pending) {
+      unresolvedId = pending.id;
+      finish(`Unknown: no acknowledgement observed for ${pending.id}. Inspect the scene after reconnecting. Do not assume success or failure; no automatic resend.`);
+    }
+  }
+  function show(message) {
+    log('received', message);
+    if (message.type === 'state') {
+      if (message.revision < lastRevision) { log('ignored older snapshot'); return; }
+      lastRevision = message.revision;
+      el('ball').style.left = `${message.x}%`;
+      el('snapshot').textContent = `x = ${message.x} / revision ${message.revision}`;
+      el('snapshot').dataset.x = message.x;
+      el('snapshot').dataset.revision = message.revision;
+    } else if (message.type === 'ack' && message.id === pending?.id) {
+      finish(`Acknowledged ${message.id} at revision ${message.revision}.`);
+    } else if (message.type === 'ack' && message.id === unresolvedId) {
+      unresolvedId = null;
+      el('outcome').textContent = `Acknowledged late: ${message.id} at revision ${message.revision}.`;
+    } else if (message.type === 'rejected' && pending) {
+      finish(`Rejected: ${message.error} Shared state stays unchanged.`);
+    }
+  }
+  function connect() {
+    if (socket && socket.readyState < WebSocket.CLOSING) return;
+    ignoreReplies = false;
+    el('connection').textContent = 'Connecting';
+    socket = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/ws`);
+    socket.onopen = () => { lastRevision = -1; el('connection').textContent = 'Connected'; log('connection open'); buttons(); };
+    socket.onmessage = event => { if (!ignoreReplies) show(JSON.parse(event.data)); };
+    socket.onerror = () => log('connection error', 'Check server terminal and address.');
+    socket.onclose = () => {
+      el('connection').textContent = 'Disconnected - display is last known';
+      if (pending?.transport === 'ws') unknown();
+      log('connection closed', 'Use Connect to get a fresh snapshot.'); buttons();
+    };
+    buttons();
+  }
+  async function send(transport, invalid = false, disconnect = false) {
+    if (pending) return;
+    const message = { id: crypto.randomUUID(), action: 'set_x', x: invalid ? 101 : Number(el('position').value) };
+    pending = { id: message.id, transport, timer: setTimeout(unknown, 3000) };
+    el('outcome').textContent = `Waiting for acknowledgement: ${message.id}`;
+    log(`sent ${transport}`, message); buttons();
+    if (transport === 'ws') {
+      try {
+        socket.send(JSON.stringify(message));
+        if (disconnect) {
+          ignoreReplies = true;
+          log('demo', 'Deliberately ignoring replies before closing.');
+          socket.close();
+        }
+      } catch { unknown(); }
+    } else {
+      try {
+        const response = await fetch('/action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(message), signal: AbortSignal.timeout(3000) });
+        const result = await response.json();
+        log(`HTTP ${response.status}`); show(result);
+      } catch { unknown(); }
+    }
+  }
+  el('connect').onclick = connect;
+  el('disconnect').onclick = () => socket?.close();
+  el('send-ws').onclick = () => send('ws');
+  el('send-http').onclick = () => send('http');
+  el('invalid').onclick = () => send('ws', true);
+  el('uncertain').onclick = () => send('ws', false, true);
+  el('read-http').onclick = async () => {
+    try {
+      const response = await fetch('/state', { signal: AbortSignal.timeout(3000) });
+      if (!response.ok) throw new Error();
+      log(`HTTP ${response.status}`); show(await response.json());
+    } catch { log('HTTP read failed', 'Check the server and port; displayed position may be stale.'); }
+  };
+  el('position').oninput = () => { el('chosen').textContent = el('position').value; };
+  connect();
+</script>
+</html>
