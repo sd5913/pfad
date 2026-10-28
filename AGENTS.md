@@ -2,7 +2,7 @@
 
 Read [AUTHORING.md](AUTHORING.md) before creating or reviewing a week's examples
 or tutorial. It complements the
-[teaching-repo guide](https://github.com/sd5913/teaching/blob/fc58e392d86a988bfc8f7feee414909c359b7297/docs/COURSE-AUTHORING.md).
+[teaching-repo guide](https://github.com/sd5913/teaching/blob/1b3ba08a7099c74db037f799cca733cfe633bad0/docs/COURSE-AUTHORING.md).
 
 - The audience is artists, designers and game-design students learning to read,
   reason about and verify programs. Python is the conceptual language; use
@@ -16,6 +16,10 @@ or tutorial. It complements the
   classes/methods and earlier concepts to explain new systems; avoid teaching
   the same two-object example each week. Compare the relevant 2025 archive and
   explain deliberate updates instead of silently dropping material.
+- Preserve dependencies across weeks: persistent model classes and related
+  rows, embeddings/semantic retrieval, then exploration of those same vectors
+  and sources. Maintain a source-to-lesson concept crosswalk; replacing setup
+  does not authorize deleting the teaching idea.
 - Give each exercise an exact command, expected output/observation, a code
   location to inspect, a small edit or prediction, a check and a recovery path.
   Students should be able to do the work without the instructor's login or a

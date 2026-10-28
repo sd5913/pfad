@@ -20,11 +20,32 @@ current instructor's request overrides historical assessment or platform
 choices. An old test that enforces a paper-only lesson is not a reason to
 reject an approved hands-on revision; update obsolete assertions deliberately.
 
+Keep a concept crosswalk from the original slide/page/example to its proposed
+destination. Read adjacent weeks for dependencies, not only the matching week's
+title. Preserve the progression from classes to persistent relational models,
+from embeddings to semantic retrieval/RAG, and from those same vectors to
+visual exploration and later tool/agent use. Modernize the installation or
+framework while retaining the idea. Explain substantive removals in the agreed
+outline; an audit recommendation or missing draft example is not authorization
+to remove the concept.
+
 Choose a small, observable outcome. For a game-design student, a color echo is
 a useful networking starter; a connected interface that reacts to a message,
 survives a disconnect and can be tested is a stronger complete tutorial.
 Similarly, naming SQLite is not teaching persistence: students need to create,
 query and change records, then observe what survives a restart.
+Use meaningful model classes such as User, Account, Message and SaveFile;
+trace a model method to stored rows/relationships and a reloaded object. Keep
+SQL visible enough to explain the mapping. Data persists; method bodies remain
+part of the program. One implemented relationship plus short modelling drills
+is more achievable than several complete applications.
+
+For embeddings, students need real model-derived numerical vectors, ranked
+similarity results and source IDs/text/metadata. Compare exact lookup with
+semantic retrieval and inspect sources before an answer is generated. Supply
+the same corpus/vectors, encoder identity/version and dimension to any later
+visualization exercise. Use sourced real-vector/query fixtures when downloads
+are unavailable; do not label keyword matching as an embedding demonstration.
 
 ## README contract
 
