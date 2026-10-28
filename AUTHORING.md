@@ -23,11 +23,16 @@ reject an approved hands-on revision; update obsolete assertions deliberately.
 Keep a concept crosswalk from the original slide/page/example to its proposed
 destination. Read adjacent weeks for dependencies, not only the matching week's
 title. Preserve the progression from classes to persistent relational models,
-from embeddings to semantic retrieval/RAG, and from those same vectors to
-visual exploration and later tool/agent use. Modernize the installation or
-framework while retaining the idea. Explain substantive removals in the agreed
-outline; an audit recommendation or missing draft example is not authorization
-to remove the concept.
+from handbook PDF embeddings to source-backed retrieval/RAG, then conversation
+memory, tool use and spoken replies. Indexed handbook knowledge and conversation
+history contribute different context to the agent; do not conflate them.
+Preserve the approved concepts, not every original framework or visualization.
+Record instructor-approved removals or redistribution in the crosswalk. Orange
+is deliberately removed to give Blender/Godot more time; visual exploration is
+not a mandatory dependency of embeddings or agents. Modernizing setup does not
+authorize other conceptual deletions. Explain proposed substantive scope changes
+in the agreed outline; an audit recommendation or missing draft example is not
+approval to remove a concept.
 
 Choose a small, observable outcome. For a game-design student, a color echo is
 a useful networking starter; a connected interface that reacts to a message,
@@ -41,11 +46,17 @@ part of the program. One implemented relationship plus short modelling drills
 is more achievable than several complete applications.
 
 For embeddings, students need real model-derived numerical vectors, ranked
-similarity results and source IDs/text/metadata. Compare exact lookup with
-semantic retrieval and inspect sources before an answer is generated. Supply
-the same corpus/vectors, encoder identity/version and dimension to any later
-visualization exercise. Use sourced real-vector/query fixtures when downloads
-are unavailable; do not label keyword matching as an embedding demonstration.
+similarity results and source IDs/text/page metadata for the handbook chunks.
+Compare exact lookup with semantic retrieval and inspect sources before an
+answer is generated. Preserve corpus/encoder identity, dimension and provenance
+across the retrieval handoff. Use sourced real-vector/query fixtures when
+downloads are unavailable; keyword matching is not an embedding demonstration.
+
+For the handbook agent, keep the indexed PDF knowledge separate from conversation
+history. Show which previous turns are retained or recalled, then trace retrieved
+sources, conversation context and tool results into the answer and spoken reply.
+Conversation memory is not automatically another embedding index. Verify the
+audio output separately from the answer's correctness.
 
 ## README contract
 

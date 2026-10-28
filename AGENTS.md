@@ -2,7 +2,7 @@
 
 Read [AUTHORING.md](AUTHORING.md) before creating or reviewing a week's examples
 or tutorial. It complements the
-[teaching-repo guide](https://github.com/sd5913/teaching/blob/1b3ba08a7099c74db037f799cca733cfe633bad0/docs/COURSE-AUTHORING.md).
+[teaching-repo guide](https://github.com/sd5913/teaching/blob/b943695a9b6b40e0340d1153361b3aaf695222dc/docs/COURSE-AUTHORING.md).
 
 - The audience is artists, designers and game-design students learning to read,
   reason about and verify programs. Python is the conceptual language; use
@@ -17,9 +17,11 @@ or tutorial. It complements the
   the same two-object example each week. Compare the relevant 2025 archive and
   explain deliberate updates instead of silently dropping material.
 - Preserve dependencies across weeks: persistent model classes and related
-  rows, embeddings/semantic retrieval, then exploration of those same vectors
-  and sources. Maintain a source-to-lesson concept crosswalk; replacing setup
-  does not authorize deleting the teaching idea.
+  rows lead to embeddings/source-backed handbook retrieval, then conversation
+  memory, tool use and spoken replies. Distinguish indexed handbook knowledge
+  from conversation history. Record instructor-approved removals or
+  redistribution in the crosswalk; no original framework or visualization is
+  automatically mandatory. Replacing setup does not authorize other cuts.
 - Give each exercise an exact command, expected output/observation, a code
   location to inspect, a small edit or prediction, a check and a recovery path.
   Students should be able to do the work without the instructor's login or a
