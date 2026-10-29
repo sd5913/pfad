@@ -10,6 +10,8 @@ from mathutils import Vector
 args = argparse.ArgumentParser()
 args.add_argument("--scale", type=float, default=1.0)
 args.add_argument("--target", default="Sculpture")
+args.add_argument("--camera-x", type=float, default=7)
+args.add_argument("--camera-y", type=float, default=-9)
 args.add_argument("--output", default=str(Path(__file__).resolve().parent / ".output/blender"))
 options = args.parse_args(sys.argv[sys.argv.index("--")+1:] if "--" in sys.argv else [])
 if not 0.5 <= options.scale <= 2.0:
@@ -29,7 +31,7 @@ sculpture.data.materials.append(material)
 bpy.ops.mesh.primitive_plane_add(size=200)
 floor = bpy.context.object
 floor.name = "Floor"
-bpy.ops.object.camera_add(location=(7, -9, 6))
+bpy.ops.object.camera_add(location=(options.camera_x, options.camera_y, 6))
 camera = bpy.context.object
 camera.rotation_euler = (Vector((0, 0, 1.1)) - camera.location).to_track_quat('-Z', 'Y').to_euler()
 bpy.context.scene.camera = camera
@@ -55,6 +57,7 @@ scene.render.filepath = str(output / f"sculpture-{options.scale:g}.png")
 bpy.ops.wm.save_as_mainfile(filepath=str(output / "sculpture.blend"))
 bpy.ops.render.render(write_still=True)
 evidence = {"application":bpy.app.version_string, "target":target.name, "before":before,
-    "after":list(target.scale), "render":scene.render.filepath, "saved_scene":bpy.data.filepath}
+    "after":list(target.scale), "camera":list(camera.location),
+    "render":scene.render.filepath, "saved_scene":bpy.data.filepath}
 (output / "inspect.json").write_text(json.dumps(evidence, indent=2))
 print("BLENDER_CHECK " + json.dumps(evidence))

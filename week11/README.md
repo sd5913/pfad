@@ -31,7 +31,8 @@ to play/record in Godot. No dedicated GPU, camera, microphone or model is requir
 
 The community Godot bridge additionally needs **Node.js 26** and npm (tested
 26.12.1); first installation needs internet. The Blender course adapter needs
-only Python and Blender. `bpy` runs inside Blender's Python, not uv's Python.
+only Python and Blender; the optional live community bridge adds a local Python
+environment installed by the supplied setup command. `bpy` runs inside Blender's Python, not uv's Python.
 Do not install `bpy` into this weekly environment.
 
 From the PFAD repository root:
@@ -104,9 +105,9 @@ uv run python mcp_client.py list
 uv run python mcp_client.py demo
 ```
 
-Setup needs GitHub/npm access. The source/runtime combination was checked
-using already available package artifacts; a fresh network install remains
-unverified. If setup fails, continue direct application work and pair with a
+Setup needs GitHub/npm access. A fresh source/runtime installation passed on
+29 October: 3.606 seconds with an empty npm cache on the author machine. This
+is bridge setup time, not a first-time Godot editor download measurement. If setup fails, continue direct application work and pair with a
 prepared bridge machine. Do not label an unexecuted request a successful tool run.
 
 `demo` initializes MCP, inspects the actual project, creates `godot/probe.tscn`,
@@ -130,8 +131,8 @@ uv run python mcp_client.py add_node '{"projectPath":"ABSOLUTE/PATH/TO/week11/go
 
 PowerShell argument quoting varies: edit the `calls` list inside `mcp_client.py`
 instead and run `demo`. Open `probe.tscn` in Godot and inspect Caption's text.
-The saved Label/property were checked in the real engine; visual preview needs
-your desktop. This does not update an editor window showing another scene.
+The saved Label/property were checked in the real engine. The supplied game
+was also rendered and recorded in Godot 4.7.2; inspect your own desktop result. This does not update an editor window showing another scene.
 The community server invokes Godot CLI/bundled GDScript; it is not a general
 live-editor remote control.
 
@@ -221,17 +222,61 @@ cannot prove clean shutdown. `isError: true` means failure even if an older PNG 
 The wider [MCP for Blender](https://github.com/ahujasid/blender-mcp), by Siddharth
 Ahuja, is now packaged as `mcp-for-blender` 2.2.6. Its Python MCP server connects
 to an add-on inside live Blender over localhost TCP (default 9876). Its
-`execute_blender_code` is broader than the supplied adapter. Current source
-and license were read, but **that live bridge has not passed runtime acceptance
-here**. It is an optional prepared demo, not a prerequisite. No paid asset
-generation or telemetry service is needed for our local scene.
+`execute_blender_code` is broader than the supplied adapter. The supplied live demonstration passed startup, discovery, scene inspection,
+scale change to 1.5, a second live inspection, CPU render/save and clean shutdown
+in real Blender 5.2.3. It is an optional alternative to the simpler course
+adapter; no paid asset generation or model call is involved.
+
+```bash
+uv run python setup_blender.py
+uv run python blender_live.py
+```
+
+The setup fetches the pinned MIT-licensed add-on and installs `mcp-for-blender`
+2.2.6 in ignored `.tools/blender-env`; it changes no global client or Blender
+preferences. The demo creates a **disposable separate Blender window**, binds
+its add-on to a free loopback port, then drives the community server over stdio.
+It inspects Sculpture, changes its live scale, inspects again and saves/renders
+`.output/blender/sculpture-live.blend` and `sculpture-live.png`. Inspect the
+object in the window; press Enter in the terminal to close the client, stop the
+add-on and quit this window. Do not open personal work in this disposable
+process. `.output/blender-live-result.json` must show scale `[1.5,1.5,1.5]`,
+`blender_exit: 0` and `socket_closed: true`.
+
+Read the request sequence in [blender_live.py](blender_live.py) and the local
+startup/stop hook in [blender_addon_boot.py](blender_addon_boot.py).
+`get_scene_info` reads the running Blender scene; the course adapter's
+`inspect_scene` reads a saved JSON file. They answer different questions.
+`execute_blender_code` executes Python inside Blender and can do far more than
+change a scale; this example supplies reviewed code for the disposable scene.
+The helper disables the bridge's telemetry and update check. Do not select
+asset or generation tools: they are outside this exercise.
+
+For automatic closure, tutors can run
+`uv run python blender_live.py --verify`; this exercises the real GUI/render
+path and needs a working display. Fresh add-on/package installation passed in
+4.602 seconds on the author machine with an empty uv cache; Blender itself
+was already installed. Download times vary.
 
 ### 55-100: break, compose, fail and recover
 
-Keep the 55-65 break. Change the camera from `(7, -9, 6)` to `(9, -7, 6)`.
-Predict which faces become more visible, render at 1.25 and compare images.
-Restore the camera before sharing. This retains the archive's systematic
-camera-variant idea without AI-generated models or a large dataset.
+Keep the 55-65 break. Predict which faces become more visible when the camera
+moves from `(7, -9, 6)` to `(9, -7, 6)`, keeping sculpture scale at 1.25:
+
+```bash
+uv run python blender_variants.py
+```
+
+Compare `.output/blender/angle-1/sculpture-1.25.png` with the corresponding
+`angle-2` image and read each `inspect.json`. The loop in
+[blender_variants.py](blender_variants.py) enumerates a list of camera pairs,
+starts Blender with those command-line arguments and keeps each output in its
+own folder. The sculpture is unchanged; camera position changes the observation.
+Change the second pair to `(5, -10)` and rerun. Check the camera coordinates
+and render before restoring `(9, -7)`. Two controlled variants are enough to
+explain the archive's multi-angle dataset idea without AI-generated meshes or
+a large dataset. `to_track_quat` keeps the camera looking at the target; moving
+a camera and rotating a sculpture are different edits.
 
 ```bash
 blender --background --factory-startup -noaudio --python-exit-code 1 --python blender_scene.py -- --target MissingObject
@@ -269,8 +314,10 @@ baseline still fails. You do not need both applications today.
 
 Optional `uv run python world.py capture` uses official Godot Movie Maker,
 120 frames at 30fps, then FFmpeg to write `.output/world.mp4`. It needs a
-working graphical renderer plus FFmpeg/ffprobe; no verified clip is claimed
-here. The three-second check and four-second recording serve different jobs.
+working graphical renderer plus FFmpeg/ffprobe. The Linux software-rendered
+route was verified on 29 October: a playable 960x540 H.264 MP4, four seconds,
+120 frames, with early/middle/end frames inspected for collection and completion.
+This is deterministic replay of the supplied world, not an autonomous agent. The three-second check and four-second recording serve different jobs.
 
 [The archive](https://github.com/sd5913/pfad/tree/2025/week11) includes
 TouchDesigner, OSC/handtracking, NDI and a networked game. OSC carries addressed
@@ -292,11 +339,21 @@ Checked 29 October 2026 through current documentation and primary sources:
 Godot is MIT-licensed; Blender is GPL-licensed; both community bridges and MCP
 SDK are MIT-licensed. Geometry is original course code; no downloaded assets.
 
-Verified: Godot 4.7.2 actual headless behavior and slow-speed failure/recovery;
-community MCP discovery/project metadata/create/add-node/stop protocol;
-Blender 5.2.3 real CPU-rendered PNG/scene visually inspected; local stdio
-validation/discovery checks. Outstanding: fresh bridge installation, Blender
-shutdown under the restricted host, live third-party Blender bridge, graphical
-Godot play/capture, Windows/macOS and classroom rehearsal. A tool launch
-response, headless check or trace does not close those gaps. The old `browser/`
+Verified: Godot 4.7.2 actual engine behavior and slow-speed failure/recovery;
+community MCP discovery/project metadata/create/add-node/stop; actual graphical
+Godot capture and full MP4 decode; Blender 5.2.3 CPU-rendered PNG/scene; course
+MCP adapter clean exit; live third-party Blender bridge change/reinspection/
+render/save/clean close; fresh public installation of both bridges.
+Four automated tests pass, including an opt-in real Blender acceptance test:
+
+```bash
+uv run python -m unittest test_world test_mcp_transport test_engine
+uv run python -m unittest test_blender_live
+```
+
+The last command needs Blender, its installed bridge and a working display.
+On a Linux CI machine with Xvfb installed, prefix it with `xvfb-run -a`.
+Windows/macOS and classroom rehearsal remain outstanding. Actual keyboard
+play and projected display should be rehearsed on the teaching machine.
+A tool launch response, headless check or trace does not close those gaps. The old `browser/`
 exercise remains a historical simulation and is not the core practical.
