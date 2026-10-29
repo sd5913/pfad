@@ -55,6 +55,8 @@ def synthesize(text, destination):
 
 
 def play(path):
+    if not Path(path).is_file():
+        raise FileNotFoundError(f'Audio file is missing: {path}')
     executable = shutil.which('ffplay')
     if not executable:
         raise RuntimeError('ffplay unavailable. Open the WAV in an audio player; playback unverified.')

@@ -1,29 +1,23 @@
 # Week 10: persistent objects and a talking handbook agent
 
-**Thursday 12 November 2026. Lecture: 120 minutes; this tutorial: a separate
-120 minutes.** Build on Week 7's objects and Week 8's inspected, tested programs.
-The new question is what happens when an object must survive a restart and
-supply context to a later model call.
+**Thursday 12 November 2026. This is a complete 120-minute tutorial, separate
+from the 120-minute lecture.** Build on Week 7's classes, Week 8's inspected
+programs and Week 9's requests/processes. Trace one system: related saved
+conversations supply context to a source-backed handbook bot with spoken replies.
 
-> **Production status, 29 October: incomplete core.** The real SQLite/ORM path,
-> bounded tool dispatcher, memory plumbing and local speech synthesis have been
-> checked. Current handbook extraction/index fixtures, a live model's grounded
-> answers and contextual follow-up, and audible playback/stop have not yet passed
-> integrated verification. The approved tutorial route is specified here, but
-> its second half is **not classroom-ready**. See [bundle status](fixtures/README.md).
-> The old artwork JSON example remains supplementary; it does not replace this core.
+By the end you can explain and inspect:
 
-By the end, explain and inspect:
+- A `User`, `Conversation` or `Message` model, an instance, its SQL operation and stored row.
+- Stable keys, references, ordinary indexes, owner-scoped queries and a fresh-process reload.
+- A real handbook chunk/vector, a compatible query vector and a cited retrieval result.
+- Previous turns actually entering a model request, an isolated conversation and a spoken answer.
 
-- `User -> Conversation -> Message`: a Python model, one instance, its row and its stable ID.
-- Exact, owner-scoped queries, constraints, ordinary indexes and a fresh-process reload.
-- A real handbook chunk, its learned vector, a query in the same space and a cited result.
-- A real retriever tool call, the history sent to the next model call, and an isolated second conversation.
-- A displayed answer, its source support, synthesis, playback and failure as separate checks.
+## Prepare before class
 
-## Prepare before the session
-
-Clone the current PFAD companion and open a terminal in **`pfad/week10`**:
+Work in **`pfad/week10`**. You need `uv` and Python 3.12 or newer. The weekly
+project and lockfile isolate dependencies from the repository's other examples.
+Begin with the small storage dependency; there is no database server, Docker,
+account, API key or dedicated GPU:
 
 ```bash
 cd week10
@@ -31,83 +25,81 @@ uv run python storage_demo.py seed
 uv run python storage_demo.py inspect
 ```
 
-Python 3.12 or newer and `uv` are prerequisites. This week has its own
-`pyproject.toml`; commands from this directory use Peewee **4.5.3**, the latest
-upstream release checked on 29 October. First use needs internet to install the
-small Peewee package; no database server, account, Docker or GPU is required for
-storage. Linux storage/protocol checks passed on Python 3.14; Python 3.12 was
-used for the cached encoder probe. Windows/macOS execution is not yet verified.
-Package installation from an empty uv cache is still blocked in production by
-network restrictions; no clean-install claim or fabricated lockfile is supplied.
+A prepared Linux x86_64 machine must have the local model server, public model
+weights, pinned sentence encoder, eSpeak NG library/English voice data and
+FFmpeg/`ffplay` before the tutorial. Follow [REHEARSAL.md](REHEARSAL.md); this is
+preparation, not twenty minutes of surprise model installation. The core
+application makes only loopback model requests on **127.0.0.1:11440**. It does
+not contact a paid endpoint or download models during a conversation.
 
-The instructor must prepare the **actual 2026-27 handbook extract/index** and
-verify its page references before students start. Full PDF ingestion is an
-instructor preparation job, not a tutorial exercise. Students inspect the small
-bundle and two prepared real query vectors without downloading a model.
-Arbitrary live typed questions require the exact matching encoder, a locally
-installed tool-capable model, and a prepared local Ollama service. The proposed
-chat model default is `qwen3:4b`; it is **not yet empirically verified here**.
-Model downloads and hardware requirements must be timed on a prepared machine
-before declaring this route ready. The CLI does not download models or contact
-paid endpoints. A generic subscription to a coding assistant does not establish
-this local application endpoint.
+The verified CPU route uses Qwen3.5-2B Q4_K_M (1.28 GB) and MiniLM (about 90 MB).
+Allow roughly 3 GB for weights, runtime and the encoder environment, plus
+package caches. On the tested Ryzen 9 5900HS laptop, a clean dependency install
+from an empty cache took 12 seconds; re-downloading the chat model took 47
+seconds on that connection. Your connection/hardware may be much slower.
+The measured model-call timings are recorded in the preparation/evidence files.
+No Windows/macOS execution claim is made; those systems can use their matching
+llama.cpp release and normal eSpeak/FFmpeg installation, but must rehearse or
+use a prepared partner machine. Linux is the verified route.
 
-Speech uses the open-source eSpeak NG shared library and English voice data,
-plus FFmpeg's `ffplay` for playback. Install these through the normal platform
-package manager before class. The core voice is intentionally simple and local.
-A synthesized WAV has been verified; system playback was denied in production.
-For a different library location, `ESPEAK_LIBRARY` and `ESPEAK_DATA_PATH` can name
-an existing installation. No Steam installation is a student prerequisite.
+**At minute 10, pair with a prepared machine if setup is still failing.**
+Alternate the keyboard and explanations. The supplied cited vectors can be
+inspected without encoder/model downloads. [recorded-run.json](fixtures/recorded-run.json)
+and [recorded-answer.wav](fixtures/recorded-answer.wav) are labelled recordings
+of an actual local run, useful for inspection when a service is unavailable;
+playing them does not establish a new live tool call, memory or synthesis.
+A physical listener must check intelligibility/volume on the teaching speakers.
 
-If setup fails at minute 10, pair with a prepared machine and alternate the
-keyboard. Copy only fictional `out/` data if you need to inspect its records.
-If no prepared machine has the source/index/model/speech path, the tutor must
-record the incomplete core and use the inspection fallbacks explicitly. Paper
-and replay can support reasoning but cannot establish live retrieval or memory.
+Use fictional profiles/questions only. The trace JSON contains the actual model
+prompt; keep personal data out of it. Local names such as Ada are ownership
+examples, **not authenticated accounts**.
 
 ## The complete 120-minute route
 
 | Minutes | Work and evidence |
 | --- | --- |
-| 0-10 | Setup; first storage run; verify prepared handbook/index/model status |
-| 10-30 | Create/load User, Conversation and Message; map methods to SQL and rows |
-| 30-50 | Query history, distinguish keys/indexes, update/restart, reject a broken relation |
+| 0-10 | Setup; first storage result; check prepared model/index/speech readiness |
+| 10-30 | Create/load User, Conversation and Message; methods → SQL → rows |
+| 30-50 | Exact history queries, keys/indexes, update/restart, constraints/rollback |
 | 50-60 | Break |
-| 60-70 | Inspect real handbook vectors, two query rankings and cited retriever results |
-| 70-90 | Typed question and follow-up; inspect actual model context; hear the reply |
-| 90-100 | Reopen/isolate conversations; trigger one retrieval or speech failure |
-| 100-120 | Integrated-core-experience tutor review and group-project support |
+| 60-70 | Real handbook vectors, three rankings and inspected cited passages |
+| 70-90 | Typed question/follow-up; inspect model context; synthesize/play a reply |
+| 90-100 | Reopen/isolate conversations; trigger one failure and recover |
+| 100-120 | Tutor review and group-project support |
 
-## 0-10: get the first visible result
+## 0-10: get a visible storage result
 
-Run the setup commands. Expect `user=1 conversation=1` on a new database and two
-message rows. The assistant seed explicitly says **prepared storage example;
-no model was called**. Inspect `out/chat.sqlite` through the printed SQL and
-rows. Do not type real passwords or student information. Running `seed` again
-while the original title exists reuses that seed; after renaming, a new
-Handbook conversation can be created. IDs need not always be 1 in a reused file.
-Use `--db out/experiment.sqlite` to start a separate disposable experiment.
+Run the preparation commands. A fresh file prints `user=1 conversation=1` and
+two saved messages. The assistant seed explicitly says **prepared storage
+example; no model was called**. Read the actual SQL, parameters, rows and index
+names printed by `inspect`. IDs may differ in a reused file. Repeating `seed`
+reuses an existing seed title; after `rename`, another Handbook conversation
+can be created. Use `--db out/experiment.sqlite` for a separate disposable file.
 
-Run the behavior checks:
+Run the behavioral checks:
 
 ```bash
 uv run python -m unittest discover -p 'test_*.py'
 ```
 
-Protocol tests use explicit scripted model replies and synthetic coordinates
-inside unit tests. They prove dispatch/validation, not model understanding or
-real handbook embeddings. A green suite does not close the live-core gap.
+Expect 20 passing checks. Scripted model replies and synthetic coordinates
+inside protocol unit tests are doubles; the separate learned-vector fixture
+and recorded live model run supply different evidence. Green unit tests alone
+do not prove a speaker can be heard or a model's factual claims are supported.
 
-## 10-30: trace a model through a real row
+**Check/recover:** point to the database filename before experimenting. Do not
+remove a database containing work you need. Use a new filename for a fresh run.
 
-**Predict:** does `Conversation.create(...)` save its methods, or its field
-values? Does changing a Python attribute alone change the stored row?
+## 10-30: follow a model through a real row
 
-Read [models.py](models.py). `Record` inherits Peewee's `Model`; `User`,
-`Conversation` and `Message` inherit persistence/query methods. The database
-adds the primary-key `id`. Each conversation stores its owner's ID, and each
-message stores its conversation's ID. A foreign key is a stored reference,
-not a copied parent object.
+**Predict:** does `Conversation.create(...)` store its methods or its field
+values? Does an attribute assignment alone update the database?
+
+Read [models.py](models.py). `Record` inherits Peewee's `Model`, supplying real
+persistence/query methods. `User`, `Conversation` and `Message` inherit Record.
+Each gets an automatic primary-key `id`. A conversation stores its owner's ID;
+a message stores its conversation's ID. A foreign key is a reference, not a
+copy of the parent object. No password/login app is required.
 
 ```bash
 uv run python storage_demo.py inspect
@@ -115,198 +107,224 @@ uv run python storage_demo.py rename
 uv run python storage_demo.py inspect
 ```
 
-**Observe:** `rename` changes a loaded object's `title` then calls `.save()`.
-A new `inspect` process sees `My game questions`, with the same conversation ID.
-Methods stay in `models.py`; SQLite stores stable values and references.
-Read the `SELECT ... WHERE conversation_id = ? ORDER BY id` trace and its
-parameter list. The parameter binds a value; it is not pasted into SQL text.
+**Observe/inspect:** `rename` loads a conversation, changes `chat.title`, then
+calls `.save()`. The separate inspection process reads the new title with the
+same stored ID. Methods remain in Python; SQLite stores values/references.
+The previous process's object is gone. Python's `id(chat)` is not this primary key.
 
-**Change:** edit only `chat.title = 'My game questions'` in
-[storage_demo.py](storage_demo.py), predict the next inspection, then run it.
-**Check:** the title changes; owner and IDs remain. **Recover:** restore that
-one string; do not delete a database that contains work you need.
+**Change:** edit only the title string in [storage_demo.py](storage_demo.py).
+Predict the new output, run `rename`, then inspect in a new process.
+**Check:** title changes; owner and IDs remain. Now temporarily omit `.save()`
+and repeat: another process must still see the previous saved value.
+**Recover:** restore `.save()` and the original string; inspect your diff.
 
-## 30-50: relationships, exact lookup and recovery
+Spend the final five minutes explaining the path to a partner: Python method,
+SQL operation, affected row and newly loaded object. A notebook printing the
+same original object again is insufficient restart evidence.
 
-Open `Store.history_query()` and trace the ownership check before the message
-query. `history()` returns the most recent **four complete user/assistant pairs**
-in chronological order. All older pairs remain in SQLite, but are not sent in
-the next model call. This is an explicit context-window policy, not unlimited
-memory. Local fictional usernames demonstrate ownership checks; this is not an
-authenticated multi-user service.
+## 30-50: exact queries, relationships and failure
+
+Read `Store.owned_conversation()`, then `history_query()`. The application checks
+the owner before selecting messages for that conversation. Read the actual
+`SELECT ... WHERE conversation_id = ? ORDER BY id` and bound parameter list.
+A parameter supplies a value; it is not pasted into SQL text.
+
+`history()` selects the newest **four complete user/assistant pairs**, then
+restores chronological order. Older pairs remain in SQLite but do not enter
+the next model request. This explicit window is not unlimited memory.
 
 ```bash
 uv run python storage_demo.py invalid
 uv run python storage_demo.py inspect
 ```
 
-**Predict:** can a message reference conversation 999999? **Observe:** SQLite
-rejects it with `FOREIGN KEY constraint failed`; the existing rows remain.
-Inspect the connection's `foreign_keys` pragma and the `role`/nonempty-content
-checks in the models. `append_turn()` puts the user and assistant rows in one
-transaction: if the second insert fails, the first rolls back too. Do not claim
-a failed answer was successfully saved. No password/login implementation is needed.
+**Predict/run/observe:** can a message refer to missing conversation 999999?
+SQLite rejects it with `FOREIGN KEY constraint failed`. Inspect the explicit
+`foreign_keys` pragma; SQLite does not enforce this by default. Existing rows
+remain. Role/nonempty-content checks reject invalid rows too.
 
-**Check the three different jobs:** a primary key identifies a row; a foreign
-key refers to another row and can enforce existence; an ordinary index makes
-matching-row lookup cheaper. Inspect the index names printed by `inspect`.
-The `(conversation_id, id)` index supports finding and ordering one history.
-Indexes cost storage and work on each write; they are not semantic vectors.
-No benchmark is required to explain the distinction.
+**Inspect/change/check:** `append_turn()` puts the user and assistant inserts
+inside `db.atomic()`. Temporarily call it with an empty assistant answer in a
+disposable experiment, or inspect `test_constraints_and_atomic_rollback`:
+the user insert rolls back when the second insert fails. Explain why a
+half-turn would damage later context. Restore the valid call afterwards.
 
-Close the terminal and reopen it in `pfad/week10`. Run `inspect` again. Explain
-why stable IDs survive while the previous Python objects do not. Then make a
-short relationship sketch: User/SaveFile is one-to-many; User/Membership/Team
-uses a junction record; Message replying to Message is a self-reference. These
-are transfer questions, not three extra apps to implement.
+Distinguish three jobs using the printed indexes:
+
+- A primary key identifies a row.
+- A foreign key refers to a parent and can enforce existence.
+- An ordinary `(conversation_id, id)` index helps find/order matching rows; it costs storage and work on writes.
+
+This index does not search semantic meaning. No benchmark is needed to explain
+the distinction. Close Python and inspect again in a fresh process. Sketch
+User/SaveFile ownership (one-to-many), User/Membership/Team (many-to-many through
+a joining row), and Message replying to Message (self-reference). These are
+transfer questions, not three additional app implementations.
 
 ## 50-60: break
 
-Leave the source files and database available. Save your one-file edit.
+Save your one-file experiment and leave the source/database available.
 
 ## 60-70: inspect the handbook before trusting an answer
 
-**Blocked until the real bundle is supplied and reviewed.** With that bundle:
+The bundle contains **six short genuine extracts**, not the full handbook.
+Source: Academic Registry's *Student Handbook for Taught Programmes 2026/27*,
+July 2026; verified 29 October, 137 PDF pages. PDF positions 20, 25 and 76
+correspond to printed pages 9, 14 and 61. The official URL, edition, PDF SHA-256,
+section and chunk IDs accompany the text in [chunks.json](fixtures/chunks.json).
 
 ```bash
 uv run python handbook.py
 ```
 
-Read the printed official URL, year, PDF SHA-256, one-based PDF page, chunk ID,
-encoder/weight identity, dimension and first eight numeric values. Each vector
-is a learned representation of that exact short passage. It is not a row ID,
-a policy, a truth score or the full PDF. The supplied two queries have actual
-vectors from the same encoder and pooling rule.
+**Predict/run:** choose the relevant section for lost-card procedure, leave
+request and card replacement cost. The three exact prepared questions use real
+384D vectors generated by the pinned MiniLM encoder. Expect first results
+`hb2026-p020-replacement`, `hb2026-p025-leave` and `hb2026-p076-fees` respectively.
+The fee query's measured cosine scores are about 0.893 (fee row) and 0.737
+(replacement rule). Inspect the printed numeric values and passage text.
 
-**Predict:** which source passage should support each query? **Run** the two
-prepared queries. **Check:** compare both ranked results with the cited PDF
-sections, including neighbouring text that a short chunk may omit. A larger
-cosine score means closer directions, not greater policy correctness. A query
-about an unrelated subject still has a nearest neighbour.
+**Check:** open the cited PDF sections and neighbouring text. The fee's HK$
+heading is retained in section metadata. The leave table had ambiguous flattened
+columns; the prepared bundle keeps unambiguous prose instead. Similarity is
+approximate, not policy truth or a probability. An unrelated question still
+has nearest neighbours. The six extracts cannot answer every handbook question.
 
-`handbook.py --query '...'` accepts only an exact prepared question in fixture
-mode; it cannot silently invent a new vector. A new question requires the same
-live encoder. Changing encoder/weights/tokenization requires rebuilding both
-stored chunks and queries. A dimension match alone is insufficient.
+**Change/recover:** try `uv run python handbook.py --query 'An unprepared question'`.
+It rejects the missing prepared vector. Fixture mode only handles its exact
+stored queries; it never substitutes keyword search. Arbitrary new questions
+need the live matching encoder. A changed encoder/revision/pooling requires
+rebuilding both document and query vectors; matching dimension alone is insufficient.
 
-## 70-90: type, retrieve, answer, speak
+## 70-90: type, retrieve, inspect, speak
 
-**The live route is implemented but not yet verified end to end.** On the
-prepared machine, use its matching cached encoder path; this path is the one
-instructor-supplied argument, not a model download command:
-
-```bash
-uv run --extra encoder python bot.py --encoder-path /path/to/prepared/snapshot
-```
-
-The `--extra encoder` flag supplies the live CLIP dependencies; prepared-vector
-inspection needs no extra. For an Ollama-embedded bundle, omit `--encoder-path`; its model name/digest must
-match the installed encoder. `bot.py` defaults to local port 11434, a fresh
-conversation and four retained turns. The CLI prints the actual conversation
-ID to reuse. Type a short source-supported question chosen from the real
-bundle; then ask a follow-up referring to it. Keep within CLIP's short-text
-limit when this encoder is used; overly long input fails visibly, never silently
-truncates. Type an empty line to end the typed loop.
-
-**Observe:** the model chooses `retrieve_handbook`, supplies a query, receives
-source IDs/text/pages, and then answers. Inspect `TOOL TRACE` and
-`out/last-turn.json`: the second call must contain the first user and assistant
-messages, plus actual tool results. The `thread` label is not the proof; the
-serialized messages reaching the model are. The trace contains the ephemeral
-prompt snapshot for this exercise; it is overwritten by the next successful
-turn and is separate from persistent history. Use fictional conversation only.
-
-**Check:** does the follow-up resolve its reference using the previous turn?
-Is each factual claim supported by its cited source? The program rejects
-unknown citation IDs, but a valid ID can still accompany a wrong claim. Inspect
-the source text yourself. Ask something outside the source scope. Expected:
-`I cannot answer from these sources.` A scripted unit-test refusal is not live
-model evidence; the actual model must be checked on both cases.
-
-The displayed answer is saved atomically before synthesis. Hear the same answer;
-compare words/citations with the text. If speech fails, it prints `SPEECH FAILED`
-and retains the text/history. `Ctrl+C` during playback stops its player; an
-empty typed line ends the session. WAV generation, player completion and a
-listener hearing intelligible output are three separate observations.
-
-**Change:** set the `history_turns` default in `agent.Bot` from four to two.
-After enough turns, inspect the selected prompt and explain what disappeared
-from the next call versus what remains in SQLite. **Recover:** restore four.
-The CLI's printed policy must be updated if you keep this as a project change.
-
-## 90-100: restart, isolation and one failure
-
-Close the program and run a fresh process using the printed ID:
+**Terminal 1:** the prepared model server must say it is listening on
+`http://127.0.0.1:11440`; exact startup is in REHEARSAL.md. Leave it running.
+**Terminal 2**, from `week10`:
 
 ```bash
-uv run --extra encoder python bot.py --encoder-path /path/to/prepared/snapshot --conversation 1
+uv run --extra encoder python bot.py
 ```
 
-Replace `1` with your actual ID. Ask a follow-up. Inspect the loaded history and
-the next request, then start a new conversation by omitting `--conversation`.
-Ask the same vague follow-up. It must not receive the other conversation's
-messages. Using `--user Bo --conversation 1` for Ada's conversation must fail
-ownership checking. This is application-level separation, not secure login.
+The extra installs the verified CPU encoder dependencies. Encoder weights are
+loaded locally; missing assets fail rather than silently downloading. Input
+above 256 encoder tokens is rejected, not silently truncated. No GPU is used.
 
-Choose one failure:
+Type these questions, one at a time:
 
-- Run `uv run python bot.py --bundle out/missing.json`: a clear missing-index error; no answer, saved turn or speech claimed.
-- Stop the prepared local model server and retry: connection failure; no turn saved. Restart it before continuing.
-- Run `uv run python speech.py --text ''`: a visible speech error; existing history remains unchanged.
+```text
+What should I do if I lose my student identity card?
+If I find the original later, should I keep both?
+```
 
-For speech-only verification:
+**Predict/observe:** the first answer should direct an online replacement
+application, cite the replacement rule and, when retrieved, the HK$150 fee row.
+The follow-up should resolve “the original” to the identity card and explain
+return/cancellation rather than keeping both. Actual model wording may vary;
+compare claims against the returned passages, not the recorded wording alone.
+
+The application requires retrieval on every turn. The **model composes the
+query**, Python executes the retriever tool, then a second model call receives
+its actual result. The model returns structured `answer` and `source_ids`.
+The adapter formats bracketed citations; an empty source list becomes the
+canonical `I cannot answer from these sources.` No script supplies policy
+answers. This is a bounded RAG/tool workflow, with an explicit retrieval policy,
+not an autonomous choice of arbitrary tools. JSON shape and allowed IDs do not
+prove factual support; a valid ID can accompany a wrong claim.
+
+Open `out/last-turn.json` after the second question. **Inspect:** the earlier
+user/assistant pair must be present in the actual request, followed by the new
+question, tool call, source result and final answer. A conversation number alone
+is not memory. History helps resolve references; the handbook supplies policy
+evidence. The trace is a temporary diagnostic snapshot, separate from SQLite.
+Use `--trace out/my-check.json` to retain a particular fictional test.
+
+**Hear/check:** after a validated atomic save, eSpeak NG synthesizes that answer
+and `ffplay` plays it. Compare words with the visible answer. WAV creation,
+player completion and a listener hearing intelligible speech are separate
+checks. `Ctrl+C` during playback stops its player; an empty typed line exits.
+A speech error prints `SPEECH FAILED`; the displayed/saved turn remains.
+
+**Change/recover:** change the `history_turns` default in `agent.Bot` from four
+to two. After enough turns, compare the selected next prompt with the full
+SQLite history. Explain what was excluded, then restore four. Update the CLI's
+printed policy too if you keep a different window in your own project.
+
+## 90-100: reopen, isolate and recover
+
+Exit, then run a fresh process with the ID your CLI printed:
 
 ```bash
-uv run python speech.py --play
+uv run --extra encoder python bot.py --conversation 1
 ```
 
-This says **prepared speech check**, not handbook policy. The supplied
-[prepared-refusal.wav](fixtures/prepared-refusal.wav) is prerecorded synthesized
-fallback audio: 1.777 seconds, 22050 Hz, mono PCM. Its text is `I cannot answer
-from these sources.` Playing it demonstrates playback only, not live synthesis,
-retrieval, agent memory or a source-supported answer. `--text-only` is an
-explicitly labeled bot fallback that skips speech; it cannot pass the spoken core.
+Replace `1` with your actual conversation ID. Ask the contextual follow-up.
+Inspect the reloaded previous messages and the model-composed query. Then exit
+and run a separate profile/conversation:
+
+```bash
+uv run --extra encoder python bot.py --user Bo
+```
+
+Ask `How do I request leave from class?` and inspect its prompt: Ada's earlier
+turns must be absent. Using `--user Bo --conversation ADA_ID` must reject the
+wrong owner. An unknown ID gives a recoverable error. Profiles demonstrate
+application-level isolation; anybody who controls this local file can change it.
+
+Choose a failure, predict the retained state, run it and recover:
+
+- Ask `What is the Wi-Fi password at the campus cafeteria?` Expect a source-limited refusal; the nearest passage is insufficient.
+- Run `uv run python bot.py --bundle out/missing.json`. Missing index: no answer/save/speech; return to the normal command.
+- Stop terminal 1's model with Ctrl+C and retry. Connection failure: no new turn; restart the server before continuing.
+- Run `uv run python speech.py --text ''`. Invalid speech text: a clear error; previous conversation history remains.
+
+For separate speech testing, `uv run python speech.py --play` speaks a labelled
+prepared check, not handbook policy. The prerecorded refusal WAV demonstrates
+playback only; `recorded-answer.wav` records a real earlier cited answer.
+`--text-only` is an explicitly labelled fallback that skips speech and therefore
+cannot verify the spoken-output core. If the service cannot run, inspect the
+recorded trace honestly and arrange a prepared-machine run.
 
 ## 100-120: tutor review and project support
 
-Use the existing 12 November tutor allocation; the tutor confirms exact meeting
-times. Show your integrated core experience, one current risk and one next
-change. Partners explain the row, source, history and audio evidence in turn.
-A missing live component is a known gap to resolve, not a reason to invent a demo.
-Support unfinished setup or code within this twenty-minute block.
+Use the existing 12 November tutor allocation; exact times follow your assigned
+slot. Partners explain the row, source, history and audio evidence in turn.
+Show the integrated result, one failure/recovery and one next change. Use this
+block to help unfinished setup/code, rather than adding appointments afterwards.
 
-Compare storage by the question you ask:
-
-| Representation | Useful question | Limit |
+| Representation | Useful question | Limitation |
 | --- | --- | --- |
-| Related User/Conversation/Message rows | Which messages belong to this user's conversation, in order? | Exact fields/relations must be modelled |
-| Nested save/config document | What is this scene's whole saved configuration? | Cross-document references need a design/check |
-| Handbook vectors plus metadata | Which passages resemble this question semantically? | Similarity does not establish truth or permission |
+| Related User/Conversation/Message rows | Whose messages, in what order? | Ownership/fields/constraints need a model |
+| Nested scene/save document | What is the whole saved configuration? | References across documents need checks |
+| Vectors plus source metadata | Which passages resemble this query? | Similarity does not establish truth |
 
-JSON is a representation, not the opposite of a schema. Document databases may
-validate schemas; relational systems can also store nested data. No extra
-NoSQL service is required. SaveFile ownership remains a transfer sketch.
+JSON is a representation, not the absence of schema. Document stores can
+validate schemas; relational systems can store nested data. SaveFile ownership
+is a transfer sketch, not another required app. Optional extensions: alter the
+history policy with tests, add carefully sourced chunks, reuse Week 6 microphone
+input, or use a saved conversation for a game NPC. No AI feature is required.
 
-These techniques are optional project inspiration. The project remains **40%**,
-with **25% idea / 50% code / 25% execution**, due **6 December 2026, 23:59 HKT**.
-Use a public **sd5913-owned** team repository with teammate Write access.
-GitHub Projects is recommended; an equivalent accessible shared progress record
-is valid. Link useful evidence from your team's README. This adds no graded
-upload, compulsory defence, AI feature or required technology. Canvas remains
-the submission system; this tutorial needs no ClassPoint or instructor login.
+Project policy stays **40%**, **25% idea / 50% code / 25% execution**, due
+**6 December 2026, 23:59 HKT**. Use one public **sd5913-owned** team repository
+with teammate Write access. GitHub Projects is recommended; an equivalent
+accessible progress record is valid. Link useful evidence from the team README.
+This adds no graded upload, compulsory defence or required technology. Canvas
+is the submission system; no ClassPoint or instructor login is needed here.
 
-## Sources, versions and honest limits
+## Sources and verified limits
 
-- [Peewee 4.5.3 release, 7 October 2026](https://github.com/coleifer/peewee/releases/tag/4.5.3): checked 29 October; genuine upstream source, commit `e245a01b1f57005e7ae315736da8e6a70e65afba`, used for local tests.
-- [Peewee models](https://docs.peewee-orm.com/en/latest/peewee/models.html) and [SQLite pragmas](https://docs.peewee-orm.com/en/latest/peewee/sqlite.html): Context7 checked 29 October.
-- [Ollama tool calls](https://docs.ollama.com/capabilities/tool-calling) and [embeddings](https://docs.ollama.com/capabilities/embeddings): current protocol checked through Context7; local endpoint unavailable, default model not verified.
-- [Transformers 5.19.0](https://huggingface.co/docs/transformers/v5.19.0/en/model_doc/clip): cached CLIPTextModel CPU probe with PyTorch 2.14.1+cu132 produced 768D vectors. This is not evidence of handbook retrieval until real extracted passages are indexed.
-- [Stable Diffusion v1.5 source snapshot](https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/tree/451f4fe16113bff5a5d2269ed5ad43b0592e9a14): existing learned text encoder; model license/provenance belongs with preparation. We do not redistribute weights or generate images.
-- [eSpeak NG integration](https://github.com/espeak-ng/espeak-ng/blob/master/docs/integration.md): real local eSpeak NG 1.52.0.1 synthesis passed; playback/audibility/stop still require a real machine check.
-- [Official current handbook](https://www.polyu.edu.hk/ar/docdrive/polyu-students/student-handbook/Student_Handbook_2026-27_English.pdf): instructor-supplied URL; retrieval/title/pages not yet independently verified.
-- Historical [2025 Week 10 examples](https://github.com/sd5913/pfad/tree/2025/week10): ORM classes, retrieval tool and vectors retained; unsafe login hashing is not reused. Orange/t-SNE is removed by instructor decision, not a missing prerequisite.
+Checked 29 October 2026: Python 3.12.15, uv 0.13.6, Peewee 4.5.3,
+PyTorch 2.14.1+cpu, Transformers 5.19.0, Sentence Transformers 6.2.0,
+llama.cpp build b11972 (`cf24317be`), eSpeak NG 1.52.0.1.
+Linux x86_64 CPU storage, actual tool/answer/follow-up/reopen/isolation and player
+completion/stop/failure were exercised. Physical speaker audibility and other
+OSes need rehearsal. A small local model can still choose a poor query, omit
+useful sources, refuse unnecessarily or produce an unsupported claim: inspect
+the trace and source rather than treating the program as official advice.
 
-Storage, protocol and original supplementary artwork tests pass locally.
-Scripted model doubles check dispatch/history/citation validation and failure
-paths only. Missing current PDF bundle, verified live model reasoning, a clean
-student environment and actual heard/stopped speech remain release blockers.
+- [Peewee models/SQLite](https://docs.peewee-orm.com/en/latest/peewee/models.html) and [4.5.3 release](https://github.com/coleifer/peewee/releases/tag/4.5.3).
+- [MiniLM model and license](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/tree/1110a243fdf4706b3f48f1d95db1a4f5529b4d41), Apache-2.0; [Sentence Transformers documentation](https://sbert.net/).
+- [Qwen3.5-2B quantization](https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/tree/f6d5376be1edb4d416d56da11e5397a961aca8ae), Apache-2.0; [llama.cpp tools](https://github.com/ggml-org/llama.cpp/blob/master/docs/function-calling.md).
+- [eSpeak NG integration](https://github.com/espeak-ng/espeak-ng/blob/master/docs/integration.md).
+- [Official 2026/27 handbook](https://www.polyu.edu.hk/ar/docdrive/polyu-students/student-handbook/Student_Handbook_2026-27_English.pdf); attribution and exact provenance in fixtures.
+- Historical [2025 Week 10](https://github.com/sd5913/pfad/tree/2025/week10): persistent models, vectors and retriever retained; unsafe login hashing not reused. Orange/t-SNE removed by explicit instructor decision.

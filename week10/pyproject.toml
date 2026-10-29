@@ -6,7 +6,7 @@ requires-python = ">=3.12"
 dependencies = ["peewee==4.5.3"]
 
 [project.optional-dependencies]
-encoder = ["torch==2.14.1", "transformers==5.19.0"]
+encoder = ["torch==2.14.1", "transformers==5.19.0", "sentence-transformers==6.2.0"]
 
 [tool.uv]
 package = false

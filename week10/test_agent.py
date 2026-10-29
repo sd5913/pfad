@@ -13,9 +13,11 @@ class ScriptedModel:
     def __init__(self, answers):
         self.answers = iter(answers)
         self.requests = []
+        self.offered_tools = []
 
     def chat(self, messages, tools):
         self.requests.append(copy.deepcopy(messages))
+        self.offered_tools.append(copy.deepcopy(tools))
         return next(self.answers)
 
 
@@ -46,6 +48,8 @@ class ProtocolTests(unittest.TestCase):
         bot.ask(self.user.id, self.chat.id, 'What about that?')
         self.assertIn({'role': 'user', 'content': 'First question'}, model.requests[2])
         self.assertTrue(any(m['role'] == 'tool' for m in model.requests[1]))
+        self.assertTrue(model.offered_tools[0])
+        self.assertEqual(model.offered_tools[1], [])
         self.assertEqual(len(self.store.history(self.user.id, self.chat.id)), 4)
         second = Conversation.create(owner=self.user, title='Isolated')
         isolated = ScriptedModel([call(), {'role': 'assistant', 'content': 'Other [test-p1-c1]'}])

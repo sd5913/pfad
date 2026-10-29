@@ -43,6 +43,10 @@ class StoreTests(unittest.TestCase):
         with self.assertRaises(PermissionError):
             self.store.history(other.id, self.chat.id)
 
+    def test_unknown_conversation_has_a_recoverable_error(self):
+        with self.assertRaisesRegex(ValueError, 'Conversation not found'):
+            self.store.owned_conversation(self.user.id, 999999)
+
     def test_constraints_and_atomic_rollback(self):
         with self.assertRaises(IntegrityError):
             Message.create(conversation=999, role='user', content='orphan')

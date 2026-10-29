@@ -41,7 +41,9 @@ class Store:
         self.db = database
 
     def owned_conversation(self, owner_id, conversation_id):
-        chat = Conversation.get_by_id(conversation_id)
+        chat = Conversation.get_or_none(Conversation.id == conversation_id)
+        if chat is None:
+            raise ValueError('Conversation not found. Use the printed ID or start a new conversation.')
         if chat.owner_id != owner_id:
             raise PermissionError('This conversation belongs to another user.')
         return chat

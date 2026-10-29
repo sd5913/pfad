@@ -38,7 +38,8 @@ class Bot:
         trace = []
         calls = 0
         for step in range(4):
-            reply = self.model.chat(messages, [TOOL])
+            # Retrieve first, then give the small local model one answer phase.
+            reply = self.model.chat(messages, [TOOL] if not calls else [])
             if reply.get('role') != 'assistant':
                 raise ModelError('The model returned an invalid role.')
             messages.append(reply)
@@ -61,8 +62,11 @@ class Bot:
                     evidence.update({chunk['id']: chunk for chunk in result})
                     trace.append({'tool': function['name'], 'query': query, 'results': result})
                     import json
-                    messages.append({'role': 'tool', 'tool_name': function['name'],
-                                     'content': json.dumps(result, ensure_ascii=False)})
+                    tool_message = {'role': 'tool', 'tool_name': function['name'],
+                                    'content': json.dumps(result, ensure_ascii=False)}
+                    if 'id' in tool_call:
+                        tool_message['tool_call_id'] = tool_call['id']
+                    messages.append(tool_message)
                 continue
             answer = reply.get('content', '').strip()
             citations = re.findall(r'\[([^\[\]]+)\]', answer)
@@ -74,5 +78,5 @@ class Bot:
             # Citation membership is checked here; humans still inspect factual support.
             self.store.append_turn(owner_id, conversation_id, question, answer)
             return {'answer': answer, 'citations': citations, 'tools': trace,
-                    'prompt': messages, 'saved': True, 'spoken': False}
+                    'prompt': messages, 'saved': True, 'speech': {'status': 'not_attempted'}}
         raise ModelError('Model did not finish within four calls; no turn saved.')
