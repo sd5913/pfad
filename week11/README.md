@@ -39,7 +39,7 @@ From the PFAD repository root:
 
 ```bash
 cd week11
-uv run python -m unittest test_world test_mcp_transport test_mcp_cleanup
+uv run python -m unittest test_world test_mcp_transport test_mcp_cleanup test_mcp_client_status
 ```
 
 Keep this directory for all commands. uv uses its separate environment and
@@ -115,6 +115,9 @@ adds a `Marker` Node2D and a `Caption` Label with text `THREE LIGHTS`, requests
 project launch, reads debug output, requests stop and closes stdio. Stop is
 attempted even if a later request fails; bounded process cleanup also stops the
 owned application if the bridge no longer responds. Inspect the saved scene.
+If bridge closure fails after a successful request, the command exits nonzero.
+If the request already failed, its original error is preserved and the cleanup
+error is reported separately.
 The server's “project started”
 text is an acknowledgement: look at the actual window/debug output before
 claiming it ran correctly. This is **human-directed execution**, not a model
@@ -354,11 +357,11 @@ community MCP discovery/project metadata/create/add-node/stop; actual graphical
 Godot capture and full MP4 decode; Blender 5.2.3 CPU-rendered PNG/scene; course
 MCP adapter clean exit; live third-party Blender bridge change/reinspection/
 render/save/clean close; fresh public installation of both bridges.
-Six automated tests pass, including cleanup regressions and an opt-in real
+Eight automated tests pass, including cleanup regressions and an opt-in real
 Blender acceptance test:
 
 ```bash
-uv run python -m unittest test_world test_mcp_transport test_mcp_cleanup test_engine
+uv run python -m unittest test_world test_mcp_transport test_mcp_cleanup test_mcp_client_status test_engine
 uv run python -m unittest test_blender_live
 ```
 

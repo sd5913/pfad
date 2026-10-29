@@ -115,6 +115,7 @@ def main():
     command = ["python", str(ROOT / "blender_tools.py")] if args.blender else ["node", str(entry)]
     session = Session(command)
     launch_attempted = False
+    body_failed = False
     try:
         print(json.dumps({"initialize":session.request("initialize", {"protocolVersion":"2024-11-05", "capabilities":{}, "clientInfo":{"name":"pfad-human-client", "version":"1.0"}})}))
         session.send({"method":"notifications/initialized"})
@@ -141,6 +142,9 @@ def main():
             print(json.dumps(result, indent=2))
             if result.get("isError"):
                 raise SystemExit(1)
+    except BaseException:
+        body_failed = True
+        raise
     finally:
         if launch_attempted:
             try:
@@ -154,6 +158,8 @@ def main():
             session.close()
         except Exception as error:
             print(f"Bridge cleanup failed: {error}", file=sys.stderr)
+            if not body_failed:
+                raise
 
 
 if __name__ == "__main__":
