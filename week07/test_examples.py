@@ -10,6 +10,8 @@ import unittest
 
 root = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(root))
-suite = unittest.defaultTestLoader.discover(str(root / "week07" / "tests"))
+suite = unittest.defaultTestLoader.discover(
+    start_dir=str(root / "week07" / "tests"), top_level_dir=str(root / "week07" / "tests")
+)
 result = unittest.TextTestRunner(verbosity=2).run(suite)
 raise SystemExit(not result.wasSuccessful())
