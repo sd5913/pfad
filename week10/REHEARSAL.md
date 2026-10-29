@@ -6,6 +6,21 @@ The bot itself never downloads weights or connects to a paid endpoint.
 
 ## Dependencies and source
 
+Rebuilding the index also needs Poppler's **`pdftotext` system executable**;
+`uv sync` does not install it. The Linux package is `poppler-utils` on
+Debian/Ubuntu and Fedora, or `poppler` on Arch. Install it with your system
+package manager, then check readiness before the rebuild:
+
+```bash
+pdftotext -v
+```
+
+Expect a Poppler version and exit status 0 (verified here with 26.10.0). If the
+command is missing, install the package and retry. The supplied already-verified
+`fixtures/handbook.json` can be inspected with `handbook.py` and used by the bot
+without Poppler or rebuilding. Arbitrary bot questions still need the prepared
+matching encoder and model described below.
+
 ```bash
 uv sync --extra encoder
 uv run python download_handbook.py

@@ -25,8 +25,13 @@ def main():
         parser.error('Output exists; use --out out/rebuilt-handbook.json and review the diff.')
     for chunk in source['chunks']:
         page = str(chunk['page'])
-        text = subprocess.run(['pdftotext', '-layout', '-f', page, '-l', page,
-                               str(pdf), '-'], capture_output=True, text=True, check=True).stdout
+        try:
+            text = subprocess.run(['pdftotext', '-layout', '-f', page, '-l', page,
+                                   str(pdf), '-'], capture_output=True, text=True, check=True).stdout
+        except FileNotFoundError:
+            parser.error('pdftotext is missing; install Poppler (poppler-utils on Debian/Ubuntu '
+                         'or Fedora; poppler on Arch), then check pdftotext -v. '
+                         'The supplied fixtures/handbook.json can be used without rebuilding.')
         if chunk['text'] not in ' '.join(text.split()):
             parser.error(f"Extract does not match PDF page: {chunk['id']}")
     from encoder import Encoder

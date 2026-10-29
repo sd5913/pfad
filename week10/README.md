@@ -32,6 +32,13 @@ preparation, not twenty minutes of surprise model installation. The core
 application makes only loopback model requests on **127.0.0.1:11440**. It does
 not contact a paid endpoint or download models during a conversation.
 
+Only rebuilding the handbook index additionally needs Poppler's `pdftotext`
+system executable (`poppler-utils` on Debian/Ubuntu or Fedora; `poppler` on
+Arch). Check `pdftotext -v` before rebuilding; `uv` does not install this tool.
+The supplied already-verified `fixtures/handbook.json` can be inspected and
+used by the bot without Poppler or rebuilding. See the preparation guide for
+the rebuild command and recovery steps.
+
 The verified CPU route uses Qwen3.5-2B Q4_K_M (1.28 GB) and MiniLM (about 90 MB).
 Allow roughly 3 GB for weights, runtime and the encoder environment, plus
 package caches. On the tested Ryzen 9 5900HS laptop, a clean dependency install
