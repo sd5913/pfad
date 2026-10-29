@@ -1,11 +1,12 @@
 # Week 12: build, check and film a tiny world
 
-**Thursday 26 November 2026. Separate 120-minute tutorial. Draft, with an open
-production gate:** real Godot behavior and a genuine model-selected adaptation
-are recorded; a playable graphical capture and a timed first-time graphical
-bootstrap are still unverified. The incumbent lecture deck is historical and
-has not been accepted for this new lesson. Tutors must verify a prepared
-Godot machine and film before delivering the graphical route below.
+**Thursday 26 November 2026. Separate 120-minute tutorial.** The real model
+adaptation, actual graphical film and Linux operator bootstrap have been
+verified on 29 October; see [evidence/provenance.json](evidence/provenance.json)
+and [verification record](verification.md). A tutor must still preflight the
+actual classroom machine and latest release. The timed rehearsal used an
+automated operator with existing uv/Python/FFmpeg and software graphics; it
+is not a novice student timing or Windows/macOS acceptance.
 
 You will inspect a supplied world, change a bounded configuration, explain a
 failed check, recover and inspect a deterministic clip. Python connects the
@@ -31,7 +32,7 @@ deadline, compulsory engine or AI feature for your group project.
 | 85-100 | Replay, capture, decode and visually inspect the clip; retain your own evidence. |
 | 100-120 | Tutor delivery-candidate review and project support, including unfinished projects. |
 
-The setup and capture blocks are budgets, not measured promises. Do not eat the
+The setup and capture blocks are teaching budgets, not promises for every laptop. Do not eat the
 break or tutor time to repair an installation. If all machines lack graphics,
 the practical is incomplete: retain the config/check work, ask the tutor for a
 verified machine and arrange recovery within the existing support process.
@@ -52,13 +53,16 @@ As verified on 29 October, current stable is **Godot 4.7.2**. Recheck the
 [official download page](https://godotengine.org/download/) before class; use a
 newer stable release if it has arrived, then repeat the checks and visible
 preflight. Do not use the superseded 4.5.1 cache. Windows/macOS/Linux standard
-builds are available; only Linux x86_64 headless behavior has been tested here.
+builds are available; Linux x86_64 engine, real software-rendered editor/play/
+capture and isolated operator bootstrap have been tested here.
 Windows/macOS first launch, signing prompts and graphics remain untested.
 
 The official Linux x86_64 4.7.2 ZIP is 77,860,424 bytes (about 78 MB), excluding
-extraction, Python and FFmpeg. Other platform download sizes and all cold
-installation/download times are unmeasured. The author used a warm installed
-Arch Linux binary; that is not a timed first-time bootstrap. See
+extraction, Python and FFmpeg. The fresh official Linux ZIP took 9.484 seconds on the author's connection;
+active isolated import/check/capture/partner work plus full editor orientation
+totalled 60.528 seconds in two measured stages. Existing uv/Python/FFmpeg/Mesa
+were prerequisites. Novice setup, cold prerequisite installation and Windows/
+macOS timing remain unmeasured. See
 [verification.md](verification.md) for exact evidence and outstanding gates.
 
 1. **Minutes 0-5:** students who used only Blender in Week 11 follow this same
@@ -84,6 +88,9 @@ Arch Linux binary; that is not a timed first-time bootstrap. See
 3. **Minutes 10-15:** in Godot's Project Manager choose **Import**, browse to
    this checkout's `week12/godot/project.godot`, then **Import & Edit**. Locate
    `world.tscn`, its World node and `world.gd`; do not create a blank project.
+   Choose the **2D** workspace. This starter draws during runtime: the editor
+   canvas may be empty until you run it. An empty editor canvas is not proof
+   that the running world is missing.
    Run with **F6** while `world.tscn` is open, or use the supplied launch command:
 
    ```bash
@@ -111,9 +118,9 @@ Arch Linux binary; that is not a timed first-time bootstrap. See
 
 **Minute-20 prepared-machine handoff.** The tutor must have preflighted the
 latest Godot, this exact starter, visible play, passing/failing checks and
-`world.py capture`, including actually viewing the four-second film. This
-preparation is still an open production gate. Do not call an unverified laptop
-prepared. If your setup is unfinished, join that machine now. Open its supplied
+`world.py capture`, including actually viewing the four-second film. The author
+rehearsed this route on isolated Linux source copies; the tutor must verify the
+particular partner laptop before class. If setup is unfinished, join it now. Open its supplied
 `week12/godot/project.godot` through Project Manager **Import**, as above. Open
 its terminal in `week12`; identify `godot/world.json` and `.output` together.
 Agree who operates first and who reads/checks observations. The first learner
@@ -155,13 +162,15 @@ The recording helper logged one requested action; it did not choose retries.
 | Check | Godot 4.7.2, two lights, x455.000732421875, no win after 180 ticks, exit 1. |
 | Model chooses speed 275 | Only speed changes. The model estimates the needed travel rate from the failed run. |
 | Check again | Three lights, x840.832336425781, win at 166 ticks, exit 0. |
-| Stop | No more scene edits; playable film and graphical bootstrap are missing. |
+| Stop | No more scene edits; film/bootstrap were missing at that recorded moment. |
 
 The original check was weaker than today's added premature-exit probes; do not
 attribute these newer observations to that model. Its display prerequisite
 observation was corrected later: socket creation succeeded, but connecting to
-the actual Wayland display returned EPERM. No accepted film exists in this
-fixture. Reading it does not make new calls. Compare the two check observations:
+the actual Wayland display returned EPERM. The original fixture records no film at that moment. A later actual capture
+of its unchanged final source is [available here](evidence/model-selected-world.mp4);
+its [provenance](evidence/provenance.json) distinguishes later filming from
+the model's original decisions. Reading it does not make new calls. Compare the two check observations:
 what changed, what stayed fixed, and what evidence justified stopping edits?
 
 ## 35-55: one bounded change
@@ -280,8 +289,9 @@ hold. Replay follows a predetermined route, with no model action selection.
 Capture first reruns the behavior check, uses official `--write-movie`, expects
 a completion observation, encodes H.264 MP4, checks metadata, decodes every
 frame and extracts sample PNGs. It requires graphical rendering: never use
-headless black frames as the substitute. This capture path is supplied but
-remains unaccepted until actual graphics can be exercised and inspected.
+headless black frames as the substitute. This path passed actual Linux/Xvfb/Mesa rendering, encoding, full decode and
+visual inspection on 29 October. Each new attempt still needs its own check
+and visual inspection.
 
 Open `.output/world.mp4` in your video player. Expect 960x540, about 4 seconds,
 120 frames; compare `.output/frame-start.png`, `frame-middle.png` and
@@ -354,8 +364,8 @@ Sources checked 29 October 2026: [Godot 4.7 Movie Maker](https://docs.godotengin
 [4.7.2 official release](https://github.com/godotengine/godot-builds/releases/tag/4.7.2-stable).
 Documentation was fetched through Context7 before API changes. The
 [verification record](verification.md) separates current checks, supplied
-recordings and missing acceptance. [CI candidate](ci-capture-candidate.md)
+recordings, later real graphics evidence and classroom limits. [CI candidate](ci-capture-candidate.md)
 describes an unrun public-runner graphics path. All starter code is copied
 from the course-owned Week 11 commit recorded in the fixture; no unmerged
-sibling import is needed. W10 source-backed handbook retrieval remains a
-separate unproven dependency: this world does not claim to search that index.
+sibling import is needed. The short lecture handoff to W10's source-backed handbook retriever is a
+separate dependency; this tiny world does not search that index.

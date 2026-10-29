@@ -143,5 +143,13 @@
         "message": "[Errno 1] Operation not permitted"
       }
     }
-  ]
+  ],
+  "later_verification": {
+    "date": "2026-10-29",
+    "evidence": "evidence/provenance.json",
+    "clip": "evidence/model-selected-world.mp4",
+    "scope": "Later deterministic graphical capture of exact final source selected in the recorded model episode, not new model decisions. Original gate/records describe their own earlier moment and are preserved.",
+    "graphical_capture_verified": true,
+    "bootstrap_operator_feasibility_verified": true
+  }
 }

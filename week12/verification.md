@@ -1,9 +1,10 @@
 # Week 12 verification record
 
-29 October 2026. **Full production acceptance incomplete.** No playable film,
-graphical application acceptance, first-time graphical bootstrap timing or
-prepared-partner rehearsal has passed here. The new long lecture deck has not
-been authored; the incumbent addition/MCP deck remains historical draft work.
+29 October 2026. **Core model/engine/film/operator-bootstrap feasibility proven
+on Linux; independent review and classroom preflight remain.** The genuine model
+trace is preserved without changing its historical observations. Later actual
+film, stills and sanitized metadata are under [evidence/](evidence/provenance.json).
+No new paid model call, presenter operation or public CI run was made.
 
 ## Actual current environment and behavior
 
@@ -71,41 +72,71 @@ model. The historical source hashes and starter commit are retained in the
 provenance. Current W12 strengthens the checker and adds completion logging;
 these newer probes are not retroactively attributed to the recorded model.
 
-## Missing proof and exact recovery route
+## Actual film, timed bootstrap and prepared partner rehearsal
 
-The coordinator's current display transport connect returned EPERM. No further
-GUI/crash attempt was made, and no headless black frames, dummy movie or fake
-screenshot was generated. `world.py play`, visible replay and actual Movie
-Maker/FFmpeg capture remain unaccepted here. The helper code checks a fresh
-behavior result, engine completion, 960x540/about 4 seconds/120 frames, full decode
-and sample extraction, but these capture operations still need actual exercise
-on a graphics path. Metadata/decode checks alone cannot prove the intended
-scene or action: view the real clip and all sample frames.
+After full local permissions became available, the author rendered the exact
+original model-selected final source, speed 275, with real Godot 4.7.2 on a
+separate Xvfb display and Mesa llvmpipe software OpenGL. This is a deterministic
+capture after the model's genuine choice, not a new agent run. The original
+source hashes are retained in `evidence/provenance.json`; the current stronger
+checker and completion logger are not retroactively attributed to that model.
+The actual clip `evidence/model-selected-world.mp4` is 960x540, 4.000 seconds,
+120 frames at 30 fps. FFmpeg decoded every frame; ffplay played the complete
+clip; beginning/middle/end images were inspected: 0 lights, then 2 with player
+movement, then 3 with mint exit and COMPLETE. There are no dummy/black frames.
 
-`ci-capture-candidate.md` supplies the coordinator with an ordinary read-only
-public PR-runner proposal: current official 4.7.2 ZIP/checksum, Mesa software
-OpenGL/Xvfb, actual engine tests/capture, ffprobe, full decode, samples and
-seven-day artifact retention. It has not run. Nothing in this record claims a
-CI artifact exists or that a runner substitutes for student bootstrap timing.
+The current `world.py capture` helper separately passed the same real graphics,
+encoding, metadata/full-decode/sample acceptance, with completion at 166 physics
+ticks. Its `visual_inspection_required: true` remains intentional: each new
+capture needs a person to inspect it. The public sample film is a reference,
+not another learner's practice result.
 
-Official Linux 4.7.2 standard ZIP: 77,860,424 bytes, SHA-256
+The official latest-stable release endpoint was checked 29 October: 4.7.2,
+published 18 August 2026 at 15:56:46 UTC. A **fresh** official Linux standard ZIP
+was downloaded in **9.484 seconds**, 77,860,424 bytes, SHA-256
 `cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4`.
-The coordinator verified the current release. Cold download/extraction/
-first visible baseline/capture duration is unmeasured. Windows/macOS setup,
-all graphical paths and partner evidence retrieval are untested. A warm
-installed Linux check is not a first-time graphical bootstrap. Before class,
-recheck latest stable and time the README's 0-20 minute route; prepare and verify
-a partner machine, rehearse each learner's turn and retrieval, and keep the
-55-65 break/100-120 support blocks intact.
+Fresh extraction reports `4.7.2.stable.official.ed1daf0bf`. The isolated rehearsal
+had no W11 project/bridge or Godot import cache. It used existing Linux x86_64,
+uv, system CPython 3.14.8, FFmpeg/ffprobe, Xvfb and Mesa; prerequisite installation
+and novice reading time are excluded. It does not measure every student's setup.
 
-The W10 current handbook PDF/index/real-encoder/source-backed retriever proof
-has not been supplied here. The tiny world has no handbook search dependency;
-no fake retrieval or source claim is substituted. The conditional lecture
-handoff remains an explicit open dependency.
+Download/extract/copy + editor import, file inspection, real supplied baseline
+failure, human revision/passing check/capture, then two simulated learner turns
+with their own config/check/session/capture and evidence retrieval took
+**31.215 seconds of active scripted execution**. A follow-up fully initialized
+editor orientation in 2D and normal Ctrl+Q/Enter exit took **29.312 seconds**.
+The total measured active route is **60.528 seconds**, well inside the 20-minute
+budget. These are separate measured stages, not a single continuous novice
+trial. Early screenshots taken during initialization were rejected; an early
+WM_DELETE close timed out and Ctrl+Shift+Q opened Project Manager, so those were
+not counted as clean-stop proof. The final editor quit exits 0, logs only the
+expected Xvfb XIM/VSync warnings and leaves no engine descendants.
 
+`evidence/editor-orientation.png` shows the actual supplied World/files/2D tab.
+The canvas is blank by design because `_draw` executes in the running scene;
+the README now says to run F6/the play helper to see the actual world. The
+initial baseline at 125 produces 2 lights/x455/180ticks/passed false. Both
+simulated partner turns independently reset/check, change to 275/check, capture,
+copy config/check/session/report/clip/three frames, validate config identity and
+decode the copied clip. Copies use separate source folders and explicit swaps;
+no inherited passing journal is claimed as the second learner's work. This is
+an operator rehearsal, not a study with two students. The minute-20 handoff and
+7+7+1 minute evidence turns remain in the README. Break 55-65 and support100-120
+are intact. All cited evidence is private-path-free in the public fixture.
+
+Windows/macOS, installing uv/FFmpeg from scratch, slow networks and novice
+orientation remain unmeasured. Tutor preflight must verify the actual latest
+engine and prepared partner machine; arrange the minute-20 handoff exactly as
+documented. The public `ci-capture-candidate.md` is still an **unrun** normal
+PR-runner proposal, not a claim of CI artifacts or a replacement for bootstrap.
+
+## Cross-week dependency and sources
+
+The tiny world has no handbook-search dependency. W10's source/index handoff
+must use its verified current PDF, compatible real encoder/dimension, chunk/page
+metadata and actual tool results; no fake handbook search is substituted.
 Current Godot 4.7 docs were resolved and queried through Context7 before API
-changes (Movie Maker/CLI timing; SceneTree and physics callbacks). GitHub Actions
-read-only token/artifact retention docs were fetched for the CI proposal.
-The README links primary sources and states precise prerequisites/limits.
-No release, shared workflow, remote class, presenter, paid call or external
-message was made by this author.
+work: Movie Maker/CLI timing, node physics and Project Manager/import/single-
+window editor behavior. Public sources are linked from the README. No shared
+workflow, remote class, presenter change, paid call or external message was
+made by this author. Classroom rehearsal and independent review remain separate.

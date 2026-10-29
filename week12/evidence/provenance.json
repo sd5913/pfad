@@ -1,0 +1,79 @@
+{
+  "recorded_episode": "model-episode.json",
+  "film_scope": "Later deterministic Movie Maker capture of exact original final model-selected source; no new action selection or model call.",
+  "date": "2026-10-29",
+  "engine": "Godot 4.7.2 official, Mesa llvmpipe software OpenGL on Xvfb",
+  "source_hashes": [
+    {
+      "path": "godot/check_world.gd",
+      "sha256": "c9e0da91ab4f7b3460f5d85fd044ea9aad18b272f323f51dc7e4c034d7c0bda1"
+    },
+    {
+      "path": "godot/project.godot",
+      "sha256": "bf037fe27e209185c2d53163704ab9e074237956d2abc4bac3c5ca793267704d"
+    },
+    {
+      "path": "godot/world.gd",
+      "sha256": "1adcf233c9068fc429a4d38322cac27d2102975d3278b8c3caf29c9e704c300f"
+    },
+    {
+      "path": "godot/world.json",
+      "sha256": "9b9e1c540668029f9899536f22db260147b75ea9aab8bf54bc00d044efe12b9e"
+    },
+    {
+      "path": "godot/world.tscn",
+      "sha256": "3a6aad56395add3eccc3e5116f34f5a144becc894bb44976393543491567bfb3"
+    },
+    {
+      "path": "world.py",
+      "sha256": "467ec53fe4f2dc2619f7d89e4701f60bbf83d1b00841c39d6c2aa8152c7a8656"
+    }
+  ],
+  "movie": {
+    "width": 960,
+    "height": 540,
+    "seconds": 4.0,
+    "frames": 120,
+    "full_decode": true,
+    "visual_review": "start:0 lights; middle:2 lights/player moved; end:3 lights/mint exit/COMPLETE"
+  },
+  "bootstrap": {
+    "platform": "Linux x86_64",
+    "cold_engine_download_seconds": 9.483663216989953,
+    "archive_bytes": 77860424,
+    "archive_sha256": "cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4",
+    "active_download_import_checks_capture_pair_seconds": 31.215325236975332,
+    "orientation_followup_seconds": 29.31221360799998,
+    "scope": "Automated operator feasibility rehearsal with isolated project/user data, no W11 setup. Existing uv/Python/ffmpeg/Xvfb/Mesa. Not novice learner timing, Windows/macOS, or cold prerequisite installation.",
+    "partner": "Two separate learner-source copies, each own config change/check/session/clip/report/samples retrieved and decoded; simulated turns, not recruited students.",
+    "editor_clean_exit": 0,
+    "orientation": "Fully initialized actual editor, World node/files and 2D tab, Ctrl+Q/Enter normal quit, no remaining engine processes."
+  },
+  "release": {
+    "tag_name": "4.7.2-stable",
+    "published_at": "2026-08-18T15:56:46Z",
+    "html_url": "https://github.com/godotengine/godot-builds/releases/tag/4.7.2-stable"
+  },
+  "assets": [
+    {
+      "path": "editor-orientation.png",
+      "sha256": "715d15bd637894677e9f659eb512cdced72c43bee4d0e09b1535150f513f398b"
+    },
+    {
+      "path": "frame-end.png",
+      "sha256": "a032a5700682a58016ccabe26562331f62e699de92d7d31fa3eb1210f1068961"
+    },
+    {
+      "path": "frame-middle.png",
+      "sha256": "f776bd520b92303ac1d7eaf94ef1b38aeb15c175f050371ac637ca7e84f2b03c"
+    },
+    {
+      "path": "frame-start.png",
+      "sha256": "8fe1c8d626d3ecd1012c1100c19f3696cda6259360a045524554e7e6e1dd6ca2"
+    },
+    {
+      "path": "model-selected-world.mp4",
+      "sha256": "a2385f85c8af0b02cd3672f1e8e47d2631dd386c628b9208ef7f9ad6cd43af7a"
+    }
+  ]
+}
