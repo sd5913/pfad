@@ -19,7 +19,10 @@ def main():
         else:
             print(json.dumps({key: value for key, value in record.items()
                               if key not in ("time", "step", "model_selected_reason")}, indent=2))
-    print("\nCURRENT EVIDENCE LIMIT:", json.dumps(episode["gate"]))
+    print("\nORIGINAL EPISODE LIMIT AT RECORDING:", json.dumps(episode["gate"]))
+    if "later_verification" in episode:
+        print("LATER VERIFICATION (not a new model run):",
+              json.dumps(episode["later_verification"], indent=2))
 
 
 if __name__ == "__main__":

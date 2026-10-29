@@ -1,5 +1,5 @@
 {
-  "recorded_episode": "model-episode.json",
+  "recorded_episode": "../model-episode.json",
   "film_scope": "Later deterministic Movie Maker capture of exact original final model-selected source; no new action selection or model call.",
   "date": "2026-10-29",
   "engine": "Godot 4.7.2 official, Mesa llvmpipe software OpenGL on Xvfb",

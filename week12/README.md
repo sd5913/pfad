@@ -367,5 +367,10 @@ Documentation was fetched through Context7 before API changes. The
 recordings, later real graphics evidence and classroom limits. [CI candidate](ci-capture-candidate.md)
 describes an unrun public-runner graphics path. All starter code is copied
 from the course-owned Week 11 commit recorded in the fixture; no unmerged
-sibling import is needed. The short lecture handoff to W10's source-backed handbook retriever is a
-separate dependency; this tiny world does not search that index.
+sibling import is needed. The short lecture handoff to Week 10 is recorded in
+[handbook-handoff.json](handbook-handoff.json): an actual direct prepared-vector
+lookup of the official 2026/27 PDF returns `hb2026-p020-replacement`, PDF page20
+(printed9), score0.815428. Its source/encoder/revision/384D identity and bundle/
+query hashes are retained. It is not a new model call. The tiny-world core does
+not import a sibling folder or search that index. The index, saved conversation,
+ephemeral prompt and spoken output have different lifetimes.

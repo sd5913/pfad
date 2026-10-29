@@ -132,9 +132,16 @@ PR-runner proposal, not a claim of CI artifacts or a replacement for bootstrap.
 
 ## Cross-week dependency and sources
 
-The tiny world has no handbook-search dependency. W10's source/index handoff
-must use its verified current PDF, compatible real encoder/dimension, chunk/page
-metadata and actual tool results; no fake handbook search is substituted.
+The tiny world has no handbook-search dependency. The author independently ran
+W10's actual VectorIndex prepared query for the lost-card question: replacement
+chunk `hb2026-p020-replacement`, PDF20/printed9, score0.815428; return chunk
+score0.763087. `handbook-handoff.json` retains the real result, official2026/27
+PDF SHA108956feb2ffac665f8ca0f5a8f68d7150a85fda15e219916785ec50331a4e94,
+MiniLM revision1110a243fdf4706b3f48f1d95db1a4f5529b4d41/384D/attention-masked
+mean/L2-normalized identity, matching query-vector/bundle hashes and four
+lifetimes. It uses six short extracts, not the full137-page PDF. This direct
+retriever check made no model call; no keyword search or fake vectors were used.
+The lecture distinguishes this index, saved history, transient prompt and audio.
 Current Godot 4.7 docs were resolved and queried through Context7 before API
 work: Movie Maker/CLI timing, node physics and Project Manager/import/single-
 window editor behavior. Public sources are linked from the README. No shared
