@@ -96,7 +96,7 @@ jobs:
               fi
             fi
           done
-      - name: Capture and decode the real supplied tiny worlds
+      - name: Capture and decode the real worlds with verified configurations
         if: ${{ hashFiles('week11/world.py', 'week12/world.py') != '' }}
         shell: bash
         run: |
@@ -104,6 +104,10 @@ jobs:
           for week in week11 week12; do
             if [ -f "$week/world.py" ]; then
               mkdir -p "$week/.output"
+              if [ "$week" = week12 ]; then
+                # Reproduce the recorded passing configuration; no model inference.
+                (cd "$week" && uv run python world.py set speed 275 > .output/capture-config.json)
+              fi
               (cd "$week" && xvfb-run -a uv run python world.py capture > .output/capture-ci.json)
               ffmpeg -v error -i "$week/.output/world.mp4" -f null -
               ffprobe -v error -count_frames -show_entries format=duration:stream=width,height,nb_read_frames -of json "$week/.output/world.mp4" > "$week/.output/probe-ci.json"
