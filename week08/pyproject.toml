@@ -1,0 +1,8 @@
+[project]
+name = "sd5913-week08-vision"
+version = "0.1.0"
+requires-python = ">=3.13,<3.14"
+dependencies = ["mediapipe==1.2.0"]
+
+[dependency-groups]
+emotion = ["emotiefflib==1.1.1"]

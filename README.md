@@ -64,9 +64,10 @@ now, know that they exist and that switching between them is free.
 
 ## Reference
 
-The current [sound, music and speech tutorial](week06/README.md) is in `week06/`:
-WAV samples, browser instruments, a song API preview, and an optional local voice
-chatbot. The [images and frames examples](week05/README.md) remain in `week05/`.
+The [Week 7 activity](week07/README.md) is the current lesson. The draft
+[Week 8 companion](week08/README.md) builds on it; earlier
+[sound, music and speech](week06/README.md) and
+[images and frames](week05/README.md) examples remain available.
 
 Five pages the weekly tutorials assume and do not repeat — index at
 [`reference/README.md`](reference/README.md).
@@ -106,6 +107,7 @@ can show people. Treat them accordingly.
 | 05 | [Images, frames and representations — 8 October 2026](week05/README.md) |
 | 06 | [Sound, music and speech — WAV samples, browser instruments and a local voice bot](week06/README.md) |
 | 07 | [From an idea to one interaction — 22 October 2026](week07/README.md) |
+| 08 | [Camera interactions — OpenCV, MediaPipe and teamwork (29 October 2026)](week08/README.md) |
 | 10 | [Classes, objects and saved data — Thu 12 Nov 2026](week10/README.md) |
 
 More lands each week.
