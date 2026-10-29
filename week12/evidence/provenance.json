@@ -74,6 +74,54 @@
     {
       "path": "model-selected-world.mp4",
       "sha256": "a2385f85c8af0b02cd3672f1e8e47d2631dd386c628b9208ef7f9ad6cd43af7a"
+    },
+    {
+      "path": "original-check.json",
+      "sha256": "e2cafc205e48b53f4ee6174582de182626e422dfd5fb2c7c805211573c943b26"
+    },
+    {
+      "path": "original-final-source/godot/check_world.gd",
+      "sha256": "c9e0da91ab4f7b3460f5d85fd044ea9aad18b272f323f51dc7e4c034d7c0bda1"
+    },
+    {
+      "path": "original-final-source/godot/project.godot",
+      "sha256": "bf037fe27e209185c2d53163704ab9e074237956d2abc4bac3c5ca793267704d"
+    },
+    {
+      "path": "original-final-source/godot/world.gd",
+      "sha256": "1adcf233c9068fc429a4d38322cac27d2102975d3278b8c3caf29c9e704c300f"
+    },
+    {
+      "path": "original-final-source/godot/world.json",
+      "sha256": "9b9e1c540668029f9899536f22db260147b75ea9aab8bf54bc00d044efe12b9e"
+    },
+    {
+      "path": "original-final-source/godot/world.tscn",
+      "sha256": "3a6aad56395add3eccc3e5116f34f5a144becc894bb44976393543491567bfb3"
+    },
+    {
+      "path": "original-final-source/world.py",
+      "sha256": "467ec53fe4f2dc2619f7d89e4701f60bbf83d1b00841c39d6c2aa8152c7a8656"
     }
-  ]
+  ],
+  "original_source": "original-final-source/",
+  "original_passing_check": "original-check.json",
+  "probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 960,
+        "height": 540,
+        "pix_fmt": "yuvj420p",
+        "r_frame_rate": "30/1",
+        "nb_frames": "120"
+      }
+    ],
+    "format": {
+      "duration": "4.000000"
+    }
+  }
 }
