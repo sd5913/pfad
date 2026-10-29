@@ -4,7 +4,9 @@ import json
 import os
 from pathlib import Path
 import queue
+import signal
 import subprocess
+import sys
 import threading
 import time
 
@@ -15,7 +17,8 @@ class Session:
     def __init__(self, command, env=None):
         environment = {**os.environ, "XDG_DATA_HOME":str(ROOT / ".output/data"), **(env or {})}
         self.process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                        stderr=subprocess.PIPE, text=True, env=environment)
+                                        stderr=subprocess.PIPE, text=True, env=environment,
+                                        start_new_session=os.name == "posix")
         self.messages = queue.Queue()
         self.errors = []
         def read_messages():
@@ -54,16 +57,50 @@ class Session:
         raise RuntimeError("no response with the request ID")
 
     def close(self):
-        self.process.stdin.close()
+        # The bridge's SIGINT handler stops Godot; EOF/SIGTERM alone do not.
+        # Own a separate group so fallback cleanup also reaches orphaned children.
+        if os.name == "posix":
+            for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGKILL):
+                try:
+                    os.killpg(self.process.pid, sig)
+                except ProcessLookupError:
+                    break
+                deadline = time.monotonic() + 2
+                while time.monotonic() < deadline:
+                    self.process.poll()
+                    try:
+                        os.killpg(self.process.pid, 0)
+                    except ProcessLookupError:
+                        break
+                    time.sleep(0.02)
+                else:
+                    continue
+                break
+        elif self.process.poll() is None:
+            # Keep the server alive until taskkill can identify its descendants.
+            try:
+                subprocess.run(["taskkill", "/PID", str(self.process.pid), "/T", "/F"],
+                               capture_output=True, timeout=5, check=False)
+            except (OSError, subprocess.TimeoutExpired) as error:
+                print(f"Process-tree cleanup: {error}", file=sys.stderr)
         try:
-            self.process.wait(timeout=5)
+            self.process.stdin.close()
+        except OSError:
+            pass
+        try:
+            self.process.wait(timeout=2)
         except subprocess.TimeoutExpired:
-            self.process.terminate()
-            self.process.wait(timeout=5)
+            self.process.kill()
+            self.process.wait(timeout=2)
         self.reader.join(timeout=1)
         self.error_reader.join(timeout=1)
-        self.process.stdout.close()
-        self.process.stderr.close()
+        # Closing a pipe while another thread reads it can block indefinitely.
+        for reader, stream in ((self.reader, self.process.stdout),
+                               (self.error_reader, self.process.stderr)):
+            if not reader.is_alive():
+                stream.close()
+            else:
+                print("Cleanup: a bridge output pipe remains open", file=sys.stderr)
 
 
 def main():
@@ -77,6 +114,7 @@ def main():
         raise SystemExit("Install the pinned third-party bridge first; see README / MCP setup.")
     command = ["python", str(ROOT / "blender_tools.py")] if args.blender else ["node", str(entry)]
     session = Session(command)
+    launch_attempted = False
     try:
         print(json.dumps({"initialize":session.request("initialize", {"protocolVersion":"2024-11-05", "capabilities":{}, "clientInfo":{"name":"pfad-human-client", "version":"1.0"}})}))
         session.send({"method":"notifications/initialized"})
@@ -88,8 +126,10 @@ def main():
                 ("create_scene", {"projectPath":project, "scenePath":"probe.tscn", "rootNodeType":"Node2D"}),
                 ("add_node", {"projectPath":project, "scenePath":"probe.tscn", "parentNodePath":".", "nodeType":"Node2D", "nodeName":"Marker"}),
                 ("add_node", {"projectPath":project, "scenePath":"probe.tscn", "parentNodePath":".", "nodeType":"Label", "nodeName":"Caption", "properties":{"text":"THREE LIGHTS"}}),
-                ("run_project", {"projectPath":project}), ("get_debug_output", {}), ("stop_project", {})]
+                ("run_project", {"projectPath":project}), ("get_debug_output", {})]
             for name, arguments in calls:
+                if name == "run_project":
+                    launch_attempted = True
                 result = session.request("tools/call", {"name":name, "arguments":arguments})
                 print(json.dumps({"tool":name, "arguments":arguments, "result":result}))
                 if result.get("isError"):
@@ -102,7 +142,18 @@ def main():
             if result.get("isError"):
                 raise SystemExit(1)
     finally:
-        session.close()
+        if launch_attempted:
+            try:
+                result = session.request("tools/call", {"name":"stop_project", "arguments":{}}, timeout=5)
+                print(json.dumps({"tool":"stop_project", "result":result}))
+                if result.get("isError"):
+                    print(f"Project cleanup failed: {result}", file=sys.stderr)
+            except Exception as error:
+                print(f"Project cleanup failed: {error}", file=sys.stderr)
+        try:
+            session.close()
+        except Exception as error:
+            print(f"Bridge cleanup failed: {error}", file=sys.stderr)
 
 
 if __name__ == "__main__":

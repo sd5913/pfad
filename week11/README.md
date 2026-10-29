@@ -39,7 +39,7 @@ From the PFAD repository root:
 
 ```bash
 cd week11
-uv run python -m unittest test_world test_mcp_transport
+uv run python -m unittest test_world test_mcp_transport test_mcp_cleanup
 ```
 
 Keep this directory for all commands. uv uses its separate environment and
@@ -111,27 +111,37 @@ is bridge setup time, not a first-time Godot editor download measurement. If set
 prepared bridge machine. Do not label an unexecuted request a successful tool run.
 
 `demo` initializes MCP, inspects the actual project, creates `godot/probe.tscn`,
-adds a `Marker` Node2D, requests project launch, reads debug output, requests
-stop and closes stdio. Inspect the saved scene. The server's “project started”
+adds a `Marker` Node2D and a `Caption` Label with text `THREE LIGHTS`, requests
+project launch, reads debug output, requests stop and closes stdio. Stop is
+attempted even if a later request fails; bounded process cleanup also stops the
+owned application if the bridge no longer responds. Inspect the saved scene.
+The server's “project started”
 text is an acknowledgement: look at the actual window/debug output before
 claiming it ran correctly. This is **human-directed execution**, not a model
 choosing actions autonomously.
 
-Trace this request in [mcp_client.py](mcp_client.py):
+Trace the existing Caption request in [mcp_client.py](mcp_client.py). Now add a
+different instruction label, `RouteHint`, to the scene created by `demo`:
 
 ```json
-{"method":"tools/call","params":{"name":"add_node","arguments":{"projectPath":"ABSOLUTE/PATH/TO/week11/godot","scenePath":"probe.tscn","parentNodePath":".","nodeType":"Label","nodeName":"Caption","properties":{"text":"THREE LIGHTS"}}}}
+{"method":"tools/call","params":{"name":"add_node","arguments":{"projectPath":"ABSOLUTE/PATH/TO/week11/godot","scenePath":"probe.tscn","parentNodePath":".","nodeType":"Label","nodeName":"RouteHint","properties":{"text":"COLLECT THREE, THEN EXIT"}}}}
 ```
 
-Replace the absolute project path, then call the same tool:
+Predict: Caption should stay unchanged, and one new named Label should appear.
+Replace the absolute project path, then call the tool once:
 
 ```bash
-uv run python mcp_client.py add_node '{"projectPath":"ABSOLUTE/PATH/TO/week11/godot","scenePath":"probe.tscn","parentNodePath":".","nodeType":"Label","nodeName":"Caption","properties":{"text":"THREE LIGHTS"}}'
+uv run python mcp_client.py add_node '{"projectPath":"ABSOLUTE/PATH/TO/week11/godot","scenePath":"probe.tscn","parentNodePath":".","nodeType":"Label","nodeName":"RouteHint","properties":{"text":"COLLECT THREE, THEN EXIT"}}'
 ```
 
-PowerShell argument quoting varies: edit the `calls` list inside `mcp_client.py`
-instead and run `demo`. Open `probe.tscn` in Godot and inspect Caption's text.
-The saved Label/property were checked in the real engine. The supplied game
+PowerShell argument quoting varies: append this `add_node` request's arguments
+as another `("add_node", {...})` entry after Caption in the `calls` list inside
+`mcp_client.py`, then run `demo`. Open `probe.tscn` in Godot: inspect Caption's
+text `THREE LIGHTS` and the new RouteHint's text `COLLECT THREE, THEN EXIT`.
+Read the saved `.tscn` too; a generated name such as `@Label@2` means you repeated
+a name. To reset, undo any `calls` edit, rerun `demo` (which recreates the probe)
+and make the RouteHint request once. The saved nodes/properties were checked
+with these real bridge calls. The supplied game
 was also rendered and recorded in Godot 4.7.2; inspect your own desktop result. This does not update an editor window showing another scene.
 The community server invokes Godot CLI/bundled GDScript; it is not a general
 live-editor remote control.
@@ -344,14 +354,19 @@ community MCP discovery/project metadata/create/add-node/stop; actual graphical
 Godot capture and full MP4 decode; Blender 5.2.3 CPU-rendered PNG/scene; course
 MCP adapter clean exit; live third-party Blender bridge change/reinspection/
 render/save/clean close; fresh public installation of both bridges.
-Four automated tests pass, including an opt-in real Blender acceptance test:
+Six automated tests pass, including cleanup regressions and an opt-in real
+Blender acceptance test:
 
 ```bash
-uv run python -m unittest test_world test_mcp_transport test_engine
+uv run python -m unittest test_world test_mcp_transport test_mcp_cleanup test_engine
 uv run python -m unittest test_blender_live
 ```
 
-The last command needs Blender, its installed bridge and a working display.
+The cleanup tests use POSIX process groups; the actual-bridge case needs the
+installed pinned Godot bridge, Node and Godot, otherwise it skips. It launches
+real Godot headlessly in a temporary project and injects an error after launch,
+including an unresponsive stop request. The last command needs Blender, its
+installed bridge and a working display.
 On a Linux CI machine with Xvfb installed, prefix it with `xvfb-run -a`.
 Windows/macOS and classroom rehearsal remain outstanding. Actual keyboard
 play and projected display should be rehearsed on the teaching machine.
