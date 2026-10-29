@@ -1,0 +1,52 @@
+{
+  "checked_on": "2026-10-29",
+  "hardware": "AMD Ryzen 9 5900HS; CPU only; approximately 40 GB RAM",
+  "llama_cpp": {
+    "build": "b11972",
+    "commit": "cf24317be",
+    "startup_seconds": 2.26,
+    "cpu_threads": 6,
+    "port": 11440
+  },
+  "chat_model": {
+    "repository": "unsloth/Qwen3.5-2B-GGUF",
+    "revision": "f6d5376be1edb4d416d56da11e5397a961aca8ae",
+    "file": "Qwen3.5-2B-Q4_K_M.gguf",
+    "url": "https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/f6d5376be1edb4d416d56da11e5397a961aca8ae/Qwen3.5-2B-Q4_K_M.gguf",
+    "bytes": 1280835840,
+    "sha256": "aaf42c8b7c3cab2bf3d69c355048d4a0ee9973d48f16c731c0520ee914699223",
+    "download_seconds": 46.503821418999905
+  },
+  "encoder": {
+    "kind": "sentence-transformer",
+    "name": "sentence-transformers/all-MiniLM-L6-v2",
+    "revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+    "dimension": 384,
+    "pooling": "attention-masked mean; L2 normalized",
+    "max_tokens": 256
+  },
+  "dependencies": {
+    "Python": "3.12.15",
+    "uv": "0.13.6",
+    "peewee": "4.5.3",
+    "torch": "2.14.1+cpu",
+    "transformers": "5.19.0",
+    "sentence-transformers": "6.2.0",
+    "espeak-ng": "1.52.0.1"
+  },
+  "clean_uv_install_seconds": 12.053,
+  "end_to_end_cli_seconds": {
+    "supported": 38.670393585000056,
+    "followup": 18.797932289999835,
+    "unsupported": 17.17594647100009,
+    "isolated": 18.758404290999806
+  },
+  "speech": {
+    "actual_answer_seconds": 18.76185941043084,
+    "sample_rate": 22050,
+    "channels": 1,
+    "player_completion": "checked",
+    "ctrl_c_stop": "checked",
+    "physical_audibility": "requires listener; not claimed"
+  }
+}
