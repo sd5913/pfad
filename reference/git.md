@@ -36,8 +36,10 @@ git pull                                    # bring GitHub's down
 
 Two things about that list.
 
-**Only `push` and `pull` touch the internet.** You can commit forty times on a
-plane. Until you push, GitHub has not seen any of it, and neither has anyone else.
+**The `clone` shown above, `push` and `pull` contact GitHub.** `status`, `add`
+and `commit` work locally, so you can commit forty times on a plane. Until you
+push, GitHub has not seen those commits. Other commands, such as `fetch`, also
+contact a remote; a remote can be local rather than on the internet.
 
 **`status` is free.** Run it before and after every other command until you can
 predict what it will say. It is the cheapest debugging in the course.
@@ -180,11 +182,12 @@ with Windows has its own command called `curl` which is not curl, takes differen
 arguments, and fails on that line. The `.exe` is not decoration; it tells
 PowerShell you mean the real program.
 
-**"Exactly `.github/workflows/check.yml`" means exactly that.** Not
-`.github/workflow/check.yml`, not `github/workflows/check.yml`, not
-`.github/workflows/Check.yml`. GitHub looks at that one address and nowhere else,
-and when the file is somewhere else it does not warn you — the Actions tab is
-simply empty, and an empty tab looks exactly like a tab that has not run yet.
+**The directory must be `.github/workflows/`.** Our example uses `check.yml`,
+but GitHub accepts other filenames with a `.yml` or `.yaml` extension there,
+including `Check.yml`. The leading dot and plural `workflows` matter. The
+workflow also needs an `on:` trigger matching the event you expect; merely
+placing any YAML file there does not make it run on every push. See
+[GitHub’s workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax).
 
 The folder starts with a dot, so Finder and Explorer hide it. `git status` does
 not, and `git ls-files .github` tells you whether git really has it.
@@ -200,8 +203,10 @@ not, and `git ls-files .github` tells you whether git really has it.
 - **`curl.exe`, not `curl`**, in PowerShell. As above.
 - **Paths use `\`** — `..\pfad\week01\first-repo\sketch.py`. Git itself always
   writes `/`, in every message and in `.gitignore`, on every platform.
-- **`pwd` is `cd`** with no arguments in PowerShell, if you want to know where you
-  are. `ls -Force` is `ls -a`.
+- **`pwd` works in PowerShell** as an alias for `Get-Location`; use either to
+  display your current folder. `cd` is an alias for `Set-Location`, which changes
+  folders, not the equivalent of `pwd`. `Get-ChildItem -Force` (or `ls -Force`)
+  includes hidden entries, like `ls -a` in a Unix shell.
 
 ## When it goes wrong
 
