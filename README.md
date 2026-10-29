@@ -18,7 +18,7 @@ runs, so expect it to grow week by week — `git pull` before each class.
 3. **Read [`assignments/01-why-are-we-here.md`](assignments/01-why-are-we-here.md).**
    Your first assignment is due at the end of week 2. Before you submit, run
    [the check](assignments/check.py) inside your repo — it tells you what is missing.
-4. **For the current lesson, go to [Week 13: explain the loop](week13/README.md).**
+4. **For the current lesson, go to [Week 7: from an idea to one interaction](week07/README.md).**
    The [weekly content index](#weekly-content) links to the same material.
 
 ```bash
@@ -64,9 +64,10 @@ now, know that they exist and that switching between them is free.
 
 ## Reference
 
-The current [sound, music and speech tutorial](week06/README.md) is in `week06/`:
-WAV samples, browser instruments, a song API preview, and an optional local voice
-chatbot. The [images and frames examples](week05/README.md) remain in `week05/`.
+The [Week 7 activity](week07/README.md) is the current lesson. The draft
+[Week 8 companion](week08/README.md) builds on it; earlier
+[sound, music and speech](week06/README.md) and
+[images and frames](week05/README.md) examples remain available.
 
 Five pages the weekly tutorials assume and do not repeat — index at
 [`reference/README.md`](reference/README.md).
@@ -105,6 +106,11 @@ can show people. Treat them accordingly.
 | 04 | [One control, one clear response — Streamlit, browser events, FastAPI and a test](week04/README.md) |
 | 05 | [Images, frames and representations — 8 October 2026](week05/README.md) |
 | 06 | [Sound, music and speech — WAV samples, browser instruments and a local voice bot](week06/README.md) |
-| 13 | [Explain the loop and your work — Thu 3 Dec 2026](week13/README.md) |
+| 07 | [From an idea to one interaction — 22 October 2026](week07/README.md) |
+| 08 | [Camera interactions — OpenCV, MediaPipe and teamwork (29 October 2026)](week08/README.md) |
+| 1 | [Why are we here?](assignments/01-why-are-we-here.md) — a reflection, published as a repository | 5% | Sun 13 Sep 2026, 23:59 |
+| 13 | [Final quiz, revision and project support - class date TBC](week13/README.md) |
+| 2 | [Data visualisation](assignments/02-data-visualisation.md) — numbers about a natural phenomenon, made into a picture | 10% | Sun 4 Oct 2026, 23:59 |
+| 3 | Interactive experience project | 15% | Sun 1 Nov 2026, 23:59 (Hong Kong time) |
 
 More lands each week.
