@@ -108,9 +108,6 @@ can show people. Treat them accordingly.
 | 06 | [Sound, music and speech — WAV samples, browser instruments and a local voice bot](week06/README.md) |
 | 07 | [From an idea to one interaction — 22 October 2026](week07/README.md) |
 | 08 | [Camera interactions — OpenCV, MediaPipe and teamwork (29 October 2026)](week08/README.md) |
-| 1 | [Why are we here?](assignments/01-why-are-we-here.md) — a reflection, published as a repository | 5% | Sun 13 Sep 2026, 23:59 |
 | 13 | [Final quiz, revision and project support - class date TBC](week13/README.md) |
-| 2 | [Data visualisation](assignments/02-data-visualisation.md) — numbers about a natural phenomenon, made into a picture | 10% | Sun 4 Oct 2026, 23:59 |
-| 3 | Interactive experience project | 15% | Sun 1 Nov 2026, 23:59 (Hong Kong time) |
 
 More lands each week.
