@@ -1,7 +1,7 @@
 {
   "label": "Actual direct retriever observation, not a fresh model call or a world dependency",
   "checked_on": "2026-10-29",
-  "source_week10_commit": "adaf62422b7fc7c7fb20761950294ea999c45377",
+  "source_week10_commit": "c59fae0df42e316a431c308bfe582a84411d5887",
   "bundle_sha256": "0f7c3c6069c865154b2df3fb6dd7e8b73f1a8e6f5a9d7a867a1bb2cc5280b7dc",
   "source": {
     "title": "Student Handbook for Taught Programmes 2026/27",
@@ -70,5 +70,6 @@
     "saved_conversation": "Owner-scoped rows persist and reopen, supplying previous turns.",
     "ephemeral_prompt": "System, current question, selected history and actual tool results are assembled for this call.",
     "spoken_output": "Derived audio/playback is checked separately from citation correctness and saved history."
-  }
+  },
+  "source_bundle_url": "https://github.com/sd5913/pfad/blob/c59fae0df42e316a431c308bfe582a84411d5887/week10/fixtures/handbook.json"
 }
