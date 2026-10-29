@@ -28,7 +28,7 @@ permissions:
 jobs:
   examples:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
         with:
@@ -42,6 +42,37 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           version: "0.13.6"
+      - name: Install the verified current Godot for real engine checks
+        if: ${{ hashFiles('week11/test_engine.py', 'week12/test_engine.py') != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y xvfb libgl1-mesa-dri libegl1 ffmpeg
+          mkdir -p "$RUNNER_TEMP/pfad-godot"
+          cd "$RUNNER_TEMP/pfad-godot"
+          curl --fail --location --retry 3 -o Godot_v4.7.2-stable_linux.x86_64.zip https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          sha256sum --check <<'CHECKSUM'
+          cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4  Godot_v4.7.2-stable_linux.x86_64.zip
+          CHECKSUM
+          unzip -q Godot_v4.7.2-stable_linux.x86_64.zip
+          chmod +x Godot_v4.7.2-stable_linux.x86_64
+          echo "GODOT_PATH=$RUNNER_TEMP/pfad-godot/Godot_v4.7.2-stable_linux.x86_64" >> "$GITHUB_ENV"
+      - name: Install verified Blender and its isolated community bridge
+        if: ${{ hashFiles('week11/setup_blender.py') != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/pfad-blender"
+          cd "$RUNNER_TEMP/pfad-blender"
+          curl --fail --location --retry 3 -o blender-5.2.3-linux-x64.tar.xz https://download.blender.org/release/Blender5.2/blender-5.2.3-linux-x64.tar.xz
+          sha256sum --check <<'CHECKSUM'
+          78486c018b4443efe5e75ab54c290ed8c15abafd249b862c2c9ce2530a918eec  blender-5.2.3-linux-x64.tar.xz
+          CHECKSUM
+          tar -xf blender-5.2.3-linux-x64.tar.xz
+          echo "$RUNNER_TEMP/pfad-blender/blender-5.2.3-linux-x64" >> "$GITHUB_PATH"
+          cd "$GITHUB_WORKSPACE/week11"
+          uv run python setup_blender.py
       - name: Test every available Python companion independently
         shell: bash
         run: |
@@ -49,12 +80,42 @@ jobs:
           for week in week08 week09 week10 week11 week12 week13; do
             if [ -d "$week" ]; then
               if [ -f "$week/pyproject.toml" ]; then
-                (cd "$week" && uv run python -B -m unittest discover -s . -p 'test_*.py' -v)
+                if [ "$week" = week11 ]; then
+                  (cd "$week" && xvfb-run -a uv run python -B -m unittest discover -s . -p 'test_*.py' -v)
+                else
+                  (cd "$week" && uv run python -B -m unittest discover -s . -p 'test_*.py' -v)
+                fi
               else
                 python -B -m unittest discover -s "$week" -p 'test_*.py' -v
               fi
             fi
           done
+      - name: Capture and decode the real supplied tiny worlds
+        if: ${{ hashFiles('week11/world.py', 'week12/world.py') != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for week in week11 week12; do
+            if [ -f "$week/world.py" ]; then
+              mkdir -p "$week/.output"
+              (cd "$week" && xvfb-run -a uv run python world.py capture > .output/capture-ci.json)
+              ffmpeg -v error -i "$week/.output/world.mp4" -f null -
+              ffprobe -v error -count_frames -show_entries format=duration:stream=width,height,nb_read_frames -of json "$week/.output/world.mp4" > "$week/.output/probe-ci.json"
+            fi
+          done
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() && hashFiles('week11/world.py', 'week12/world.py') != '' }}
+        with:
+          name: creative-application-evidence-${{ github.sha }}
+          path: |
+            week11/.output/*.json
+            week11/.output/world.mp4
+            week11/.output/blender/*.png
+            week12/.output/*.json
+            week12/.output/world.mp4
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 7
       - name: Test browser mapping when present
         if: ${{ hashFiles('week11/browser/control.test.cjs') != '' }}
         run: node --test week11/browser/control.test.cjs
