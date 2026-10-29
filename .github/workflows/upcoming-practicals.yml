@@ -1,4 +1,4 @@
-name: Weeks 8–12 practical checks
+name: Weeks 8-13 practical checks
 
 on:
   pull_request:
@@ -9,6 +9,7 @@ on:
       - "week10/**"
       - "week11/**"
       - "week12/**"
+      - "week13/**"
       - ".github/workflows/upcoming-practicals.yml"
   push:
     branches: ["2026"]
@@ -18,6 +19,7 @@ on:
       - "week10/**"
       - "week11/**"
       - "week12/**"
+      - "week13/**"
       - ".github/workflows/upcoming-practicals.yml"
 
 permissions:
@@ -26,7 +28,7 @@ permissions:
 jobs:
   examples:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
         with:
@@ -36,22 +38,119 @@ jobs:
           python-version: "3.12"
       - uses: actions/setup-node@v4
         with:
-          node-version: "24"
+          node-version: "26"
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.6"
+      - name: Install the verified current Godot for real engine checks
+        if: ${{ hashFiles('week11/test_engine.py', 'week12/test_engine.py') != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y xvfb libgl1-mesa-dri libegl1 ffmpeg
+          mkdir -p "$RUNNER_TEMP/pfad-godot"
+          cd "$RUNNER_TEMP/pfad-godot"
+          curl --fail --location --retry 3 -o Godot_v4.7.2-stable_linux.x86_64.zip https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          sha256sum --check <<'CHECKSUM'
+          cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4  Godot_v4.7.2-stable_linux.x86_64.zip
+          CHECKSUM
+          unzip -q Godot_v4.7.2-stable_linux.x86_64.zip
+          chmod +x Godot_v4.7.2-stable_linux.x86_64
+          echo "GODOT_PATH=$RUNNER_TEMP/pfad-godot/Godot_v4.7.2-stable_linux.x86_64" >> "$GITHUB_ENV"
+      - name: Install verified Blender and its isolated community bridge
+        if: ${{ hashFiles('week11/setup_blender.py') != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/pfad-blender"
+          cd "$RUNNER_TEMP/pfad-blender"
+          curl --fail --location --retry 3 -o blender-5.2.3-linux-x64.tar.xz https://download.blender.org/release/Blender5.2/blender-5.2.3-linux-x64.tar.xz
+          sha256sum --check <<'CHECKSUM'
+          78486c018b4443efe5e75ab54c290ed8c15abafd249b862c2c9ce2530a918eec  blender-5.2.3-linux-x64.tar.xz
+          CHECKSUM
+          tar -xf blender-5.2.3-linux-x64.tar.xz
+          echo "$RUNNER_TEMP/pfad-blender/blender-5.2.3-linux-x64" >> "$GITHUB_PATH"
+          cd "$GITHUB_WORKSPACE/week11"
+          uv run python setup_blender.py
       - name: Test every available Python companion independently
         shell: bash
         run: |
           set -euo pipefail
-          for week in week08 week09 week10 week12; do
+          for week in week08 week09 week10 week11 week12 week13; do
             if [ -d "$week" ]; then
-              python -B -m unittest discover -s "$week" -p 'test_*.py' -v
+              if [ -f "$week/pyproject.toml" ]; then
+                if [ "$week" = week11 ]; then
+                  (cd "$week" && xvfb-run -a uv run python -B -m unittest discover -s . -p 'test_*.py' -v)
+                else
+                  (cd "$week" && uv run python -B -m unittest discover -s . -p 'test_*.py' -v)
+                fi
+              else
+                python -B -m unittest discover -s "$week" -p 'test_*.py' -v
+              fi
             fi
           done
+      - name: Capture and decode the real supplied tiny worlds
+        if: ${{ hashFiles('week11/world.py', 'week12/world.py') != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for week in week11 week12; do
+            if [ -f "$week/world.py" ]; then
+              mkdir -p "$week/.output"
+              (cd "$week" && xvfb-run -a uv run python world.py capture > .output/capture-ci.json)
+              ffmpeg -v error -i "$week/.output/world.mp4" -f null -
+              ffprobe -v error -count_frames -show_entries format=duration:stream=width,height,nb_read_frames -of json "$week/.output/world.mp4" > "$week/.output/probe-ci.json"
+            fi
+          done
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() && hashFiles('week11/world.py', 'week12/world.py') != '' }}
+        with:
+          name: creative-application-evidence-${{ github.sha }}
+          path: |
+            week11/.output/*.json
+            week11/.output/world.mp4
+            week11/.output/blender/*.png
+            week12/.output/*.json
+            week12/.output/world.mp4
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 7
       - name: Test browser mapping when present
         if: ${{ hashFiles('week11/browser/control.test.cjs') != '' }}
         run: node --test week11/browser/control.test.cjs
-      - name: Install pinned runner for the optional MCP protocol smoke
-        if: ${{ hashFiles('week12/check_mcp.py') != '' }}
-        run: python -m pip install uv==0.12.23
+      - name: Check action correlation and restarted-server snapshot state
+        if: ${{ hashFiles('week09/test_browser_state.cjs') != '' }}
+        run: node week09/test_browser_state.cjs
       - name: Exercise real local MCP discovery and call
         if: ${{ hashFiles('week12/check_mcp.py') != '' }}
         run: timeout 90s uv run --no-project --python 3.12 week12/check_mcp.py
+      - name: Install browser for the connected-interaction acceptance check
+        if: ${{ hashFiles('week09/check_browser.cjs') != '' }}
+        run: |
+          npm install --prefix "$RUNNER_TEMP/week09-browser" --no-save --package-lock=false playwright@1.64.1
+          node "$RUNNER_TEMP/week09-browser/node_modules/playwright/cli.js" install --with-deps chromium
+          echo "NODE_PATH=$RUNNER_TEMP/week09-browser/node_modules" >> "$GITHUB_ENV"
+      - name: Verify two real browsers, stopped server and recovery on port 8009
+        if: ${{ hashFiles('week09/check_browser.cjs') != '' }}
+        env:
+          WEEK09_PYTHON: ${{ github.workspace }}/week09/.venv/bin/python
+          WEEK09_SCREENSHOT_DIR: ${{ runner.temp }}/week09-evidence
+        run: |
+          mkdir -p "$WEEK09_SCREENSHOT_DIR"
+          cp week09/uv.lock "$WEEK09_SCREENSHOT_DIR/uv.lock"
+          "$WEEK09_PYTHON" - <<'PY' > "$WEEK09_SCREENSHOT_DIR/versions.json"
+          import importlib.metadata, json, sys
+          print(json.dumps({"python": sys.version, "packages": {
+              item.metadata['Name']: item.version
+              for item in importlib.metadata.distributions()
+          }}, indent=2))
+          PY
+          node week09/check_browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() && hashFiles('week09/check_browser.cjs') != '' }}
+        with:
+          name: week09-browser-${{ github.sha }}
+          path: ${{ runner.temp }}/week09-evidence/
+          if-no-files-found: warn
+          retention-days: 14
