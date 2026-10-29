@@ -301,17 +301,19 @@ the creative-protocol comparison, not an implemented OSC integration.
 
 Dependency targets are current upstream releases verified through GitHub on
 29 October: **FastAPI 0.162.0** (23 October), **uvicorn 0.54.0** (25 September),
-**websockets 17.3** (19 October), on Python 3.13. Exact transitive lock capture
-and latest-pin runtime acceptance await normal-network CI.
+**websockets 17.3** (19 October), on Python **3.13.16**. The checked-in
+`uv.lock` records the successfully installed transitive environment.
 
-Linux x86_64 / Python **3.13.16** preparation: four rule and five actual
-in-memory ASGI checks pass with cached FastAPI **0.142.2**, Starlette **1.7.0**,
-uvicorn **0.54.0**, websockets **17.2**, Pydantic **2.10.6**. This is not
-latest-pin acceptance. The authoring host forbids sockets, so both live suites
-explicitly skip there. Nine deterministic checks of the production JavaScript
-pass with controlled browser boundaries, and syntax checks pass. Real two-browser behavior,
-desktop/mobile appearance, default-port coexistence with the presenter, and
-Windows/macOS execution still need the separate live checks.
+Linux x86_64 verification on 29 October: **15 Python tests pass without skips**,
+including real HTTP/WebSocket clients, TCP framing, validation and stopped-server
+recovery. Installed FastAPI **0.162.0**, Starlette **1.10.0**, uvicorn **0.54.0**,
+websockets **17.3** and Pydantic **2.14.1**. Nine deterministic checks of the
+production JavaScript also pass. The separate Playwright **1.64.1** / Chromium
+**156.0.8078.4** two-page check passes, including delayed replies and HTTP-only
+restart recovery; desktop/mobile captures were inspected. The same real checks
+pass in [public Ubuntu PR CI](https://github.com/sd5913/pfad/actions/runs/40796663469).
+Earlier restricted-sandbox skips are superseded by these live results.
+Physical presenter coexistence and Windows/macOS execution still need rehearsal.
 
 Maintainers: `node test_browser_state.cjs` executes the production inline
 JavaScript with controlled DOM/network/timer boundaries. It checks delayed
@@ -324,5 +326,5 @@ back a newer observation; revision order is still enforced for the live stream.
 and restart on 8009; do not start another server for it. With Playwright 1.64.1
 and Chromium installed, `node check_browser.cjs` checks two pages and recovery.
 `WEEK09_PYTHON` selects this folder's Python; `WEEK09_SCREENSHOT_DIR` optionally
-retains desktop/mobile screenshots and a browser trace. These are prepared
-checks, not a claim that a browser run passed.
+retains desktop/mobile screenshots and a browser trace. This verifies a local
+two-tab interaction; it does not establish cross-machine or classroom access.
