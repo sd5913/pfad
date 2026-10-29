@@ -57,7 +57,13 @@ jobs:
           CHECKSUM
           unzip -q Godot_v4.7.2-stable_linux.x86_64.zip
           chmod +x Godot_v4.7.2-stable_linux.x86_64
+          ln -s Godot_v4.7.2-stable_linux.x86_64 godot
           echo "GODOT_PATH=$RUNNER_TEMP/pfad-godot/Godot_v4.7.2-stable_linux.x86_64" >> "$GITHUB_ENV"
+          echo "$RUNNER_TEMP/pfad-godot" >> "$GITHUB_PATH"
+      - name: Install the pinned Godot bridge for real failure cleanup checks
+        if: ${{ hashFiles('week11/setup_bridge.py') != '' }}
+        working-directory: week11
+        run: uv run python setup_bridge.py
       - name: Install verified Blender and its isolated community bridge
         if: ${{ hashFiles('week11/setup_blender.py') != '' }}
         shell: bash
