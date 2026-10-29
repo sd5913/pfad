@@ -108,6 +108,6 @@ can show people. Treat them accordingly.
 | 06 | [Sound, music and speech — WAV samples, browser instruments and a local voice bot](week06/README.md) |
 | 07 | [From an idea to one interaction — 22 October 2026](week07/README.md) |
 | 08 | [Camera interactions — OpenCV, MediaPipe and teamwork (29 October 2026)](week08/README.md) |
-| 11 | [One number, one creative response — Thu 19 Nov 2026](week11/README.md) |
+| 11 | [Python controls creative software - Blender, Godot and MCP (19 November 2026)](week11/README.md) |
 
 More lands each week.
