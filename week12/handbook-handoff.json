@@ -1,0 +1,75 @@
+{
+  "label": "Actual direct retriever observation, not a fresh model call or a world dependency",
+  "checked_on": "2026-10-29",
+  "source_week10_commit": "c59fae0df42e316a431c308bfe582a84411d5887",
+  "bundle_sha256": "0f7c3c6069c865154b2df3fb6dd7e8b73f1a8e6f5a9d7a867a1bb2cc5280b7dc",
+  "source": {
+    "title": "Student Handbook for Taught Programmes 2026/27",
+    "year": "2026-27",
+    "publisher": "Academic Registry, The Hong Kong Polytechnic University",
+    "edition": "July 2026; PDF metadata modified 2026-07-29",
+    "url": "https://www.polyu.edu.hk/ar/docdrive/polyu-students/student-handbook/Student_Handbook_2026-27_English.pdf",
+    "sha256": "108956feb2ffac665f8ca0f5a8f68d7150a85fda15e219916785ec50331a4e94",
+    "retrieved_on": "2026-10-29",
+    "page_numbering": "PDF positions starting at one; printed_page supplied separately",
+    "scope": "Six short teaching extracts from PDF pages 20, 25, 76; not the full handbook"
+  },
+  "encoder": {
+    "kind": "sentence-transformer",
+    "name": "sentence-transformers/all-MiniLM-L6-v2",
+    "revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+    "dimension": 384,
+    "pooling": "attention-masked mean; L2 normalized",
+    "max_tokens": 256
+  },
+  "query": "What should I do if I lose my student identity card?",
+  "query_vector_sha256": "3453138dab8ea741b19faf95d3f393dec03f4e046d3a7aae17d9a38287cb90d6",
+  "results": [
+    {
+      "id": "hb2026-p020-replacement",
+      "page": 20,
+      "printed_page": 9,
+      "section": "Student identity card: loss and replacement",
+      "text": "If your student identity card is lost or damaged, if you need to amend your name, or if you have transferred to another programme of a different mode (e.g. from full-time to part-time or vice versa), you should submit an application for a replacement online. A non-refundable and non-transferable replacement fee will be charged for the new student identity card. If the original student identity card is subsequently found, you should immediately return it to the Academic Registry for cancellation. It is an offence to possess more than one student identity card for the same programme at any time during your studies at the University and you shall be subject to disciplinary actions if found committing this offence.",
+      "score": 0.815428,
+      "source": {
+        "title": "Student Handbook for Taught Programmes 2026/27",
+        "year": "2026-27",
+        "publisher": "Academic Registry, The Hong Kong Polytechnic University",
+        "edition": "July 2026; PDF metadata modified 2026-07-29",
+        "url": "https://www.polyu.edu.hk/ar/docdrive/polyu-students/student-handbook/Student_Handbook_2026-27_English.pdf",
+        "sha256": "108956feb2ffac665f8ca0f5a8f68d7150a85fda15e219916785ec50331a4e94",
+        "retrieved_on": "2026-10-29",
+        "page_numbering": "PDF positions starting at one; printed_page supplied separately",
+        "scope": "Six short teaching extracts from PDF pages 20, 25, 76; not the full handbook"
+      }
+    },
+    {
+      "id": "hb2026-p020-return",
+      "page": 20,
+      "printed_page": 9,
+      "section": "Student identity card: return",
+      "text": "Student identity cards are the property of the University and are not transferable. You are advised to return the card in person to the Academic Registry, as required. If you prefer to return it by post, you are urged to cut it into halves so as to prevent fraudulent use of your card in case it gets lost in post.",
+      "score": 0.763087,
+      "source": {
+        "title": "Student Handbook for Taught Programmes 2026/27",
+        "year": "2026-27",
+        "publisher": "Academic Registry, The Hong Kong Polytechnic University",
+        "edition": "July 2026; PDF metadata modified 2026-07-29",
+        "url": "https://www.polyu.edu.hk/ar/docdrive/polyu-students/student-handbook/Student_Handbook_2026-27_English.pdf",
+        "sha256": "108956feb2ffac665f8ca0f5a8f68d7150a85fda15e219916785ec50331a4e94",
+        "retrieved_on": "2026-10-29",
+        "page_numbering": "PDF positions starting at one; printed_page supplied separately",
+        "scope": "Six short teaching extracts from PDF pages 20, 25, 76; not the full handbook"
+      }
+    }
+  ],
+  "limits": "Six short teaching extracts only. Prepared exact question uses its saved real vector; arbitrary new questions require the same live encoder/revision/384D space. Similarity is not a truth probability. No model was invoked for this check.",
+  "four_lifetimes": {
+    "knowledge_index": "PDF passages and compatible vectors survive calls; rebuild documents and queries together when encoder changes.",
+    "saved_conversation": "Owner-scoped rows persist and reopen, supplying previous turns.",
+    "ephemeral_prompt": "System, current question, selected history and actual tool results are assembled for this call.",
+    "spoken_output": "Derived audio/playback is checked separately from citation correctness and saved history."
+  },
+  "source_bundle_url": "https://github.com/sd5913/pfad/blob/c59fae0df42e316a431c308bfe582a84411d5887/week10/fixtures/handbook.json"
+}
