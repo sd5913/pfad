@@ -41,11 +41,21 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for week in week08 week09 week10 week12; do
+          for week in week08 week10 week12; do
             if [ -d "$week" ]; then
               python -B -m unittest discover -s "$week" -p 'test_*.py' -v
             fi
           done
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.6"
+      - name: Test Week 9 pinned Python companion (real sockets)
+        if: ${{ hashFiles('week09/pyproject.toml') != '' }}
+        working-directory: week09
+        run: uv run --locked python -B -m unittest discover -s . -p 'test_*.py' -v
+      - name: Test Week 9 production browser-state regressions
+        if: ${{ hashFiles('week09/test_browser_state.cjs') != '' }}
+        run: node week09/test_browser_state.cjs
       - name: Test browser mapping when present
         if: ${{ hashFiles('week11/browser/control.test.cjs') != '' }}
         run: node --test week11/browser/control.test.cjs
@@ -55,3 +65,24 @@ jobs:
       - name: Exercise real local MCP discovery and call
         if: ${{ hashFiles('week12/check_mcp.py') != '' }}
         run: timeout 90s uv run --no-project --python 3.12 week12/check_mcp.py
+      - name: Install Playwright and Chromium for Week 9 acceptance
+        if: ${{ hashFiles('week09/check_browser.cjs') != '' }}
+        run: |
+          npm install --prefix "$RUNNER_TEMP/week09-browser" --no-save --package-lock=false playwright@1.64.1
+          node "$RUNNER_TEMP/week09-browser/node_modules/playwright/cli.js" install --with-deps chromium
+          echo "NODE_PATH=$RUNNER_TEMP/week09-browser/node_modules" >> "$GITHUB_ENV"
+      - name: Verify Week 9 two-client interaction and recovery
+        if: ${{ hashFiles('week09/check_browser.cjs') != '' }}
+        env:
+          WEEK09_PYTHON: ${{ github.workspace }}/week09/.venv/bin/python
+          WEEK09_SCREENSHOT_DIR: ${{ runner.temp }}/week09-evidence
+        run: |
+          mkdir -p "$WEEK09_SCREENSHOT_DIR"
+          node week09/check_browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() && hashFiles('week09/check_browser.cjs') != '' }}
+        with:
+          name: week09-browser-${{ github.sha }}
+          path: ${{ runner.temp }}/week09-evidence/
+          if-no-files-found: warn
+          retention-days: 14
