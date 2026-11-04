@@ -1,20 +1,36 @@
 # Week 9: connected interactions
 
-**Thursday 5 November 2026.** A separate 120-minute tutorial after the lecture.
-Two browser tabs see the same scene because one Python server owns its position.
-Trace HTTP, change a Python rule, observe WebSocket updates, reject bad input,
-and recover from a disconnect. Explain which process owns state, what a message
-means, and why sending does not prove processing. Reuse Week 4's tide API and
-Week 8's input-to-action mapping; classes are a prerequisite rather than a new topic.
+**Thursday 5 November 2026.** A separate 120-minute tutorial after the lecture:
+**30 minutes of WebSocket work, 30 minutes observing Multiboxes, and 40 minutes
+for group work and TA feedback**, plus setup and a break.
 
-## Before you start
+Use a small shared scene to trace a message and change one Python rule. Then
+observe the same client/server ideas in a multiplayer physics game. Keep the
+last 40 minutes for your own project, including teams still getting started.
+Networking is inspiration for the project, not a required feature.
 
-Use one laptop with a current browser, terminal, editor and
-[uv](https://docs.astral.sh/uv/getting-started/installation/). First setup needs
-internet for Python 3.13 and packages. No account, camera, microphone, GPU,
-model, paid API or instructor ClassPoint login is needed. Core commands work
-in PowerShell as well as Linux/macOS shells; actual platform limits are listed
-under verification. Pair on a prepared laptop if installation is unavailable.
+## The two-hour route
+
+| Minutes | Activity | What you should be able to show |
+| --- | --- | --- |
+| 0-10 | Setup or pair on a prepared laptop | Two tabs connected to one local server |
+| 10-40 | WebSockets: send, change one rule, reconnect | One action, shared state, rejection and a fresh snapshot |
+| 40-50 | Break | Take the full ten minutes |
+| 50-80 | Observe Multiboxes | Input, Python-owned physics and two views of the same world |
+| 80-120 | Group work and TA feedback | A usable project increment, one blocker and the next fix |
+
+Move to a prepared partner machine at minute 10 if setup is still blocked.
+Alternate who predicts, edits and operates. Do not let installation or extra
+exercises consume the group/TA block. The longer linked Multiboxes study guide
+is a reference; this tutorial selects a **30-minute observation**, not its full
+separate two-hour route.
+
+## 0-10: prepare two views
+
+Use a browser, terminal, editor and
+[uv](https://docs.astral.sh/uv/getting-started/installation/). The small scene
+needs Python 3.13 and packages, which uv selects automatically. First setup
+needs internet. No account, camera, GPU, paid API or ClassPoint login is needed.
 
 From the **PFAD repository root**:
 
@@ -23,308 +39,224 @@ cd week09
 uv run python server.py
 ```
 
-Keep terminal **A** running. `uv` selects this folder's `pyproject.toml` and
-creates `week09/.venv` separately from the root Worker project. Wait for
-`Uvicorn running on http://127.0.0.1:8009`. Open <http://127.0.0.1:8009> in
-**two tabs**, A and B. Each is a separate client of the same server. Keep
-terminals in `week09` for every command below. **Ctrl+C** stops Python; closing
-a tab disconnects only that client.
+Keep the terminal running. Wait for
+`Uvicorn running on http://127.0.0.1:8009`, then open
+**<http://127.0.0.1:8009> in two tabs**, A and B. Expect **Connected** and
+`x = 50 / revision 0` after a fresh start. Tabs joining an already used server
+see its current values.
 
-`127.0.0.1` means this laptop (loopback), `8009` selects the service, `/state`
-a route, and `http://` a protocol. The presenter uses **8765**; leave it alone.
-If 8009 is occupied, close your earlier copy or choose one other port everywhere:
+**127.0.0.1** means this laptop; **8009** selects the service. uv uses this
+folder's `pyproject.toml` and environment, separate from the root Worker project.
+Keep terminals in `week09` for the scene commands. **Ctrl+C** stops Python;
+closing one tab disconnects only that client. Leave presenter port **8765** alone.
+If 8009 is occupied, close your earlier copy or use
+`uv run python server.py --port 8011` and change both browser URLs to 8011.
 
-```bash
-uv run python server.py --port 8011
-```
+**Before the tutorial, the tutor also prepares Multiboxes:** use its
+[setup guide][multiboxes-setup] on a prepared machine or rehearse an available
+classroom endpoint. Students can observe two local tabs, pair at that machine,
+or follow the tutor's demonstration. Multiboxes is a separate project; running
+`server.py` above does not start it. No second installation is required during
+the observation block. Its documented local browser address is
+**http://localhost:8000**; the small scene remains on **8009**.
 
-Then use `http://127.0.0.1:8011` in both tabs. Do not kill an unknown process
-or expose this teaching service to other machines to fix a local exercise.
+## 10-40: WebSockets, one rule and one recovery
 
-## The two-hour route
+### 10-20: send one action
 
-| Minutes | Work and observable result |
-| --- | --- |
-| 0-15 | Setup; open two tabs; identify server and clients |
-| 15-35 | Trace accepted messages and shared state |
-| 35-55 | Change a Python validation rule and check it |
-| 55-65 | Break |
-| 65-85 | Compare two clients, polling and continuing updates |
-| 85-100 | Trigger failure, recover and explain the evidence |
-| 100-120 | First-working-interaction tutor review and project support |
+1. Predict B's result. In A choose **25** and press **Send WebSocket**.
+   Both dots should move to 25 with the same revision.
+2. Read A's **Message trace**: outgoing action, incoming state, then an
+   acknowledgement. B receives state without requesting it again.
+3. Move B's slider without pressing Send. Its local input changes; the shared
+   scene does not. Which process owns the scene?
 
-At minute 15, use a working partner machine if setup is still blocked. Alternate
-who predicts, edits and operates. If none can run the service, use the explicit
-paper fallback below; it does not establish a working network result.
-
-## 0-15: locate each process
-
-**Predict:** does opening a tab create a new server or another client? Run the
-setup. Expect **Connected**, `x = 50 / revision 0` in both tabs after the
-first snapshot. A new tab joining an already used server sees its current values.
-
-Draw one server and two clients. Label the server `127.0.0.1:8009` and both
-connections `/ws`. Inspect [server.py](server.py): `create_app()` creates one
-`Scene`, shared by HTTP and WebSocket handlers. The supplied
-[index.html](index.html) draws it; your main edit will be in Python.
-
-Read the server terminal on failure. An occupied port differs from a stopped
-listener. A 404 means a server answered but did not know that route. A connection
-refusal normally means no listener is present at that address and port.
-
-## 15-35: predict, send, trace
-
-1. In A select **25** and press **Send WebSocket** once. Predict B's result
-   first. Both should move to 25 with the same new revision.
-2. Read A's **Message trace**: outgoing action, incoming state, acknowledgement.
-   B receives state without making another request.
-3. Move B's slider without pressing Send. The scene stays unchanged: unsent
-   local input differs from server state.
-4. Select **80** in A and press **Send HTTP**. One `POST /action` receives a
-   response. Both tabs also receive the server's WebSocket broadcast.
-5. Open <http://127.0.0.1:8009/state>. This `GET /state` returns JSON. Send a
-   new position from B. The plain JSON document needs **Reload** for a fresh
-   snapshot; return to the controller afterward.
-
-An outgoing message looks like this; the browser generates a unique ID:
+An action and its results look like this after a fresh start:
 
 ```json
 {"id":"a-1","action":"set_x","x":25}
-```
-
-The server validates it, changes `Scene.x`, increments `revision`, broadcasts
-state, then acknowledges the sender. On a newly started server:
-
-```json
 {"type":"state","x":25,"revision":1}
 {"type":"ack","id":"a-1","revision":1}
 ```
 
-The ID matches a receipt to an action; revision orders server changes. This
-demo **does not store IDs to deduplicate retries**. `set_x` assigns an absolute
-position; retrying a command such as `add_score` would need a different decision.
-Rejections echo a usable action ID too. A delayed result for an earlier action
-must not finish a different action that is still waiting. An unidentifiable
-message error is logged without pretending to resolve a named action.
+The browser generates the actual ID. **State** describes the scene;
+**ack** names the action that was applied. The revision orders accepted changes
+in this process. An ID correlates a reply; this example does not deduplicate
+repeated commands. A "sent" line alone does not prove processing.
 
-Inspect `apply()` and `snapshot()` in [scene.py](scene.py), then trace the
-action through `updates()` in [server.py](server.py) and the browser's `show()`.
-Your partner should identify all three outgoing fields, the matching ack, and
-the same revision in both views. A “sent” line alone is insufficient evidence.
+Open <http://127.0.0.1:8009/state> once to see an HTTP snapshot. Reload is needed
+for a later snapshot; the WebSocket tabs receive continuing updates.
 
-## 35-55: make one bounded Python change
+### 20-30: change one Python rule
 
-**Predict** results for 0, 80 and 101. Press **Try invalid x = 101**. Expect
-**Rejected**, with neither position nor revision changed. A slider constrains
-ordinary input, but a server still validates messages sent by other clients.
+Open [scene.py](scene.py), find `Scene.apply()`, and predict results at **80** and
+**81**. Change the allowed maximum from **100 to 80**, including its error message.
+Keep the integer check and the rest of the message contract.
 
-In `Scene.apply()` change the right edge from **100 to 80** in the comparison
-and explanatory error message. Read your diff: one boundary is changing, not
-the protocol. Keep `type(message["x"]) is int`: a boolean is not a position,
-although Python treats `True` as an integer in some contexts.
+Stop Python with Ctrl+C, rerun `uv run python server.py`, and press **Connect**
+in both tabs. Edits do not reload automatically; a new process resets its memory.
 
-Stop Python with Ctrl+C; run `uv run python server.py` again. This example
-does not automatically reload edits. Press **Connect** in both tabs. The new
-process starts with reset memory.
-
-| Input | Expected after your change |
+| Input after the change | Expected result |
 | --- | --- |
-| 0 | Accepted; both tabs show 0 and the same new revision |
-| 80 | Accepted; both show 80 |
-| 81 | Rejected; position and revision unchanged |
-| Invalid 101 button | Rejected with the revised boundary in its error |
+| 80 | Accepted; both tabs show 80 with the same revision |
+| 81 | Rejected; neither position nor revision changes |
 
-Inspect the trace and second tab. **Recover:** restore 100 and its error
-message, restart Python and reconnect. From terminal **B**, also in `week09`:
+Use the slider and **Send WebSocket** to check both values. **Restore 100** and
+its error message, restart and reconnect before continuing. A browser slider
+alone cannot enforce a server rule.
 
-```bash
-uv run python -m unittest -v test_rules test_asgi
+### 30-40: disconnect and recover
+
+1. Disconnect A. Send **35** from B. A keeps its last known display and labels
+   it **Disconnected**.
+2. Connect A again. It receives a fresh snapshot at 35; it does not replay its
+   previous action.
+3. Explain the difference between local input, the shared scene and an observed
+   action result. Point to `Scene.apply()` in [scene.py](scene.py) and
+   `updates()` in [server.py](server.py).
+
+**Checkpoint:** show your partner the accepted change, one rejected value and
+one recovered view. Finish at minute 40, even if some optional details remain.
+
+## 40-50: break
+
+Take ten minutes. The tutor can leave the prepared Multiboxes view ready for
+the next block. There is no new installation task during the break.
+
+## 50-80: observe Multiboxes
+
+[Multiboxes][multiboxes] is a shared physics and territory-painting game. Python
+and Pymunk own the world; browser Canvas clients draw it. Its
+[study guide][multiboxes-guide] explains the complete starter. Use the three
+observations below for today's **30 minutes**.
+
+### 50-60: two clients, one game
+
+Use the tutor's prepared instance or two tabs on the prepared local machine.
+Choose nicknames and connect. Move, jump, and paint while descending. Find the
+pink **YOU** outline in each tab and compare the shared world and coverage scores.
+
+**Predict:** if you move in A, which square should B see moving? Closing A should
+remove that player from B. Reconnecting creates a new temporary identity and
+receives the current world.
+
+### 60-70: follow one input to a shared result
+
+Observe the tutor's browser Network/WS panel, or inspect the labeled examples
+in the [protocol reference][multiboxes-protocol]. A client sends buttons:
+
+```json
+{"type":"input","seq":12,"left":false,"right":true,"jump":false,"down":false}
 ```
 
-These verify rules and actual FastAPI handlers in memory. The baseline checks
-expect 100 to be allowed, so they fail if you keep the experimental 80 rule.
-Read the case before deciding whether code or specification needs changing.
-Restore the original baseline for the next exercise. Green in-memory tests
-still require a separate check of the real browser view.
+Follow **input -> Python physics -> state snapshot -> browser drawing**.
+The client requests movement; the server decides positions, teams and score.
 
-**55-65: break.** Note current position/revision and leave the server running
-if practical. No camera or microphone is active.
+Current Multiboxes sends **JSON input and metadata**, then **complete binary
+state snapshots**. The supplied decoder turns those frames into readable state.
+Observe the tutor's decoded example or the protocol tables; you do not need to
+write a decoder. This differs from the small scene's JSON state messages.
+Label a source example as a trace if no live capture is available.
 
-## 65-85: continuing updates and two clients
+### 70-80: separate rules from rendering
 
-1. A sends 20, then B sends 70. Both follow the server's last accepted action.
-   Predict what happens if people click nearly together: the last command the
-   server processes wins, and each accepted command gets a revision.
-2. **Disconnect** A; B sends 35. B updates. A keeps its last known display and
-   labels it Disconnected, rather than pretending that data is live.
-3. **Connect** A. It reads a fresh snapshot at 35 with B's revision. It neither
-   replays the old command nor resumes the old connection.
-4. Compare **Read HTTP snapshot** with automatic updates. Polling repeats
-   requests; a WebSocket allows either side to send new messages while open.
+Compare two source locations:
 
-In `updates()`, inspect:
+- [simulation.py][multiboxes-simulation]: Python rules such as gravity and jump
+  speed affect the shared world.
+- [app.mjs][multiboxes-client]: the browser renders the world and marks your
+  local player. Changing a local outline would not change the shared score.
 
-```python
-incoming = await client.receive()
-```
+Point out where input is checked in [protocol.py][multiboxes-validation].
+Explain why a client should request an action rather than choose its own score.
+No second code-edit exercise, engine implementation or database setup is
+required. Finish at minute 80 and return to your own project.
 
-While A waits, `await` yields an opportunity for the event loop to run B's
-handler. This is cooperative concurrency in one process, not one Python thread
-per tab. The lock orders state changes and revision announcements. The small
-broadcast loop can be delayed by a slow client; it is not a production hosting
-architecture. Restarting the process loses its in-memory state.
+A shared campus session needs a prepared, reachable endpoint. If Wi-Fi or a
+client fails, observe the prepared local two-tab world instead. If no runtime is
+available, trace the linked source and sample messages and say which behavior
+has not been observed. Hosted HTTPS clients need WSS; follow the project's
+setup rather than changing browser security settings.
 
-HTTP can reuse TCP connections too: the contrast is request/response semantics
-versus continuing two-way messages. WebSocket supplies a handshake and message
-framing; raw TCP echo is a different protocol.
+## 80-120: group work and TA feedback
 
-### Compact byte-stream observation
+Protect these **40 minutes** for group work and TA feedback on your team's
+**first working interaction**. The TA confirms exact team times within the tutorial.
+Networking, Multiboxes, AI and a camera are not required project features.
 
-The lecture's TCP starter remains on a separate port, **8010**. If time remains,
-run it in two spare terminals, still in `week09`:
+1. **Show the current increment.** Help a teammate run it. Explain one input,
+   state change and visible response. Teams still blocked on setup should show
+   the blocker and get help reaching one runnable interaction.
+2. **Ask for focused feedback.** Show one failure or confusing result. Record
+   what was expected, what happened and the TA's advice.
+3. **Make the next change small.** Use the remaining time to fix or test it.
+   Record the next owner, action and observable check in the team's existing
+   accessible progress record. GitHub Projects is recommended; an equivalent
+   record is valid.
 
-```bash
-uv run python echo_server.py
-```
-
-```bash
-uv run python echo_client.py
-```
-
-Expect `received: red`, then blue on one connection, then green after reconnect.
-A newline ends each message. TCP delivers ordered **bytes**, so one read may
-contain part of a message or several messages. It does not preserve each send
-as a separate message. Inspect combined `red\nblue\n` and split `or` /
-`ange\n` sends in [test_echo.py](test_echo.py); `readline()` reconstructs them.
-Stop this extra server with Ctrl+C. It has no HTTP routes or WebSocket handshake.
-
-## 85-100: failure, recovery, uncertainty
-
-Restore the original rules first; keep both clients connected.
-
-1. **Wrong route:** open `http://127.0.0.1:8009/missing`. Expect HTTP 404 from
-   a reachable service, then return to the controller.
-2. **Wrong port:** if no exercise service uses 8011, open
-   `http://127.0.0.1:8011`. Refusal differs from an HTTP error. If another app
-   answers, do not assume that arbitrary port is empty. Return to 8009.
-3. **Missing acknowledgement:** in A choose 73 and press **Send, ignore
-   replies, disconnect**. This deliberately ignores replies after sending;
-   it should show **Unknown**, never fake success. Observe whether B sees 73.
-   Connect A again and compare its fresh snapshot. A snapshot reports current
-   state, not a receipt for A's particular command.
-4. **Stopped server:** Ctrl+C in terminal A. Both tabs become Disconnected;
-   WebSocket send controls disable. An HTTP snapshot cannot reach the stopped
-   listener. The last known scene remains visible with that label.
-5. **Recover:** rerun `uv run python server.py`. Before reconnecting B, press
-   **Read HTTP snapshot** there. Expect x = 50, revision 0, while the label
-   still says Disconnected and identifies the HTTP snapshot. This reads current
-   state once; it does not open a continuing connection or resend an action.
-   Then Connect both tabs for live updates. New connections do not restore the
-   old process's memory. Week 10 asks what should persist.
-
-The ignore-replies demonstration removes one client observation; it does not
-claim the network dropped a packet. In a real unanswered action the server
-may have processed it, or may never have received it. There is no automatic
-resend here. Decide what duplicates would do before adding retries.
-
-For the real loopback checks, **stop your server first**, then:
-
-```bash
-uv run python -m unittest -v test_scene test_echo
-```
-
-They start temporary real HTTP/WebSocket/TCP services and clean up. They normally
-use free ports. Maintainers can set `WEEK09_TEST_PORT=8009` on Linux/macOS to
-check the documented port. A reported host-policy **skip** is not live proof.
-
-## 100-120: tutor review and project support
-
-This week's tutor delivery is the **first working interaction**, in the allocated
-tutorial slot on 5 November. The tutor confirms exact team times. Show a usable
-increment from your project; networking is inspiration, not a required feature.
-Use this time to help a teammate run it and explain input, state, response,
-one failure and recovery. Record run/test evidence, feedback and the next goal
-in the team's existing accessible progress record. GitHub Projects is
-recommended; an equivalent accessible record is valid. No extra Canvas upload,
-attendance score or compulsory defence is introduced.
-
-The project remains **40% of the course**, with **25% idea / 50% code /
-25% execution**, due **6 December 2026, 23:59 HKT**. Use a shared public
-repository owned by `sd5913`, with teammate Write access. Canvas is the submission
-system; the [reviewed brief](https://github.com/sd5913/pfad/blob/4358b4e47b874ef40c120e63b2f6329acbe9b7d5/assignments/group-project.md)
+There is no extra Canvas upload, attendance score or compulsory defence. The
+project remains **40% of the course**, with **25% idea / 50% code / 25% execution**,
+due **6 December 2026, 23:59 HKT**. Use a shared public `sd5913` repository with
+teammate Write access. Canvas is the submission system; the
+[reviewed brief](https://github.com/sd5913/pfad/blob/4358b4e47b874ef40c120e63b2f6329acbe9b7d5/assignments/group-project.md)
 controls assessment details.
 
-## Optional bridges
-
-- **MediaPipe:** map Week 8 index-fingertip x to `round(x * 100)`, clamp to
-  0-100, and send `set_x` only when the value changes. No hand means no action.
-  Send coordinates, not frames. The slider covers this boundary without a camera.
-- **OSC:** Open Sound Control defines addresses such as `/scene/x` and typed
-  values. An adapter could translate it into our JSON action. OSC commonly uses
-  UDP, but OSC, UDP and WebSocket are different things. No second networking
-  stack or OSC library is required here.
-- **Games:** compare reliable “spend coin” events with frequent position
-  snapshots. UDP may favor fresh updates over retransmitting old positions;
-  the application must decide how to handle loss and order. Reliable transport
-  still does not prove a game applied an action.
-- **LAN/mobile:** accessing another machine changes addresses, exposure and
-  firewall assumptions. It is an optional separately rehearsed extension; this
-  service deliberately stays on loopback.
-
-## Fallback and troubleshooting
-
-Pair on a working laptop and take turns. If no machine can run a server,
-draw A, server and B. Give the server `x=50, revision=0`. A writes JSON; the
-server validates, changes its card, and writes two state messages and one ack.
-Reject 101 without changing the card. Hide A's ack while B receives state;
-reconnect A for a new snapshot. Label this **paper simulation**, not live proof.
+## Recovery and optional reference
 
 | Symptom | Inspect and recover |
 | --- | --- |
-| `No module named fastapi` | Run from `week09` with `uv run`, not a bare system Python |
-| Package download fails | Check normal internet access; use a prepared partner laptop |
-| Address already in use | Close your earlier server or choose a deliberate alternate port |
-| Browser shows a local file | Open the server's HTTP URL, not `index.html` directly |
-| 404 on `/statee` | Correct the route; the server did answer |
-| One tab seems frozen | Read its connection label; Connect after restarting |
-| Edit has no effect | Restart Python and reconnect; inspect your actual file/diff |
-| Revision resets to 0 | A new process starts a new in-memory scene; there is no database |
+| `No module named fastapi` | Run from `week09` with `uv run` |
+| Package download fails | Pair on a prepared machine at minute 10 |
+| Address already in use | Stop your earlier server or choose another port deliberately |
+| Browser opens a local file | Use the server's HTTP URL |
+| A tab seems frozen | Read its connection label and reconnect |
+| A rule edit has no effect | Restart Python; reconnect both tabs |
+| Revision resets to 0 | A new process has fresh RAM; no database was loaded |
+| Multiboxes is unavailable | Observe the prepared two-tab demo or a labeled source trace |
+
+If no scene can run, draw A, server and B. Start the server card at
+`x=50, revision=0`; apply 25, reject 101, and write state and ack cards.
+Label this **paper simulation**. It does not establish working networking.
+
+For later reading, inspect `await`, the lock and the sequential broadcast in
+[server.py](server.py). A slow scene client can delay the small broadcast loop.
+The supplied **Send, ignore replies, disconnect** control demonstrates an unknown
+outcome by suppressing an observation; it does not prove random packet loss.
+The optional [raw TCP server](echo_server.py) and [client](echo_client.py) use
+port 8010 and newline framing. These are references, not extra tasks in the
+protected group/TA time.
+
+After restoring the original 100 boundary, maintainers can run:
+
+```bash
+uv run python -m unittest discover -p 'test_*.py' -v
+node test_browser_state.cjs
+```
+
+The suites start temporary socket services; stop your manual scene server first.
+A host-policy skip is not live proof. [check_browser.cjs](check_browser.cjs) owns
+its own service on 8009; with the documented Playwright/Chromium environment it
+checks two real pages and restart recovery. See that file for maintainer options.
 
 ## Sources and verification
 
-Primary documentation checked **29 October 2026** through Context7:
-[FastAPI WebSockets](https://fastapi.tiangolo.com/advanced/websockets/),
-[websockets client](https://websockets.readthedocs.io/en/stable/reference/sync/client.html),
+The scene's unchanged code was checked on Linux on **29 October 2026**: 15 Python
+tests, nine production-JavaScript checks and the real two-page browser check
+passed. Installed versions were Python 3.13.16, FastAPI 0.162.0, uvicorn 0.54.0,
+websockets 17.3 and Playwright 1.64.1. [Public practical CI](https://github.com/sd5913/pfad/actions/runs/40796663469)
+records that earlier run; it is not a classroom or Windows/macOS rehearsal.
+Primary references: [FastAPI WebSockets](https://fastapi.tiangolo.com/advanced/websockets/)
 and [uv projects](https://docs.astral.sh/uv/guides/projects/).
-[OSC specification](https://opensoundcontrol.stanford.edu/spec-1_0.html) supplies
-the creative-protocol comparison, not an implemented OSC integration.
 
-Dependency targets are current upstream releases verified through GitHub on
-29 October: **FastAPI 0.162.0** (23 October), **uvicorn 0.54.0** (25 September),
-**websockets 17.3** (19 October), on Python **3.13.16**. The checked-in
-`uv.lock` records the successfully installed transitive environment.
+The revised allocation and Multiboxes references were checked **4 November**.
+The links below pin source commit `2977be17b35790dd7b31f1f242b0dc86113d5350`.
+Reading its source/docs verifies the referenced design and task descriptions;
+it does not establish a new Multiboxes runtime or campus-device test.
 
-Linux x86_64 verification on 29 October: **15 Python tests pass without skips**,
-including real HTTP/WebSocket clients, TCP framing, validation and stopped-server
-recovery. Installed FastAPI **0.162.0**, Starlette **1.10.0**, uvicorn **0.54.0**,
-websockets **17.3** and Pydantic **2.14.1**. Nine deterministic checks of the
-production JavaScript also pass. The separate Playwright **1.64.1** / Chromium
-**156.0.8078.4** two-page check passes, including delayed replies and HTTP-only
-restart recovery; desktop/mobile captures were inspected. The same real checks
-pass in [public Ubuntu PR CI](https://github.com/sd5913/pfad/actions/runs/40796663469).
-Earlier restricted-sandbox skips are superseded by these live results.
-Physical presenter coexistence and Windows/macOS execution still need rehearsal.
-
-Maintainers: `node test_browser_state.cjs` executes the production inline
-JavaScript with controlled DOM/network/timer boundaries. It checks delayed
-results and safe manual refresh, but does not prove browser layout or networking.
-Manual HTTP reads while disconnected accept the newest fresh response if no
-newer state or connection intervened. Older overlapping responses cannot roll
-back a newer observation; revision order is still enforced for the live stream.
-
-[check_browser.cjs](check_browser.cjs) owns server startup, shutdown
-and restart on 8009; do not start another server for it. With Playwright 1.64.1
-and Chromium installed, `node check_browser.cjs` checks two pages and recovery.
-`WEEK09_PYTHON` selects this folder's Python; `WEEK09_SCREENSHOT_DIR` optionally
-retains desktop/mobile screenshots and a browser trace. This verifies a local
-two-tab interaction; it does not establish cross-machine or classroom access.
+[multiboxes]: https://github.com/venetanji/multiboxes/tree/2977be17b35790dd7b31f1f242b0dc86113d5350
+[multiboxes-setup]: https://github.com/venetanji/multiboxes/blob/2977be17b35790dd7b31f1f242b0dc86113d5350/README.md
+[multiboxes-guide]: https://github.com/venetanji/multiboxes/blob/2977be17b35790dd7b31f1f242b0dc86113d5350/STUDY_GUIDE.md
+[multiboxes-protocol]: https://github.com/venetanji/multiboxes/blob/2977be17b35790dd7b31f1f242b0dc86113d5350/docs/protocol.md
+[multiboxes-simulation]: https://github.com/venetanji/multiboxes/blob/2977be17b35790dd7b31f1f242b0dc86113d5350/src/multibox/simulation.py
+[multiboxes-client]: https://github.com/venetanji/multiboxes/blob/2977be17b35790dd7b31f1f242b0dc86113d5350/src/multibox/static/app.mjs
+[multiboxes-validation]: https://github.com/venetanji/multiboxes/blob/2977be17b35790dd7b31f1f242b0dc86113d5350/src/multibox/protocol.py
