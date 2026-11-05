@@ -209,6 +209,7 @@ controls assessment details.
 | Package download fails | Pair on a prepared machine at minute 10 |
 | Address already in use | Stop your earlier server or choose another port deliberately |
 | Browser opens a local file | Use the server's HTTP URL |
+| `crypto.randomUUID is not a function` over a LAN IP | Use the updated `index.html` and reload: its action-ID fallback uses `crypto.getRandomValues()`, which works over LAN HTTP. `randomUUID()` requires HTTPS or a trusted local address such as `localhost` |
 | A tab seems frozen | Read its connection label and reconnect |
 | A rule edit has no effect | Restart Python; reconnect both tabs |
 | Revision resets to 0 | A new process has fresh RAM; no database was loaded |
@@ -247,6 +248,12 @@ websockets 17.3 and Playwright 1.64.1. [Public practical CI](https://github.com/
 records that earlier run; it is not a classroom or Windows/macOS rehearsal.
 Primary references: [FastAPI WebSockets](https://fastapi.tiangolo.com/advanced/websockets/)
 and [uv projects](https://docs.astral.sh/uv/guides/projects/).
+
+LAN action-ID compatibility checked against MDN through Context7 on
+**5 November 2026**: [`randomUUID()`](https://developer.mozilla.org/en-US/docs/Web/API/Crypto/randomUUID)
+requires a secure context, while [`getRandomValues()`](https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues)
+also works over plain HTTP. The fallback creates a random 32-character action
+ID within the server's 48-character limit; it is used to correlate replies.
 
 The revised allocation and Multiboxes references were checked **4 November**.
 The links below pin source commit `2977be17b35790dd7b31f1f242b0dc86113d5350`.

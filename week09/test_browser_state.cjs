@@ -1,5 +1,6 @@
 /* Actual production script with controlled DOM/network/timer boundaries; no browser/network proof. */
 const assert = require('node:assert/strict');
+const { webcrypto } = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const { test } = require('node:test');
@@ -7,7 +8,7 @@ const vm = require('node:vm');
 
 const script = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
 
-function controller() {
+function controller({ secure = true } = {}) {
   const elements = new Map(), timers = new Map(), sockets = [], fetches = [];
   let sequence = 0, timerNumber = 0;
   function element(id) {
@@ -22,8 +23,9 @@ function controller() {
   }
   const context = vm.createContext({
     document: { getElementById: element }, WebSocket: Socket,
-    location: { protocol: 'http:', host: '127.0.0.1:8009' },
-    crypto: { randomUUID: () => `action-${++sequence}` },
+    location: { protocol: 'http:', host: secure ? '127.0.0.1:8009' : '192.168.1.10:8009' },
+    crypto: secure ? { randomUUID: () => `action-${++sequence}` }
+      : { getRandomValues: array => webcrypto.getRandomValues(array) },
     setTimeout: callback => { timers.set(++timerNumber, callback); return timerNumber; },
     clearTimeout: () => {}, // Retain cancelled callbacks to exercise late callback isolation.
     AbortSignal: { timeout: () => ({}) },
@@ -41,6 +43,30 @@ function controller() {
     reply: (number, body, status = 200) => fetches[number].resolve({ ok: status < 400, status, json: async () => body }),
   };
 }
+
+test('LAN HTTP without randomUUID sends distinct action IDs and settles both transports', async () => {
+  const ui = controller({ secure: false });
+  await ui.click('send-ws');
+  const first = ui.sockets[0].sent.at(-1);
+  assert.ok(first, 'WebSocket action should be sent without randomUUID');
+  assert.equal(typeof first.id, 'string');
+  assert.ok(first.id.length >= 1 && first.id.length <= 48);
+  ui.receive({ type: 'ack', id: first.id, revision: 1 });
+  assert.match(ui.outcome(), /Acknowledged/);
+
+  const sending = ui.click('send-http');
+  const second = JSON.parse(ui.fetches[0].options.body);
+  assert.equal(typeof second.id, 'string');
+  assert.ok(second.id.length >= 1 && second.id.length <= 48);
+  assert.notEqual(second.id, first.id);
+  const waiting = ui.outcome();
+  ui.receive({ type: 'ack', id: first.id, revision: 1 });
+  assert.equal(ui.outcome(), waiting);
+  ui.reply(0, { type: 'ack', id: second.id, revision: 2 });
+  await sending;
+  assert.match(ui.outcome(), /Acknowledged/);
+  assert.ok(ui.outcome().includes(second.id));
+});
 
 test('delayed rejected A and uncorrelated replies leave B pending until its own acknowledgement', () => {
   const ui = controller();

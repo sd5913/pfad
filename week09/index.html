@@ -148,9 +148,14 @@
     };
     buttons();
   }
+  function actionId() {
+    if (typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+    // LAN HTTP is not a secure context; getRandomValues still works there.
+    return Array.from(crypto.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, '0')).join('');
+  }
   async function send(transport, invalid = false, disconnect = false) {
     if (pending) return;
-    const message = { id: crypto.randomUUID(), action: 'set_x', x: invalid ? 101 : Number(el('position').value) };
+    const message = { id: actionId(), action: 'set_x', x: invalid ? 101 : Number(el('position').value) };
     const request = { id: message.id, transport, channel };
     request.timer = setTimeout(() => unknown(request), 3000);
     pending = request;
