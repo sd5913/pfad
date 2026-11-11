@@ -28,14 +28,15 @@ def start(log):
     process=subprocess.Popen(CLI+['dev','--local','--ip','127.0.0.1','--port','8010']+PERSIST,
                              cwd=ROOT,env=ENV,stdout=log,stderr=log)
     for _ in range(180):
-        if process.poll() is not None:raise RuntimeError('Worker exited; inspect d1-check.log')
+        if process.poll() is not None:
+            raise RuntimeError('Worker exited:\n' + (ROOT/'d1-check.log').read_text())
         try:
             result=get('1')
             if result.get('success'):return process
         except (OSError,AssertionError):pass
         time.sleep(.5)
     process.terminate();process.wait(timeout=10)
-    raise RuntimeError('Worker not ready in 90s; inspect d1-check.log')
+    raise RuntimeError('Worker not ready in 90s:\n' + (ROOT/'d1-check.log').read_text())
 
 def stop(process):
     process.terminate()
