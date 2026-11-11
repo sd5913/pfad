@@ -145,6 +145,12 @@ jobs:
       - name: Exercise real local MCP discovery and call
         if: ${{ hashFiles('week12/check_mcp.py') != '' }}
         run: timeout 90s uv run --no-project --python 3.12 week12/check_mcp.py
+      - name: Use the official Ubuntu archive for browser dependencies
+        if: ${{ hashFiles('week09/check_browser.cjs') != '' }}
+        run: |
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            printf '%s\n' 'https://archive.ubuntu.com/ubuntu' | sudo tee /etc/apt/apt-mirrors.txt > /dev/null
+          fi
       - name: Install browser for the connected-interaction acceptance check
         if: ${{ hashFiles('week09/check_browser.cjs') != '' }}
         run: |
