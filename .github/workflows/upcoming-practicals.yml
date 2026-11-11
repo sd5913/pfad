@@ -145,17 +145,12 @@ jobs:
       - name: Exercise real local MCP discovery and call
         if: ${{ hashFiles('week12/check_mcp.py') != '' }}
         run: timeout 90s uv run --no-project --python 3.12 week12/check_mcp.py
-      - name: Use the official Ubuntu archive for browser dependencies
-        if: ${{ hashFiles('week09/check_browser.cjs') != '' }}
-        run: |
-          if [ -f /etc/apt/apt-mirrors.txt ]; then
-            printf '%s\n' 'https://archive.ubuntu.com/ubuntu' | sudo tee /etc/apt/apt-mirrors.txt > /dev/null
-          fi
       - name: Install browser for the connected-interaction acceptance check
         if: ${{ hashFiles('week09/check_browser.cjs') != '' }}
         run: |
           npm install --prefix "$RUNNER_TEMP/week09-browser" --no-save --package-lock=false playwright@1.64.1
-          node "$RUNNER_TEMP/week09-browser/node_modules/playwright/cli.js" install --with-deps chromium
+          # Ubuntu 24.04 runners already provide Chromium's system libraries.
+          node "$RUNNER_TEMP/week09-browser/node_modules/playwright/cli.js" install chromium
           echo "NODE_PATH=$RUNNER_TEMP/week09-browser/node_modules" >> "$GITHUB_ENV"
       - name: Verify two real browsers, stopped server and recovery on port 8009
         if: ${{ hashFiles('week09/check_browser.cjs') != '' }}
