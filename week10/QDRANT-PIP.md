@@ -74,7 +74,12 @@ remain. `docker compose down` removes the container but keeps the named volume;
 `up -d` recovers it. **Do not use `down -v`**: that removes the stored vectors.
 For a changed source, prepare and seed a new content-addressed collection.
 If Docker reports port 6333 busy, stop your own conflicting instance or have the
-tutor assign a free host port and matching `--port`. Do not stop another group’s work.
+tutor assign a free host port. For example, if 6335 is free, change the mapping
+in `compose.yml` to `127.0.0.1:6335:6333` and run `docker compose up -d` again.
+Use `uv run python qdrant_index.py seed --port 6335` and
+`uv run python qdrant_index.py query --port 6335`, open
+`http://127.0.0.1:6335/dashboard`, and set Pip's **Qdrant port** to **6335**.
+Keep the container port at 6333. Do not stop another group's work.
 
 ## 70-90: the familiar Pip, with retrieval and saved context
 
@@ -100,7 +105,8 @@ output directory. No second speech model is introduced. Use CPU unless your
 Week 6 machine already has a rehearsed GPU setup.
 
 Choose the exact loaded model ID and the same local URL as Week 6 (normally
-`http://127.0.0.1:1234/v1`). In Pip type:
+`http://127.0.0.1:1234/v1`). Keep **Qdrant port** at **6333** unless the tutor
+assigned a different host port; it must match the seed/query commands. In Pip type:
 
 1. `What should I do if I lose my student identity card?`
 2. `If I find the original later, should I keep both?`

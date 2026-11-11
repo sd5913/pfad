@@ -1,5 +1,27 @@
 # Week 10 revision checks — 11 November 2026
 
+## Current content and merge checks — 12 November 2026
+
+- The concept-led lecture has 65 slides. Its 11 November build produced HTML,
+  a 65-page PDF and both 65-slide PowerPoints with matching speaker notes;
+  changed diagrams and actual PDF pages were visually inspected. All 118
+  teaching tests and 25 exercise checks passed.
+- All 23 Week 10 tests pass again after the review fix. A separate Streamlit
+  AppTest reproduces the missing Qdrant port setting before the fix and passes
+  afterwards: the default remains 6333, and selecting another port sends a real
+  HTTP request to a loopback protocol probe on that port. The check stops before
+  loading the encoder or model and is not live Qdrant/inference evidence.
+- Pip's port setting, the CLI dashboard URL and the documented Compose/seed/query
+  recovery now use the same host port. The tutorial still protects minutes
+  100-120 for tutor review and project support.
+
+The earlier implementation and service evidence follows. Its 47-slide exports,
+115-test count and draft-status notes describe that earlier snapshot, not the
+current lecture or PR status. No fresh live model, Docker or room-audio rehearsal
+is claimed by the content polish and port fix.
+
+## Earlier implementation validation — 11 November 2026
+
 This revision keeps relational models/SQL/persistence as the first half and adds
 D1, a real Qdrant HTTP store and a route reusing Week 6 Pip/Kokoro. Both draft
 PRs integrate their current base histories, including merged Week 9. Historical

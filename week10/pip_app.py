@@ -15,6 +15,7 @@ st.title('Pip: a handbook, a memory and a voice')
 st.caption('Fictional local profiles; source extracts are limited. Check every policy claim.')
 base = st.sidebar.text_input('LM Studio URL', local_reply.DEFAULT_URL)
 model = st.sidebar.text_input('Exact loaded model ID')
+qdrant_port = st.sidebar.number_input('Qdrant port', min_value=1, max_value=65535, value=6333, step=1)
 profile = st.sidebar.text_input('Fictional profile', 'Ada').strip()
 chat_id = st.sidebar.number_input('Conversation ID (0 creates a new one)', min_value=0, step=1)
 speak = st.sidebar.checkbox('Kokoro speech (Week 6 prepared assets)', value=True)
@@ -35,7 +36,7 @@ if question := st.chat_input('Ask a short handbook question'):
         if not profile or len(profile) > 80:
             raise ValueError('Use a fictional profile of 1-80 characters.')
         index = VectorIndex.load(ROOT / 'fixtures/handbook.json')
-        remote = QdrantIndex(index)
+        remote = QdrantIndex(index, port=qdrant_port)
         enc = encoder()
         if enc.identity != index.encoder:
             raise ValueError('Encoder differs; rebuild and reseed together.')

@@ -81,7 +81,7 @@ def main():
     print('COLLECTION', remote.collection)
     if args.action == 'seed':
         remote.seed()
-        print('Seeded', len(index.chunks), 'points. Inspect http://127.0.0.1:6333/dashboard')
+        print('Seeded', len(index.chunks), 'points. Inspect', remote.base + '/dashboard')
     else:
         for query in index.queries:
             actual = remote.search_vector(query['vector'], index.encoder)
