@@ -25,7 +25,7 @@ def get(query,status=200):
         return json.load(exc)
 
 def start(log):
-    process=subprocess.Popen(CLI+['dev','--local','--ip','127.0.0.1','--port','8010']+PERSIST,
+    process=subprocess.Popen(['uv','run','--locked','pywrangler']+['dev','--local','--ip','127.0.0.1','--port','8010']+PERSIST,
                              cwd=ROOT,env=ENV,stdout=log,stderr=log)
     for _ in range(180):
         if process.poll() is not None:

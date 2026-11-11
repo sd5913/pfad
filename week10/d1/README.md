@@ -11,10 +11,11 @@ This is a tutor-prepared local demonstration, or an optional paired extension.
 It fits inside the relational block; don't install a second platform during
 project-support time. Use a prepared partner machine if setup stalls.
 
-From **`week10/d1`**, with Node 22+:
+From **`week10/d1`**, with Node 22+, uv and Python 3.13 (the same Worker setup as Week 4):
 
 ```bash
 npm ci
+uv sync --locked
 npm run seed
 npm run dev
 ```
@@ -26,7 +27,8 @@ available before class. If unavailable, keep the same relational exercise in
 SQLite and observe the tutor’s prepared API demo instead of installing during
 the support block.
 
-The first install needs network access. These commands use Wrangler's local D1
+The first install needs network access. `pywrangler` bundles the pinned
+Python Workers SDK, as in Week 4; raw `wrangler dev` alone cannot supply it. These commands use Wrangler's local D1
 emulation, a fictional ID and local state in `.wrangler/state`; no account,
 Cloudflare login, remote database, key or payment is required. **Do not deploy
 this configuration.** It is a read-only API over fictional public teaching rows,

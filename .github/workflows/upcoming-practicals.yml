@@ -129,7 +129,9 @@ jobs:
       - name: Install the pinned local D1 demonstration
         if: ${{ hashFiles('week10/d1/package-lock.json') != '' }}
         working-directory: week10/d1
-        run: npm ci
+        run: |
+          npm ci
+          uv sync --locked
       - name: Verify the real Python Worker and local D1 restart
         if: ${{ hashFiles('week10/d1/check_d1.py') != '' }}
         working-directory: week10/d1
