@@ -1,0 +1,4 @@
+.venv/
+.uv-cache/
+out/
+__pycache__/

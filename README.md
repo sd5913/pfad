@@ -110,5 +110,6 @@ can show people. Treat them accordingly.
 | 07 | [From an idea to one interaction — 22 October 2026](week07/README.md) |
 | 08 | [Camera interactions — OpenCV, MediaPipe and teamwork (29 October 2026)](week08/README.md) |
 | 09 | [Connected interactions — Thu 5 Nov 2026](week09/README.md) |
+| 10 | [Persistent models and a talking handbook](week10/README.md) |
 
 More lands each week.

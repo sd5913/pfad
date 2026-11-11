@@ -1,0 +1,102 @@
+{
+  "label": "RECORDED LIVE RUN, not generated during fixture playback",
+  "recorded_on": "2026-10-29",
+  "model": "Qwen3.5-2B Q4_K_M, llama.cpp b11972, CPU",
+  "model_revision": "f6d5376be1edb4d416d56da11e5397a961aca8ae",
+  "turns": [
+    {
+      "case": "supported",
+      "question": "What should I do if I lose my student identity card?",
+      "answer": "Submit an online application for a replacement. A non-refundable fee of HK$150 will be charged. If the original card is found, return it to the Academic Registry for cancellation. [hb2026-p020-replacement] [hb2026-p076-fees]",
+      "tool_query": "lost student identity card replacement procedure",
+      "source_ids": [
+        "hb2026-p020-replacement",
+        "hb2026-p076-fees"
+      ],
+      "prior_history": [],
+      "model_answer": {
+        "answer": "Submit an online application for a replacement. A non-refundable fee of HK$150 will be charged. If the original card is found, return it to the Academic Registry for cancellation.",
+        "source_ids": [
+          "hb2026-p020-replacement",
+          "hb2026-p076-fees"
+        ]
+      },
+      "elapsed_seconds": 38.670393585000056
+    },
+    {
+      "case": "followup",
+      "question": "If I find the original later, should I keep both?",
+      "answer": "If you find the original, you must immediately return it to the Academic Registry for cancellation. You should not keep both. [hb2026-p020-replacement]",
+      "tool_query": "original student identity card found return policy",
+      "source_ids": [
+        "hb2026-p020-replacement"
+      ],
+      "prior_history": [
+        {
+          "role": "user",
+          "content": "What should I do if I lose my student identity card?"
+        },
+        {
+          "role": "assistant",
+          "content": "Submit an online application for a replacement. A non-refundable fee of HK$150 will be charged. If the original card is found, return it to the Academic Registry for cancellation. [hb2026-p020-replacement] [hb2026-p076-fees]"
+        }
+      ],
+      "model_answer": {
+        "answer": "If you find the original, you must immediately return it to the Academic Registry for cancellation. You should not keep both.",
+        "source_ids": [
+          "hb2026-p020-replacement"
+        ]
+      },
+      "elapsed_seconds": 18.797932289999835
+    },
+    {
+      "case": "unsupported",
+      "question": "What is the Wi-Fi password at the campus cafeteria?",
+      "answer": "I cannot answer from these sources.",
+      "tool_query": "Wi-Fi password cafeteria",
+      "source_ids": [],
+      "prior_history": [
+        {
+          "role": "user",
+          "content": "What should I do if I lose my student identity card?"
+        },
+        {
+          "role": "assistant",
+          "content": "Submit an online application for a replacement. A non-refundable fee of HK$150 will be charged. If the original card is found, return it to the Academic Registry for cancellation. [hb2026-p020-replacement] [hb2026-p076-fees]"
+        },
+        {
+          "role": "user",
+          "content": "If I find the original later, should I keep both?"
+        },
+        {
+          "role": "assistant",
+          "content": "If you find the original, you must immediately return it to the Academic Registry for cancellation. You should not keep both. [hb2026-p020-replacement]"
+        }
+      ],
+      "model_answer": {
+        "answer": "The Wi-Fi password at the campus cafeteria is not specified in the provided handbook.",
+        "source_ids": []
+      },
+      "elapsed_seconds": 17.17594647100009
+    },
+    {
+      "case": "isolated",
+      "question": "How do I request leave from class?",
+      "answer": "To request leave, obtain approval from the Head of Department by submitting Form AR8. Applications should be made as early as possible. [hb2026-p025-leave] [hb2026-p025-decision]",
+      "tool_query": "how to request leave from class",
+      "source_ids": [
+        "hb2026-p025-leave",
+        "hb2026-p025-decision"
+      ],
+      "prior_history": [],
+      "model_answer": {
+        "answer": "To request leave, obtain approval from the Head of Department by submitting Form AR8. Applications should be made as early as possible.",
+        "source_ids": [
+          "hb2026-p025-leave",
+          "hb2026-p025-decision"
+        ]
+      },
+      "elapsed_seconds": 18.758404290999806
+    }
+  ]
+}
