@@ -36,6 +36,231 @@ typed input makes the database lesson observable without transcription errors.
 100-120 tutor review and project support. Prepare services beforehand and pair
 at minute 10. No extra assessment or installation is added to support time.
 
+## Concept revision
+
+Use these four ideas to explain a saved conversation. The questions are
+ungraded revision, outside the tutorial timetable; no running bot is needed.
+
+### 1. Save the data
+
+**Persistence** means data outlives its process. Save the conversation's values,
+stable ID and owner reference. A later process loads them into a new object;
+its methods come from Python code. Python's `id(object)` is not a persistent ID.
+
+An attribute change is saved only when the program writes it. JSON can store
+a whole scene snapshot. A database also supports queries, constraints and
+transactions. SQLite is a database in a file; local versus hosted is a separate
+choice from data model. Persistent storage still needs backups.
+
+**Predict:** a conversation's saved title is `Handbook`. You change the live
+title to `Game ideas` and stop without saving. What title can a new process
+load? Where do its methods and owner relationship come from?
+
+### 2. Link the records
+
+**Cardinality:** how many records may be linked? Count both directions.
+**Optionality:** can there be zero? The application's rules decide.
+
+| Relationship | Example rule | Representation |
+| --- | --- | --- |
+| One-to-one | A user has at most one profile; each profile has one user | A user reference with a uniqueness rule |
+| One-to-many | A user owns many conversations; each conversation has one owner | Store the owner's ID on each conversation |
+| Many-to-many | Users join many teams; teams contain many users | A Membership junction record links one user and one team |
+| Self-reference | A message may reply to another message | A reference to another record of the same type |
+
+A team role belongs to the Membership, not to the user globally. Store
+references instead of copying a whole user into every team. Self-reference
+does not imply one-to-one: many messages can reply to one message. Membership
+and reply-to are modelling examples, not extra features in the supplied app.
+
+**Draw and explain:** User/Group, Player/Score, Conversation/Message,
+Player/Team and Tag/Post. State the rules before naming the cardinality. How
+does Player/Team change if a player may join several leagues? Which design
+needs a junction record, and where would you store a per-team role?
+
+### 3. Choose storage for the job
+
+Classify the **data model** first: relational, or a non-relational model under
+the **NoSQL** umbrella. These are four common NoSQL families:
+
+| Family | Model | Useful access pattern | Example |
+| --- | --- | --- | --- |
+| Relational | Tables, rows and keys | Filter, order and join accounts/messages | SQLite, D1, PostgreSQL |
+| NoSQL | Key-value | Look up a preference/session by key | Redis |
+| NoSQL | Document | Load a nested scene/save record | MongoDB |
+| NoSQL | Wide-column | Read keyed rows designed for a query, such as device events | Cassandra |
+| NoSQL | Graph | Follow connections between nodes | Neo4j |
+
+**Vector search** is a capability that can cross these families. A vector
+database such as Qdrant is a specialist non-relational store for embeddings
+and nearby-item retrieval. PostgreSQL can add vector search through pgvector while keeping its
+relational tables. Vector similarity can be combined with exact metadata filters.
+
+NoSQL does not mean no rules: documents can have schemas, and relational systems
+can store JSON. Products may combine models. Our bot uses SQLite for exact
+ownership/order and Qdrant for handbook similarity; two separate databases are
+not a requirement for every bot. A nearest passage is not proof of truth.
+
+The lecture uses [Semantle](https://semantle.com/) to introduce **word embeddings**:
+word2vec represents words with learned numeric vectors so the game can compare
+meaning-related similarity. An **embedding** is a learned numeric representation;
+a **vector** is its list of numbers. Related usage can give similar vectors,
+including words that are related without being synonyms.
+
+Our handbook system extends the idea to **text embeddings**: a trained MiniLM
+encoder represents a whole short passage or question with 384 numbers. Semantle's
+word vectors and MiniLM's text vectors belong to different spaces. Within this
+system, encode both passages and questions with the same compatible encoder.
+The encoder creates the vectors; Qdrant stores and compares them. Similarity
+helps retrieve candidates; the returned text must still support the answer.
+
+**Choose and justify:** storing a whole scene; finding one account's ordered
+messages; finding passages about the meaning of a new question. Explain the
+query each design supports rather than naming a product alone.
+Is every NoSQL database a vector database? Can a relational database support
+vector search? Explain both answers using the taxonomy.
+
+### 4. Read and change the right rows
+
+| Concept | Job |
+| --- | --- |
+| Schema | Define fields, types and constraints |
+| Primary key | Identify one row, even after a rename |
+| Foreign key | Reference a related row; enforce its existence when configured |
+| Ordinary index | Help selected lookups/orderings; cost storage and write work |
+| SQL | INSERT, SELECT, UPDATE, DELETE; WHERE filters, ORDER BY orders, JOIN combines matches |
+| ORM | Translate between Python model operations and relational rows |
+| Transaction | Commit related changes together or roll them back |
+
+An ordinary index need not be unique. A foreign key does not authenticate a
+caller. The database enforces declared constraints. A transaction saves our
+question and answer together: if either insert fails, neither new row remains.
+
+**Explain without code:** which mechanism prevents an orphan message? Which
+identifies a renamed conversation? Which can help find its ordered messages?
+Which prevents a half-saved turn? Finally, trace one model operation through
+SQL to a row and a fresh-process reload during the practical below.
+
+### Worked SQL: from a relationship to result rows
+
+These examples use the lecture's **fictional snapshot**, not guaranteed seed
+IDs. Users are `1: Ada` and `2: Bo`. The conversation rows are:
+
+| id | owner_id | title |
+| --- | --- | --- |
+| 3 | 1 | Handbook |
+| 4 | 1 | Game notes |
+| 5 | 2 | Leave |
+
+The owner reference stores an ID rather than a copy of the user. In the
+practical, use IDs printed by `inspect`.
+
+Read a query using four keywords:
+
+| Keyword | Meaning |
+| --- | --- |
+| SELECT | Choose the columns to return |
+| FROM | Choose the source table |
+| WHERE | Keep rows that meet a condition |
+| ORDER BY | Sort the returned rows |
+
+**Example: find messages by their foreign key.** The source `message` rows are:
+
+| id | conversation_id | role | content |
+| --- | --- | --- | --- |
+| 7 | 3 | user | Lost card? |
+| 8 | 3 | assistant | Apply online. |
+| 9 | 5 | user | Another conversation |
+
+We know the parent conversation's ID is 3. Read the query as: return the ID
+and content from `message`, keeping messages linked to conversation 3, in ID order.
+
+```sql
+SELECT id, content
+FROM message
+WHERE conversation_id = 3
+ORDER BY id;
+```
+
+| id | content |
+| --- | --- |
+| 7 | Lost card? |
+| 8 | Apply online. |
+
+`conversation_id` is the foreign key pointing to `conversation.id`; `message.id`
+identifies each message itself. Filtering by `conversation_id = 3` finds all the
+messages for that parent. Filtering by `id = 3` would ask for one message with
+that primary key. We do not need a JOIN for this single-table filter.
+
+This is prepared storage text, not a model response or handbook advice.
+Messages from other conversations are excluded. The application checks owner
+access before retrieving history; a matching ID alone does not grant access.
+
+Application queries use `WHERE conversation_id = ?` and bind `(3,)` separately.
+The calling program binds each `?` to a value; these placeholders are not
+string interpolation. The literal 3 above keeps the first example easy to read.
+
+**The Python ORM version builds and runs that SQL for us.** With the supplied
+`Message` model and an open store:
+
+```python
+query = (Message
+    .select(Message.id, Message.content)
+    .where(Message.conversation == 3)
+    .order_by(Message.id))
+sql, params = query.sql()
+messages = list(query)
+```
+
+**ORM means Object-Relational Mapper.** It maps model operations to SQL and bound
+values, sends the query to the database, and turns returned rows into Python
+model instances. `Message.conversation` maps to the `conversation_id` column.
+Building this query and calling `.sql()` do not read the database; the first
+`list(query)` executes SELECT and constructs the two `Message` objects.
+SQLite still executes the SQL and enforces its constraints.
+
+**Predict:** a freshly saved conversation 3 has title `Handbook`. You load it
+and assign `chat.title = 'Game ideas'`, then another process reads row 3 before
+you call `.save()`. Which title does it load? Explain which operation would
+generate and execute UPDATE. Attribute assignment alone changes the live object.
+
+**JOIN: combine matching rows.** Bind `(1,)` for Ada:
+
+```sql
+SELECT c.id, u.name, c.title
+FROM conversation AS c
+JOIN user AS u ON c.owner_id = u.id
+WHERE u.id = ?
+ORDER BY c.id;
+```
+
+| id | name | title |
+| --- | --- | --- |
+| 3 | Ada | Handbook |
+| 4 | Ada | Game notes |
+
+`c` and `u` are short table aliases. `ON` matches each owner reference to a
+user's primary key; `WHERE` keeps Ada's rows. Her name appears twice in this
+result, while her stored user record appears once. A JOIN reads matches; it
+does not modify the tables or declare a foreign-key constraint.
+
+**UPDATE: change one existing title.** Bind `('Game ideas', 3)`:
+
+```sql
+UPDATE conversation
+SET title = ?
+WHERE id = ?;
+```
+
+After commit, row 3 is `(3, 1, 'Game ideas')`: its ID and owner are unchanged.
+Rows 4 and 5 and all message references remain unchanged. This describes saved
+state, not rows returned by UPDATE. Omitting WHERE would change every title;
+a missing ID changes zero rows. The app must check owner access before editing.
+
+**Predict:** which rows would the JOIN return for Bo? What if you select a
+conversation with no messages? Why does renaming a conversation keep its
+message links? Explain the result before changing any query.
+
 ## Prepare before class
 
 Work in **`pfad/week10`**. You need `uv` and Python 3.12 or newer. The weekly
@@ -113,7 +338,7 @@ Run the behavioral checks:
 uv run python -m unittest discover -p 'test_*.py'
 ```
 
-Expect 20 passing checks. Scripted model replies and synthetic coordinates
+Expect 23 passing checks. Scripted model replies and synthetic coordinates
 inside protocol unit tests are doubles; the separate learned-vector fixture
 and recorded live model run supply different evidence. Green unit tests alone
 do not prove a speaker can be heard or a model's factual claims are supported.
@@ -359,3 +584,4 @@ the trace and source rather than treating the program as official advice.
 - [eSpeak NG integration](https://github.com/espeak-ng/espeak-ng/blob/master/docs/integration.md).
 - [Official 2026/27 handbook](https://www.polyu.edu.hk/ar/docdrive/polyu-students/student-handbook/Student_Handbook_2026-27_English.pdf); attribution and exact provenance in fixtures.
 - Historical [2025 Week 10](https://github.com/sd5913/pfad/tree/2025/week10): persistent models, vectors and retriever retained; unsafe login hashing not reused. Orange/t-SNE removed by explicit instructor decision.
+- [Database families](https://aws.amazon.com/nosql/) and [vectors in PostgreSQL](https://github.com/pgvector/pgvector): taxonomy examples checked 11 November; no additional installation is required.

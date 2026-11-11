@@ -7,6 +7,12 @@ ordered history. Qdrant holds **shared PDF passages + vectors + provenance**.
 A foreign key encodes a declared relationship; a nearest vector is an
 approximate candidate, not a relationship, truth check or probability.
 
+Recall the lecture's Semantle example: word embeddings make single words
+numerically comparable. Here a text embedding represents an entire short
+question or passage. The trained MiniLM encoder creates 384-number vectors for
+both inputs in the same space; Qdrant stores and ranks them. We carry over the
+similarity idea from Semantle, not its word vectors or model.
+
 ## Prepare and seed (tutor or prepared pair)
 
 From **`pfad/week10`**, start Docker Desktop/Engine and run:
