@@ -36,26 +36,33 @@ neither is included in the repositories.
   exact LM Studio application and a browser/audio device are unavailable here:
   the live inference check uses its compatible API protocol, not an asserted
   LM Studio GUI run. Rehearse the exact loaded model's tool/schema support.
-- D1 pinned Wrangler **4.160.0**: local schema/seed succeeds (nine SQL commands).
-  The SQL join/constraints/repeated seed also pass against SQLite. The actual
-  Python Worker HTTP runtime remains **unverified locally**: this executor blocks
-  interface enumeration and workerd's Pyodide bundle DNS fetch. A temporary
-  loopback-only validation shim got as far as the latter failure; it isn't part
-  of the teaching files. `d1/check_d1.py` runs actual local HTTP, input, join and
-  restart checks in the draft PR workflow on a normal runner. No remote D1,
-  cloud account, credentials, paid service or deployment was used.
+- D1 pinned Wrangler **4.160.0**, workers-py **1.17.4** and runtime SDK **1.9.0**:
+  local schema/seed succeeds (nine SQL commands). The normal GitHub runner also
+  passes the **actual Python Worker HTTP/restart check**: bound JOIN, invalid
+  input, empty result and changed title surviving restart, in
+  [practical checks](https://github.com/sd5913/pfad/actions/runs/42964215984)
+  at code head `303aa24a4f2e08fffa64f955043fad1efb7aab0c`.
+  The first run found the missing SDK in raw Wrangler startup; the corrected
+  example uses the same Pywrangler package-bundling route as Week 4.
+  This executor itself cannot run workerd's Pyodide fetch because of its DNS
+  restrictions. No remote D1, cloud account, credentials or deployment is used.
+- Preserved Week 6 local HTTP-client checks: seven pass. Preserved Week 9:
+  15 Python socket/state tests and ten browser-state regressions pass locally.
 
 ## Teaching previews and limits
 
-115 teaching tests and 25 exercise checks pass. Week 10 HTML, plain/ClassPoint
-PowerPoint and all 47 PNG previews build; all three contact sheets were visually
-inspected. Chromium PDF rendering is blocked locally by the executor's forbidden
-singleton socket; draft-PR Checks provide the normal-runner PDF build/artifacts.
-Old PR-body verification claims/recordings apply to their earlier heads only.
-Use the checks attached to the current exact head for fresh preview evidence.
+115 teaching tests and 25 exercise checks pass. All ten registered decks build
+locally to HTML, plain/ClassPoint PowerPoint and PNG previews. The normal-runner
+[teaching preview build](https://github.com/sd5913/teaching/actions/runs/42963660375)
+also passes at `3ecda5062caa65dcfd99c16a3712a3cc91f210de`, with downloadable
+artifacts. Its actual Chromium PDF has 47 pages; all were rendered/visually
+reviewed. Both PowerPoint archives have 47 slides and 47 speaker-note records.
+Native Microsoft PowerPoint/ClassPoint operation was not tested.
+The executor's local Chromium singleton socket is restricted, so the normal
+runner supplies browser-PDF evidence. Later metadata-only pins use the same
+reviewed slide content. Old PR-body runs/recordings apply to their earlier heads.
 
-Before class: rehearse Docker/dashboard, the Python D1 Worker on the prepared
-machine, actual LM Studio model, browser audio, physical speakers/projector,
+Before class: rehearse Docker/dashboard, the prepared D1 machine, actual LM Studio model, browser audio, physical speakers/projector,
 student operating systems and timing. Pair at minute 10; preserve the final
 20-minute tutor/project block. `QDRANT-PIP.md` distinguishes prepared recordings,
 in-process fallback and alternate CLI from a fresh live run. No new graded
