@@ -13,6 +13,7 @@ from speech import play, synthesize
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--bundle', default='fixtures/handbook.json')
+    parser.add_argument('--qdrant', action='store_true', help='Use seeded local Qdrant instead of in-process search')
     parser.add_argument('--db', default='out/chat.sqlite')
     parser.add_argument('--user', default='Ada')
     parser.add_argument('--conversation', type=int)
@@ -31,7 +32,12 @@ def main():
         def vector(text):
             return encoder.encode([text])[0]
         def retrieve(query):
-            return index.search_vector(vector(query), index.encoder)
+            return search.search_vector(vector(query), index.encoder)
+        if args.qdrant:
+            from qdrant_index import QdrantIndex
+            search = QdrantIndex(index)
+        else:
+            search = index
         model = LlamaServer(args.model)
         model.identity()
         store = Store(args.db)

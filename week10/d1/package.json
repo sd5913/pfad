@@ -1,0 +1,1 @@
+{"private":true,"devDependencies":{"wrangler":"4.160.0"},"scripts":{"dev":"wrangler dev --local --ip 127.0.0.1 --port 8010","seed":"wrangler d1 execute sd5913-week10-local --local --file schema.sql"}}

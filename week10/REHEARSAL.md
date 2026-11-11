@@ -1,3 +1,10 @@
+# Current classroom route
+
+Use [QDRANT-PIP.md](QDRANT-PIP.md) for the revised Week 6 Pip/Qdrant route,
+[d1/README.md](d1/README.md) for the prepared D1 demo, and
+[VALIDATION.md](VALIDATION.md) for current evidence and remaining checks.
+The original alternate CPU CLI preparation is retained below.
+
 # Prepare and rehearse the local CPU route
 
 Run from `week10`. Prepare this before class; the tutorial pairs with a ready

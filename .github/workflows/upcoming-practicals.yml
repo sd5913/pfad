@@ -126,6 +126,14 @@ jobs:
           include-hidden-files: true
           if-no-files-found: warn
           retention-days: 7
+      - name: Install the pinned local D1 demonstration
+        if: ${{ hashFiles('week10/d1/package-lock.json') != '' }}
+        working-directory: week10/d1
+        run: npm ci
+      - name: Verify the real Python Worker and local D1 restart
+        if: ${{ hashFiles('week10/d1/check_d1.py') != '' }}
+        working-directory: week10/d1
+        run: python check_d1.py
       - name: Test browser mapping when present
         if: ${{ hashFiles('week11/browser/control.test.cjs') != '' }}
         run: node --test week11/browser/control.test.cjs

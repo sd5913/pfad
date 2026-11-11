@@ -31,3 +31,7 @@ week08/models/
 week08/.venv/
 # Week 10 — fictional disposable JSON created by the companion commands
 week10/out/
+
+week10/qdrant-storage/
+week10/d1/.wrangler/
+week10/d1/d1-check.log

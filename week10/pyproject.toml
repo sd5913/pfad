@@ -6,6 +6,7 @@ requires-python = ">=3.12"
 dependencies = ["peewee==4.5.3"]
 
 [project.optional-dependencies]
+pip = ["streamlit==1.65.0", "kokoro-onnx==0.6.1", "onnxruntime>=1.20.1,<2", "soundfile>=0.13,<0.14"]
 encoder = ["torch==2.14.1", "transformers==5.19.0", "sentence-transformers==6.2.0"]
 
 [tool.uv]

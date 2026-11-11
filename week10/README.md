@@ -2,7 +2,7 @@
 
 **Thursday 12 November 2026. This is a complete 120-minute tutorial, separate
 from the 120-minute lecture.** Build on Week 7's classes, Week 8's inspected
-programs and Week 9's requests/processes. Trace one system: related saved
+programs and Week 9's WebSockets and Multiboxes. Trace one system: related saved
 conversations supply context to a source-backed handbook bot with spoken replies.
 
 By the end you can explain and inspect:
@@ -11,6 +11,30 @@ By the end you can explain and inspect:
 - Stable keys, references, ordinary indexes, owner-scoped queries and a fresh-process reload.
 - A real handbook chunk/vector, a compatible query vector and a cited retrieval result.
 - Previous turns actually entering a model request, an isolated conversation and a spoken answer.
+
+## This year’s route: related rows first, then give Pip source evidence
+
+Week 9’s Scene keeps live state in memory: restarting its server resets it.
+Today ask which data should survive. Spend the first half on tables, keys,
+relationships, SQL queries and persistence. Then reuse Week 6’s **Pip** client
+and Kokoro voice with a PDF-derived Qdrant knowledge database. Week 4’s tide
+Worker supplies a separate, short [D1/API demonstration](d1/README.md).
+D1 is new material, not a feature already present in Week 4.
+
+The existing command-line/llama.cpp/eSpeak route below remains an alternate
+prepared-machine reference. For this class use [Pip + Qdrant](QDRANT-PIP.md)
+for the 60-100 minute blocks. It calls the same bounded agent and related-row
+store; it reuses `week06/speech/local_reply.py` for local HTTP and
+`synthesise_onnx.py` for Kokoro. No new paid model service is needed.
+Microphone/WebRTC input can be added from Week 6 after the typed route works;
+typed input makes the database lesson observable without transcription errors.
+
+**Timings stay 120 minutes:** 0-10 setup; 10-30 models/tables;
+30-50 queries, constraints, restart (including a prepared 5-minute D1 demo);
+50-60 break; 60-70 inspect the same vectors through Qdrant API/dashboard;
+70-90 Pip question/follow-up/voice; 90-100 reopen/isolate/recover;
+100-120 tutor review and project support. Prepare services beforehand and pair
+at minute 10. No extra assessment or installation is added to support time.
 
 ## Prepare before class
 
