@@ -3,8 +3,8 @@
 `chunks.json` contains six short attributed extracts from the official
 [Student Handbook for Taught Programmes 2026/27](https://www.polyu.edu.hk/ar/docdrive/polyu-students/student-handbook/Student_Handbook_2026-27_English.pdf),
 Academic Registry, The Hong Kong Polytechnic University, July 2026. Retrieved
-and checked 29 October 2026: 7,658,316 bytes, 137 PDF pages, SHA-256
-`108956feb2ffac665f8ca0f5a8f68d7150a85fda15e219916785ec50331a4e94`.
+and checked 11 November 2026: 7,809,020 bytes, 137 PDF pages, SHA-256
+`43ac3a6a7697b2ce78f1964f673dae0aa2ccf79ba7c58fb310b469dc2b380a1b`.
 The complete PDF is not redistributed here. Extracts are small teaching
 quotations; attribution and official URL travel with every result.
 
@@ -46,3 +46,9 @@ recording proves playback only, not a fresh retrieval, memory call or synthesis.
 Live player completion/stop/failure were checked; room audibility still needs
 a physical listener. No personal/student records, account tokens or credentials
 are included; Ada and Bo are fictional local profiles.
+
+The official URL changed its PDF bytes on 10 November. All six selected
+passages remain exact matches on the same PDF/printed pages. Their vectors
+were rebuilt and checked on 11 November; source metadata/hash were refreshed.
+The older recorded CLI traces retain their historical October provenance and
+are labelled recordings, not a current PDF download or live Qdrant run.

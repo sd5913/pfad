@@ -42,10 +42,10 @@ revision is loaded locally in subsequent runs. About 90 MB of encoder files
 are cached in ignored `out/models/`; the complete installed environment used
 about 1.2 GB, plus a similarly sized package cache.
 
-The official PDF is 7,658,316 bytes, 137 pages. Its SHA-256 is
-`108956feb2ffac665f8ca0f5a8f68d7150a85fda15e219916785ec50331a4e94`.
+The official PDF is 7,809,020 bytes, 137 pages. Its SHA-256 is
+`43ac3a6a7697b2ce78f1964f673dae0aa2ccf79ba7c58fb310b469dc2b380a1b`.
 Title: *Student Handbook for Taught Programmes 2026/27*, Academic Registry,
-July 2026; PDF metadata modified 29 July. Retrieved/inspected 29 October 2026.
+2026/27; PDF metadata modified 10 November. Retrieved/inspected 11 November 2026.
 The downloader validates signature/size and prints its hash; human inspection
 establishes title/year/page meaning. Rebuild into a separate file:
 

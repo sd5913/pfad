@@ -200,7 +200,7 @@ Save your one-file experiment and leave the source/database available.
 
 The bundle contains **six short genuine extracts**, not the full handbook.
 Source: Academic Registry's *Student Handbook for Taught Programmes 2026/27*,
-July 2026; verified 29 October, 137 PDF pages. PDF positions 20, 25 and 76
+2026/27; verified 11 November after the PDF’s 10 November update, 137 PDF pages. PDF positions 20, 25 and 76
 correspond to printed pages 9, 14 and 61. The official URL, edition, PDF SHA-256,
 section and chunk IDs accompany the text in [chunks.json](fixtures/chunks.json).
 

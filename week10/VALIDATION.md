@@ -67,3 +67,13 @@ student operating systems and timing. Pair at minute 10; preserve the final
 20-minute tutor/project block. `QDRANT-PIP.md` distinguishes prepared recordings,
 in-process fallback and alternate CLI from a fresh live run. No new graded
 submission or assessment policy is introduced. Both PRs remain draft/open.
+
+## Final source refresh
+
+The official handbook PDF was re-downloaded on 11 November: 7,809,020 bytes,
+137 pages, modified 10 November, SHA-256
+`43ac3a6a7697b2ce78f1964f673dae0aa2ccf79ba7c58fb310b469dc2b380a1b`.
+The old-hash guard correctly stopped the first rebuild. All six extracts were
+then checked verbatim against the same cited pages and the real pinned encoder
+rebuilt all passage/query vectors. Both current corpus files carry the refreshed
+provenance. Older recorded traces keep their original snapshot metadata.
