@@ -9,8 +9,10 @@ approximate candidate, not a relationship, truth check or probability.
 
 Recall the lecture's Semantle example: word embeddings make single words
 numerically comparable. Here a text embedding represents an entire short
-question or passage. The trained MiniLM encoder creates 384-number vectors for
-both inputs in the same space; Qdrant stores and ranks them. We carry over the
+question or passage. The full-PDF route uses Qwen3-Embedding-0.6B to create
+1024-number vectors. Its documented query instruction is applied to questions;
+documents use the matching encoder without that instruction. Qdrant stores and
+ranks them. We carry over the
 similarity idea from Semantle, not its word vectors or model.
 
 ## Prepare and seed (tutor or prepared pair)
@@ -19,9 +21,20 @@ From **`pfad/week10`**, start Docker Desktop/Engine and run:
 
 ```bash
 docker compose up -d qdrant
-uv run python qdrant_index.py seed
-uv run python qdrant_index.py query
+uv run --locked python download_handbook.py
+uv run --locked --extra encoder --extra ingest python qdrant_add_pdf.py --download
+uv run --locked python qdrant_index.py query --bundle out/handbook-full.json
 ```
+
+The downloader refuses to overwrite an existing PDF. If the current handbook
+is already in `out/`, skip that download command. The ingestion command converts
+**all PDF pages** to Markdown, preserves chapter/section information and PDF
+page numbers, splits with 1500-character chunks and 200-character overlap,
+embeds them with the pinned Qwen model and uploads batches to Qdrant. It prints
+the number of pages, chunks and stored points. Repeating it reuses a matching
+complete bundle and upserts the same points. A changed PDF or chunk settings
+requires another `--out` filename. See [FULL-PDF.md](FULL-PDF.md) for provenance,
+the 2025 script adaptation and command-line use.
 
 This pins Qdrant 1.20.0, binds HTTP only to this machine’s loopback port 6333,
 and mounts a named `handbook-vectors` volume at `/qdrant/storage`. No Qdrant
@@ -30,12 +43,12 @@ and Docker permissions can take time. No Docker? Pair with the prepared tutor
 machine; `uv run python handbook.py` is a labelled in-process reference, not
 proof of a Qdrant API call or server persistence.
 
-The six passages and their actual learned 384D vectors are already supplied in
-`fixtures/handbook.json`. They come from the official 2026/27 handbook, not the
-private historical slides. Inspect `download_handbook.py`, `prepare_index.py`,
-`fixtures/chunks.json` and `fixtures/README.md` to trace PDF → selected extracts →
-matching encoder → vectors. Rebuilding needs the PDF, Poppler and the pinned
-encoder; it is preparation work. No private reference deck is redistributed.
+The six selected passages and MiniLM's 384D vectors remain in
+`fixtures/handbook.json` as an explicitly labelled teaching fixture. Select
+**Six-passage teaching fixture** in Pip to use it, and seed it separately with
+`uv run --locked python qdrant_index.py seed`. `prepare_index.py` rebuilds only
+that fixture; `qdrant_add_pdf.py` is the full-document ingestion command.
+No private reference deck is redistributed.
 
 Seeding uses a collection named from a hash of the corpus/source/encoder.
 Repeated seed updates the same UUID points; it doesn’t duplicate passages or
@@ -46,12 +59,12 @@ encoder identity equal, not merely dimensions.
 ## 60-70: inspect API and visual interface
 
 **Predict:** which passage should rank first for a card-replacement fee query?
-Run `query`; the three prepared questions must produce the same chunk ordering
-as `handbook.py` (replacement, leave and fees). Inspect scores, page, text and
+Run `query --bundle out/handbook-full.json`; the prepared questions must produce
+the same chunk ordering as the in-process cosine reference. Inspect scores, page, text and
 source URL. These are the same vectors, now queried across an HTTP boundary.
 
 Open **http://127.0.0.1:6333/dashboard**. Select the printed `sd5913_...`
-collection; inspect its 384D Cosine configuration, six points and payloads.
+collection; inspect its 1024D Cosine configuration, full-document points and payloads.
 A Qdrant point’s UUID is a database identity; payload `id` is our source-citation
 identity. Point to the original text and PDF page before trusting an answer.
 The visual interface and Python client use the same server/API.
@@ -64,20 +77,21 @@ Read `qdrant_index.py`: `PUT /collections/NAME` defines vector size/distance;
 `PUT /collections/NAME/points?wait=true` stores vector/payload points;
 `POST /collections/NAME/points/query` sends a query vector, `limit: 2` and
 `with_payload: true`. These are real HTTP methods. Qdrant doesn't encode our
-text: the matching MiniLM encoder does that before the query. The returned
+text: the matching Qwen encoder does that before the query. The returned
 payload becomes the agent tool result. A `GET` listing alone doesn't prove
 semantic retrieval.
 
 **Change/check/recover:** `docker compose restart qdrant`, wait for readiness,
-then run `query` again **without seeding**. Six saved points and rankings must
+then run `query --bundle out/handbook-full.json` again **without seeding**.
+The full set of saved points and rankings must
 remain. `docker compose down` removes the container but keeps the named volume;
 `up -d` recovers it. **Do not use `down -v`**: that removes the stored vectors.
 For a changed source, prepare and seed a new content-addressed collection.
 If Docker reports port 6333 busy, stop your own conflicting instance or have the
 tutor assign a free host port. For example, if 6335 is free, change the mapping
 in `compose.yml` to `127.0.0.1:6335:6333` and run `docker compose up -d` again.
-Use `uv run python qdrant_index.py seed --port 6335` and
-`uv run python qdrant_index.py query --port 6335`, open
+Use `uv run python qdrant_index.py seed --bundle out/handbook-full.json --port 6335` and
+`uv run python qdrant_index.py query --bundle out/handbook-full.json --port 6335`, open
 `http://127.0.0.1:6335/dashboard`, and set Pip's **Qdrant port** to **6335**.
 Keep the container port at 6333. Do not stop another group's work.
 
@@ -92,7 +106,7 @@ reply fails visibly before saving a new turn. Don’t silently call a paid API.
 Prepare a separate Week 10 environment from this folder:
 
 ```bash
-uv run --extra encoder --extra pip python encoder.py --download
+uv run --extra encoder --extra pip python encoder.py --qwen --download
 uv run --extra encoder --extra pip python -m streamlit run pip_app.py
 ```
 

@@ -1,5 +1,40 @@
 # Week 10 revision checks — 11 November 2026
 
+## Full-PDF laptop restoration — 12 November 2026
+
+- Restored whole-document ingestion by adapting the 2025
+  `week10/handbook_app/qdrant_add_pdf.py` at
+  `512edb07927c5d77cacc7279ba6be601b33dc601`. It retains Markdown
+  chapter/section splitting and 1500/200 chunk size/overlap, adds PDF page
+  provenance and retains short passages. See [FULL-PDF.md](FULL-PDF.md).
+- Actual current handbook extraction covers **137 of 137 pages**, yielding
+  **407 chunks**. Actual Qwen3-Embedding-0.6B inference generates normalized
+  **1024D** vectors, stored in Docker Qdrant 1.20.0 collection
+  `sd5913_83ce4e92293b5519`. All five prepared semantic-query rankings match
+  the in-process cosine reference. A repeat ingestion reuses the bundle and
+  retains exactly 407 points.
+- Qwen upstream HEAD observed and then tested:
+  `97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3`. It is the same model family as
+  the 2025 Ollama configuration, run directly with Sentence Transformers.
+  Queries receive the published retrieval instruction; documents do not.
+- Full embedding ran on the laptop's RTX 3060 with an isolated copy of the
+  existing Week 5 Torch 2.14.1+cu132 runtime: about **19 seconds of embedding**,
+  excluding extraction/loading. The locked project retains its CPU runtime;
+  actual CPU Qwen queries pass. The BF16 CPU preparation attempt was slow;
+  both active ingestion/query identities use float32.
+- Actual Streamlit AppTest with the real local chat model, full Qwen collection
+  and Kokoro answers academic probation from PDF page 51, reopens the saved
+  conversation, and answers the GPA follow-up with prior history present.
+  Both answers generate audio. These topics are outside the six-passage
+  fixture. Pip defaults to **Full PDF**; the small fixture is an explicit choice.
+- All **28 tests** pass with the ingestion extra installed. Independent review
+  found an interrupted-write retry issue; atomic bundle publication and its
+  regression test fix it. Follow-up review has no findings. No merge or commit
+  is implied by this local validation.
+
+The earlier six-passage/384D evidence remains valid for that teaching fixture.
+It does not describe the active full-document collection.
+
 ## Current content and merge checks — 12 November 2026
 
 - The concept-led lecture has 65 slides. Its 11 November build produced HTML,

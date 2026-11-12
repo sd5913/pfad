@@ -41,7 +41,9 @@ class QdrantIndex:
     def route(self):
         return '/collections/' + self.collection
 
-    def seed(self):
+    def seed(self, batch_size=64):
+        if batch_size < 1:
+            raise ValueError('Upload batch size must be positive.')
         collections = self.call('GET', '/collections')['collections']
         if self.collection not in [item['name'] for item in collections]:
             self.call('PUT', self.route, {'vectors': {'size': self.encoder['dimension'],
@@ -51,7 +53,9 @@ class QdrantIndex:
                    'payload': {**{k: v for k, v in chunk.items() if k != 'vector'},
                                'encoder': self.encoder, 'source': self.index.source}}
                   for chunk, vector in zip(self.index.chunks, self.index.vectors)]
-        self.call('PUT', self.route + '/points?wait=true', {'points': points})
+        for start in range(0, len(points), batch_size):
+            self.call('PUT', self.route + '/points?wait=true',
+                      {'points': points[start:start + batch_size]})
 
     def search_vector(self, vector, encoder, limit=2):
         if encoder != self.encoder:

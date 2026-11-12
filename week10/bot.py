@@ -26,11 +26,11 @@ def main():
     try:
         index = VectorIndex.load(args.bundle)
         from encoder import Encoder
-        encoder = Encoder()
+        encoder = Encoder(identity=index.encoder)
         if encoder.identity != index.encoder:
             raise ValueError('Sentence encoder does not match this index.')
         def vector(text):
-            return encoder.encode([text])[0]
+            return encoder.encode([text], query=True)[0]
         def retrieve(query):
             return search.search_vector(vector(query), index.encoder)
         if args.qdrant:

@@ -1,5 +1,12 @@
 # Week 10: persistent objects and a talking handbook agent
 
+**Full-PDF ingestion:** [FULL-PDF.md](FULL-PDF.md) restores the 2025 whole-document
+workflow with Qwen3-Embedding-0.6B. Run
+`uv run --locked --extra encoder --extra ingest python qdrant_add_pdf.py --download`
+after downloading the handbook and starting Qdrant. Pip defaults to this full
+index. The six-passage MiniLM bundle described in the original exercises remains
+an explicit teaching-fixture option; `prepare_index.py` rebuilds only that fixture.
+
 **Thursday 12 November 2026. This is a complete 120-minute tutorial, separate
 from the 120-minute lecture.** Build on Week 7's classes, Week 8's inspected
 programs and Week 9's WebSockets and Multiboxes. Trace one system: related saved
@@ -335,10 +342,10 @@ can be created. Use `--db out/experiment.sqlite` for a separate disposable file.
 Run the behavioral checks:
 
 ```bash
-uv run python -m unittest discover -p 'test_*.py'
+uv run --locked --extra ingest python -m unittest discover -p 'test_*.py'
 ```
 
-Expect 23 passing checks. Scripted model replies and synthetic coordinates
+Expect 28 passing checks with the ingestion extra installed. Scripted model replies and synthetic coordinates
 inside protocol unit tests are doubles; the separate learned-vector fixture
 and recorded live model run supply different evidence. Green unit tests alone
 do not prove a speaker can be heard or a model's factual claims are supported.
