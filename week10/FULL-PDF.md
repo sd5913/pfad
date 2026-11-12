@@ -4,7 +4,30 @@
 the model family used by the 2025 example. Pip defaults to this full-document
 index. The six hand-selected MiniLM passages remain a separate teaching fixture.
 
-## Run
+## Windows without Docker
+
+Follow the [README's Windows quick start](README.md#windows-quick-start-without-docker)
+to start the native Qdrant executable. With Qdrant running, open a second
+PowerShell window in your **`pfad\week10` folder** and run:
+
+```powershell
+uv run --python 3.12 --locked python download_handbook.py
+uv run --python 3.12 --locked --extra encoder --extra ingest python qdrant_add_pdf.py --download
+```
+
+Skip the first command if the PDF is already present. The second command
+downloads the pinned Qwen model, embeds the entire PDF and uploads it to the
+local Qdrant server. It uses CPU and needs no separate embedding server. For
+the current handbook it reports 407 chunks from all 137 pages. Then verify:
+
+```powershell
+uv run --python 3.12 --locked python qdrant_index.py query --bundle out/handbook-full.json
+```
+
+The native Windows ZIP does not include dashboard assets; ingestion and Pip
+work through the HTTP API without them.
+
+## Docker route
 
 From `pfad/week10`, prepare the public handbook if it is not already downloaded:
 

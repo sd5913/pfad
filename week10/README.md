@@ -43,6 +43,67 @@ typed input makes the database lesson observable without transcription errors.
 100-120 tutor review and project support. Prepare services beforehand and pair
 at minute 10. No extra assessment or installation is added to support time.
 
+## Windows quick start (without Docker)
+
+Use the updated **2026** checkout and install `uv` before running these
+PowerShell commands. The native Qdrant server replaces Docker for this route.
+
+Download the official [Qdrant 1.20.0 Windows x64 ZIP](https://github.com/qdrant/qdrant/releases/download/v1.20.0/qdrant-x86_64-pc-windows-msvc.zip)
+and extract it into `C:\qdrant`. In one PowerShell window:
+
+```powershell
+cd C:\qdrant
+$env:QDRANT__SERVICE__HOST = "127.0.0.1"
+.\qdrant.exe
+```
+
+Keep that window open. If Qdrant is already running, continue in a second
+PowerShell window from your checkout's **`pfad\week10` folder**:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:6333/readyz
+
+uv run --python 3.12 --locked python download_handbook.py
+uv run --python 3.12 --locked --extra encoder --extra ingest python qdrant_add_pdf.py --download
+```
+
+Skip the PDF download command if
+`out\Student_Handbook_2026-27_English.pdf` already exists. The ingestion command
+installs its dependencies, downloads the pinned **Qwen3-Embedding-0.6B** model,
+extracts the entire PDF, embeds its chunks and uploads them to Qdrant. It runs
+the encoder itself; a separate embedding server is not required. The default
+environment uses CPU, so the first run can take several minutes.
+
+For the current handbook, expect:
+
+```text
+Indexed 407 chunks from 137 of 137 PDF pages. Empty pages: []
+```
+
+Verify retrieval:
+
+```powershell
+uv run --python 3.12 --locked python qdrant_index.py query --bundle out/handbook-full.json
+```
+
+After preparing your local chat model and the Week 6 Kokoro assets, launch Pip:
+
+```powershell
+uv run --python 3.12 --locked --extra encoder --extra pip python -m streamlit run pip_app.py --server.address 127.0.0.1
+```
+
+Open <http://127.0.0.1:8501>, choose **Full PDF**, keep **Qdrant port** at
+**6333**, and enter your Windows LM Studio URL (normally
+`http://127.0.0.1:1234/v1`) and exact loaded chat-model ID. See
+[Week 6 conversation setup](../week06/speech/CONVERSATION.md) for the voice
+assets and [FULL-PDF.md](FULL-PDF.md) for ingestion details and repeat runs.
+
+Qdrant persists its database in `C:\qdrant\storage`; start it from the same
+directory each time. The native ZIP contains `qdrant.exe` only, so browser
+dashboard assets need separate installation. The ingestion scripts and Pip
+use the HTTP API and work without that dashboard. This Windows procedure uses
+the official Windows build; the recorded end-to-end laptop checks were on Linux.
+
 ## Concept revision
 
 Use these four ideas to explain a saved conversation. The questions are
