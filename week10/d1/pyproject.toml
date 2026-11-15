@@ -1,0 +1,8 @@
+[project]
+name = "pfad-week10-d1"
+version = "0.1.0"
+requires-python = ">=3.13,<3.14"
+dependencies = []
+
+[dependency-groups]
+dev = ["workers-py==1.17.4", "workers-runtime-sdk==1.9.0"]

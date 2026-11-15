@@ -126,6 +126,16 @@ jobs:
           include-hidden-files: true
           if-no-files-found: warn
           retention-days: 7
+      - name: Install the pinned local D1 demonstration
+        if: ${{ hashFiles('week10/d1/package-lock.json') != '' }}
+        working-directory: week10/d1
+        run: |
+          npm ci
+          uv sync --locked
+      - name: Verify the real Python Worker and local D1 restart
+        if: ${{ hashFiles('week10/d1/check_d1.py') != '' }}
+        working-directory: week10/d1
+        run: python check_d1.py
       - name: Test browser mapping when present
         if: ${{ hashFiles('week11/browser/control.test.cjs') != '' }}
         run: node --test week11/browser/control.test.cjs
@@ -139,7 +149,8 @@ jobs:
         if: ${{ hashFiles('week09/check_browser.cjs') != '' }}
         run: |
           npm install --prefix "$RUNNER_TEMP/week09-browser" --no-save --package-lock=false playwright@1.64.1
-          node "$RUNNER_TEMP/week09-browser/node_modules/playwright/cli.js" install --with-deps chromium
+          # Ubuntu 24.04 runners already provide Chromium's system libraries.
+          node "$RUNNER_TEMP/week09-browser/node_modules/playwright/cli.js" install chromium
           echo "NODE_PATH=$RUNNER_TEMP/week09-browser/node_modules" >> "$GITHUB_ENV"
       - name: Verify two real browsers, stopped server and recovery on port 8009
         if: ${{ hashFiles('week09/check_browser.cjs') != '' }}
