@@ -46,8 +46,9 @@ cookies, client secrets or `.dev.vars` contents into an agent prompt.
   **0.13.7** on 15 November. Windows/macOS are not rehearsed here. No dedicated
   GPU or downloaded assets are needed. `bpy` runs inside Blender's Python;
   do not install it into uv's environment.
-- **Route B:** Node.js/npm matching the
-  [template prerequisites](https://github.com/sd5913/github-oauth-d1-template#readme),
+- **Route B:** Node.js **22.23.3** (the template CI version) or a newer
+  supported release, with npm; see the
+  [template prerequisites](https://github.com/sd5913/github-oauth-d1-template#readme).
   internet, your **personal GitHub OAuth App** and your own Cloudflare
   account/Worker/D1 database for live deployment. The local checks require no
   deployment credentials. The template is a separate application repository;
@@ -365,11 +366,13 @@ needs those values after the Actions job finishes. Saving repository secrets
 alone does not inject them into an already deployed Worker. PR checks run
 without deployment credentials; green checks are not a deployed app.
 
-Follow the template's main/manual Actions deployment path and inspect its
-completed job's reported URL. The template also exposes `npm run deploy`
-(build, remote migrations, deploy) for local deployment; its README explains
-the authenticated Cloudflare configuration and runtime-secret setup required
-first. Use your own infrastructure. Verify the URL matches `APP_URL` and
+Follow the template's main/manual Actions deployment path, confirm the job
+succeeded, then open the `APP_URL` you configured. GitHub may mask that URL
+in logs because it is a repository secret. The template exposes `npm run deploy`
+(build, remote migrations, deploy with runtime secrets) for the configured
+Actions environment. A local invocation needs all eight production environment
+values supplied through a secure mechanism, not the local `.dev.vars` file;
+follow the template README. Use your own infrastructure. Verify the URL matches `APP_URL` and
 the OAuth callback before sign-in. Retain only the public URL and a redacted
 success/failure note; never retain authorization codes or cookies in a PR.
 
@@ -403,7 +406,8 @@ npm run build
 npm run test:local
 ```
 
-This starts the built Worker with an isolated local D1 database, uses fixture
+This needs no `.dev.vars` or cloud credentials. It starts the built Worker
+with an isolated local D1 database, uses fixture
 signed sessions, checks two-user isolation and restarts against the same
 store. It demonstrates local runtime/persistence behavior, **not GitHub
 sign-in or remote Cloudflare acceptance**. Its fixtures are not credentials
