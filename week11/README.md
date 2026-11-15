@@ -49,8 +49,8 @@ cookies, client secrets or `.dev.vars` contents into an agent prompt.
 - **Route B:** Node.js **22.23.3** (the template CI version) or a newer
   supported release, with npm; see the
   [template prerequisites](https://github.com/sd5913/github-oauth-d1-template#readme).
-  internet, your **personal GitHub OAuth App** and your own Cloudflare
-  account/Worker/D1 database for live deployment. The local checks require no
+  Live deployment also needs internet, your **personal GitHub OAuth App**
+  and your own Cloudflare account/Worker/D1 database. The local checks require no
   deployment credentials. The template is a separate application repository;
   do not add its packages to this PFAD Python environment.
 
