@@ -1,0 +1,13 @@
+config_version=5
+
+[application]
+config/name="Week 11: Blender sculpture in Godot"
+run/main_scene="res://preview.tscn"
+
+[display]
+window/size/viewport_width=960
+window/size/viewport_height=720
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.075, 0.11, 0.16, 1)

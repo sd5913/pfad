@@ -43,7 +43,57 @@ Do not repeatedly ask the agent to "fix everything" without reading its
 changes. Do not remove checks just to obtain a green result. Stop and ask
 the tutor if the change needs broader access than the agreed scope.
 
-## Worked Blender review scenario
+## Ask an agent to use Blender
+
+This is an **example request**, not a captured autonomous episode. Give it
+to the coding agent available in your own environment, or ask a partner to
+perform the same work and label that human-directed fallback. The agent can
+use terminal tools to run Blender; the optional live bridge is another route,
+not a prerequisite for operating the application.
+
+> From the PFAD repository root inspect `week11/blender_scene.py`,
+> `week11/blender_export.py` and `week11/asset_handoff.py` first. Then use
+> `week11/` for commands. Work only in the disposable scene, not personal files.
+> Make Sculpture wider and shallower: replace uniform scale with x `1.6 * s`,
+> y `0.75 * s`, z `s`. Keep its name, terracotta material, camera, light and
+> bottom on the floor. You may edit the scene script, run Blender in background,
+> read saved inspection JSON and open the rendered PNG to judge the result.
+> If the handoff fails, you may make a focused change to `blender_export.py`
+> to preserve the mesh/material/axis contract; explain that diff and rerun
+> the checks rather than weakening them.
+> Render scale 1.25 into `.output/blender/first` from `week11/`; compare with
+> `.output/blender/before`. If the image is cropped or floats, inspect the
+> cause and make a focused revision before rendering again. Explain dimensions
+> and floor contact. Do not just report a successful command. Stop with a
+> small diff, fresh image/inspection paths, actual commands/exits and any limits
+> so I can review. Keep generated outputs ignored; no model/API purchases,
+> asset downloads, personal files, external deployment or merge.
+
+The goal is a visible sculpture. The available actions are inspect, edit,
+run Blender, view output and revise. The state is script plus saved scene;
+observations include errors, JSON and PNG. The stop condition is a grounded,
+uncropped model with a small reviewable diff and evidence. Record where the
+model actually chose its next action; a fixed command list does not prove
+that decision happened.
+
+Before accepting, open the image and inspect scale `[2.0,0.9375,1.25]`,
+dimensions `[4,1.875,2.5]`, centre z 1.25 and bottom z 0. The camera stays
+`[7,-9,6]`. Create the first PR with the actual result. A concrete review is:
+
+> Reduce x from `1.6 * s` to `1.3 * s`; keep everything else fixed. Rerender
+> into `.output/blender/revised`, inspect it, and update this same PR. Then
+> export that saved scene with `uv run python asset_handoff.py export
+> .output/blender/revised/sculpture.blend`, run `check`, and show the same
+> model in `play` or `capture`. Stop with both application observations.
+
+Expect revised Blender dimensions `[3.25,1.875,2.5]`, Godot dimensions
+`[3.25,2.5,1.875]`, bottom Godot y=0 and retained material. Blender Z-up is
+converted by the exporter; do not rotate it a second time. The GLB excludes
+the render camera/light/floor. Godot supplies its own preview scene. There
+is no collision yet. Human review judges the creative result separately
+from export/import checks. No actual model session is claimed by this prompt.
+
+## Optional worked camera review scenario
 
 This is a **rehearsed design/review scenario**, not a historical model session
 or a fabricated PR screenshot. The supplied `blender_variants.py` already
@@ -148,18 +198,33 @@ and compare your own fresh renders if choosing this extension.
 
 ## Authenticated-app review prompt
 
-Use your template-copy repository rather than PFAD. Example request:
+Use your template-copy repository rather than PFAD. Save feedback, the live
+2000-character count and retaining text after failed save **already exist**
+in `app/note-editor.tsx`. The first request is inspection and evidence:
 
-> Add clear save feedback and a visible 2000-character limit. Preserve the
-> typed note when saving fails. Work only on the page/UI and focused tests;
-> preserve server session validation and owner-scoped note queries. Inspect
-> the existing implementation first; run tests, typecheck and build. Do not
-> read local secrets, deploy or merge. Stop with a focused diff and evidence.
+> Inspect the page/editor, session handling, owner-scoped note queries and
+> tests. Run tests, typecheck and build; record actual exits. Write a short
+> evidence note explaining which save/count/error behaviors already exist,
+> what the server checks prove and what still needs a browser/live-account
+> check. Do not edit implementation yet or read secrets. Stop with an
+> evidence-only diff so I can open/review the first PR.
 
-Review the actual UI behavior and server boundary separately. A partner can
-request a more precise error message or preservation of text after a failed
-request. Revise the same PR, rerun checks, then complete the README's
-persistence/two-account acceptance when credentials are available.
+After reviewing that first PR, request a concrete new behavior:
+
+> Add a `Discard unsaved changes` button to `app/note-editor.tsx`. It restores
+> the last successfully loaded/saved body, clears stale feedback and sends no
+> network request. Disable it while saving or when text is unchanged. Keep
+> sessions, owner-scoped server queries and the save contract unchanged.
+> Revise this same branch/PR. Run checks, inspect the UI and stop with a
+> focused diff and actual evidence. Do not read secrets, deploy or merge.
+
+Check: type/discard returns to the loaded body; save/edit/discard returns
+to the last successful save; a failed save does not become the discard target;
+and no discard POST appears in browser Network. Use a labelled local fixture
+or your own real sign-in; record which. Existing server tests do not prove
+the new button works. Add focused UI coverage if a harness is available, or
+retain actual browser evidence with that testing gap explicit. Then complete
+the README's persistence/two-account checks when credentials are available.
 
 ## A compact evidence note
 

@@ -1,12 +1,14 @@
-# Week 11: agents, Blender and authenticated apps
+# Week 11: authentication, deployment and creative agents
 
 **Thursday 19 November 2026.** Choose **one** route for this separate
-120-minute tutorial: change and render a Blender sculpture, or deploy a small
-GitHub-authenticated app with a private persistent note. Both use the same
-workflow: state a goal, let an agent work on a branch, inspect its diff, check
+120-minute tutorial: deploy a small GitHub-authenticated app with a private
+persistent note, or ask an agent to use Blender and bring the same object into
+Godot. Both use the same workflow: state a goal, let an agent work on a branch,
+inspect its diff, check
 the result, open a PR, request a revision and review the new evidence.
 
-The lecture explains the systems; here you make and verify a change. Explain
+The lecture teaches authentication/deployment first, then creative tools;
+here you make and verify a change. Explain
 an agent's available actions and stopping condition, distinguish a tool
 acknowledgement from a useful result, and show how review changes the next
 attempt. The authentication route connects Week 10's fictional local identities
@@ -16,21 +18,21 @@ history serve other jobs.
 
 ## Choose a route and prepare
 
-| Minutes | Route A: Blender | Route B: authenticated app |
+| Minutes | Route A: authenticated app | Route B: Blender into Godot |
 | --- | --- | --- |
-| 0-15 | Check tools; render the baseline | Copy the template; run local checks |
-| 15-35 | Inspect scene code; state a visual goal | Trace identity/session/note; prepare personal OAuth and D1 |
-| 35-55 | Agent branch, focused edit, diff and render | Agent branch, focused UI edit, checks and PR |
+| 0-15 | Copy template; local checks and signed-out page | Check tools; render the baseline |
+| 15-35 | Trace identity/session/note; prepare own accounts | Inspect scene/Python, predict size; give a visual goal |
+| 35-55 | Evidence-first PR; a small new UI behavior | Agent edits, renders and inspects; review first result |
 | 55-65 | Break | Break |
-| 65-85 | Review request; revise the same PR; rerender | Repository secrets; deploy and test sign-in |
-| 85-100 | Failure/recovery; explain evidence limits | Persistence and second-account isolation; recover |
+| 65-85 | Secrets, deployment/sign-in or local fallback | Review request; agent revises/rerenders same PR |
+| 85-100 | Persistence, isolation, failure and recovery | Export same object; import/check/view in Godot |
 | 100-120 | Scheduled tutor review and group-project support | Scheduled tutor review and group-project support |
 
 Do not try to finish both routes in two hours. If your chosen route has no
 first result by minute 15, pair with a prepared machine and take turns.
 Keep your own goal, diff, observation and review note. A recording can orient
 you; it does not establish that your copy works. If account setup blocks
-Route B, use its local tests and a prepared partner, with live
+Route A, use its local tests and a prepared partner, with live
 sign-in/deployment explicitly marked **not tested** when unavailable.
 
 Both routes need Git, GitHub and a code editor. Use the coding agent already
@@ -40,25 +42,29 @@ make the proposed edit and review it using the same evidence. Label that
 **human-directed work**, not an autonomous model run. Never put tokens,
 cookies, client secrets or `.dev.vars` contents into an agent prompt.
 
-- **Route A:** [Blender](https://www.blender.org/download/),
-  [uv](https://docs.astral.sh/uv/) and a desktop that can display the image or
-  application. Tested on Linux x86_64 with Blender **5.2.3 LTS** and uv
-  **0.13.7** on 15 November. Windows/macOS are not rehearsed here. No dedicated
-  GPU or downloaded assets are needed. `bpy` runs inside Blender's Python;
-  do not install it into uv's environment.
-- **Route B:** Node.js **22.23.3** (the template CI version) or a newer
+- **Route A:** Node.js **22.23.3** (the template CI version) or a newer
   supported release, with npm; see the
   [template prerequisites](https://github.com/sd5913/github-oauth-d1-template#readme).
   Live deployment also needs internet, your **personal GitHub OAuth App**
   and your own Cloudflare account/Worker/D1 database. The local checks require no
   deployment credentials. The template is a separate application repository;
   do not add its packages to this PFAD Python environment.
+- **Route B:** [Blender](https://www.blender.org/download/),
+  [uv](https://docs.astral.sh/uv/),
+  [Godot 4 standard build](https://godotengine.org/download/) and a desktop.
+  The new handoff is tested on Linux x86_64 with Blender **5.3.0**, Godot
+  **4.7.2** and uv **0.13.8** on 18 November. Earlier bridge acceptance
+  used Blender 5.2.3 LTS. Install these applications before class; installers
+  are substantial downloads. The small local render/export takes seconds.
+  Windows/macOS are not rehearsed here. No dedicated
+  GPU or downloaded assets are needed. `bpy` runs inside Blender's Python;
+  do not install it into uv's environment.
 
 Use [the shared PR worksheet](agent-pr-workflow.md) throughout. Its concrete
 Blender reviewer request is a rehearsed scenario, not a transcript of a model
 choosing actions. Retain your own actual agent/partner evidence.
 
-For Route A use a personal PFAD fork/copy for your practice PR; do not target
+For Route B use a personal PFAD fork/copy for your practice PR; do not target
 the course's repository. While [Week 11 PR #14](https://github.com/sd5913/pfad/pull/14)
 is unmerged, its supplied files are on `plan/week11-companion-activity`,
 not yet `2026`. On GitHub's **Fork** page include all branches (uncheck the
@@ -75,173 +81,7 @@ separate. The practice PR's base is your own fork's Week 11 branch. Check
 `sd5913`-owned project repository. After an authorised course merge, the
 instructor can direct you to `2026` instead.
 
-## Route A: a sculpture seen from two cameras
-
-### 0-15: render a baseline
-
-From the PFAD repository root:
-
-```bash
-cd week11
-blender --version
-uv run python -m unittest test_world test_mcp_transport test_mcp_cleanup test_mcp_client_status
-blender --background --factory-startup -noaudio --python-exit-code 1 --python blender_scene.py -- --scale 1.25 --output .output/blender/before
-```
-
-Keep this directory for Route A commands. Blender must be on PATH; on macOS
-its executable is commonly in `/Applications/Blender.app/Contents/MacOS/`.
-uv uses this week's separate environment and lockfile. The script creates a
-**disposable** scene in a new background process, without loading personal
-`.blend` work.
-
-Open `.output/blender/before/sculpture-1.25.png` and `sculpture.blend`.
-A terracotta cube should sit on a floor, with a camera, light and shadow.
-Read the adjacent `inspect.json`: `after` should be `[1.25,1.25,1.25]`, camera
-`[7,-9,6]`, and application version should match your Blender. Expect process
-exit 0 as well as files. On failure, read the error, check PATH and pair if
-needed. An old PNG is not evidence that a new command succeeded.
-
-### 15-35: inspect, predict and write the goal
-
-Read [blender_scene.py](blender_scene.py) and
-[blender_variants.py](blender_variants.py). `bpy.data.objects.get()` finds the
-named object; `target.scale` is a three-number vector. The original cube has
-side length 2, so scale 1.25 produces dimensions 2.5 by 2.5 by 2.5.
-`target.location.z = options.scale` puts its centre at half its height:
-`bottom_z = centre_z - height/2 = 1.25 - 1.25 = 0`, on the floor.
-
-Assignment changes scene state, `save_as_mainfile()` saves it, and
-`bpy.ops.render.render(write_still=True)` produces the image: three separate
-results. CPU Cycles renders 640x480 at eight samples, a small check rather
-than a final-quality artwork. `to_track_quat('-Z', 'Y')` aims the camera at
-its target. Predict how a different camera changes the visible faces without
-changing Sculpture's proportions.
-
-```bash
-uv run python blender_variants.py
-```
-
-Open `.output/blender/angle-1/sculpture-1.25.png` and the `angle-2` image.
-Compare the two `inspect.json` files: cameras are `(7,-9,6)` and `(9,-7,6)`;
-the sculpture scale stays 1.25. This deterministic loop makes two controlled
-observations. It retains the archive's multi-angle dataset idea without a
-large dataset or AI-generated mesh.
-
-State the visual goal and a stopping condition before requesting an edit.
-For example: keep the same sculpture, scale, floor contact, camera target,
-light and material; make the second view show more of the front face and
-less of the side. The worksheet gives a concrete camera revision and the
-render/inspection evidence needed to judge it.
-
-### 35-55: agent branch, focused edit and PR
-
-Follow [steps 1-4 of the worksheet](agent-pr-workflow.md#the-shared-workflow).
-Create your branch. In the worked scenario the two-camera implementation
-already exists, so first ask the agent to inspect/render it and write a short
-evidence note; do not request an unnecessary code rewrite. Inspect `git diff`
-and check the note against your observations. Keep the original images for
-review; the camera-code revision comes after the reviewer request.
-
-```bash
-uv run python blender_variants.py
-uv run python -m unittest test_world test_mcp_transport test_mcp_cleanup test_mcp_client_status
-git diff --check
-git diff -- blender_variants.py blender_scene.py
-```
-
-The existing tests check transport/world behavior; they do **not** establish
-that a new camera composition is good. Open a PR with your goal, focused diff,
-commands, before/after images and known limits. Ask a partner to review the
-image, not just the successful process exit. The worksheet shows how to save
-images under separate output paths so rerunning does not erase the baseline.
-
-### 55-85: break, then revise the same PR
-
-Keep the full 55-65 break. A useful specific reviewer request is: "For the
-second camera use `(5,-10,6)` instead of `(9,-7,6)`. Keep the first camera,
-sculpture scale and floor contact. Show fresh images and inspection records."
-Ask the agent to revise **the existing branch and PR**, inspect the new diff,
-and rerun the preceding render/check commands. The changed second camera
-should be `[5,-10,6]`; both sculpture scales should remain `[1.25,1.25,1.25]`.
-The two PNGs should show the same sculpture from different views.
-
-Reply to the review with the changed code and rerun evidence. A human decides
-whether to merge after checking it. An agent's "done" message is not that
-decision; a practice PR does not need to be merged during the tutorial.
-
-Optional proportion extension: change only the assignment to
-`target.scale = (options.scale * 1.3, options.scale * 0.75, options.scale)`.
-At scale 1.25 expect `[1.625,0.9375,1.25]`, dimensions `[3.25,1.875,2.5]`,
-and bottom z 0 because vertical scale/location remain paired. Compare a fresh
-render against the uniform cube. If an agent also changes vertical scale,
-ask it to explain and preserve the floor-contact calculation; inspect the
-saved scene instead of accepting the explanation alone.
-
-### 85-100: tools, failure and recovery
-
-The course-owned [bounded MCP adapter](blender_tools.py) runs the same
-Blender CLI/script. It is **not** the broader third-party Blender add-on.
-
-```bash
-uv run python mcp_client.py --blender list
-uv run python mcp_client.py --blender render_scene '{"scale":1.25}'
-uv run python mcp_client.py --blender inspect_scene
-uv run python mcp_client.py --blender render_scene '{"scale":5}'
-```
-
-Expect two tools, then a successful render/inspection. The last call must exit
-nonzero with `isError: true`: scale must be between 0.5 and 2 and no new render
-is launched. In PowerShell, if inline JSON quoting fails, use
-`uv run python mcp_client.py --blender render_scene` for its default scale 1,
-and use the following missing-object command for the failure check.
-
-```bash
-blender --background --factory-startup -noaudio --python-exit-code 1 --python blender_scene.py -- --target MissingObject
-```
-
-Expect nonzero exit and `Missing object: MissingObject; use Sculpture`.
-Recover by removing the bad target and rerunning the last successful command.
-Do not count an earlier PNG as output of the failed command.
-`inspect_scene` reads a **saved JSON file**, not a live editor. If settings or
-cache writes fail, the adapter redirects them into `.output`. If shutdown
-hangs, preserve the error, stop with Ctrl+C and ask the tutor; do not launch
-an unbounded series of copies.
-
-The supplied adapter/client/variant commands select calls in code. They are
-**deterministic human-directed tools**, not an autonomous agent. In your
-coding-agent run the model may choose to inspect, edit, check or revise after
-an observation. Record the next-action decisions you actually observed, its
-available actions and the condition that made it stop.
-
-### Optional: inspect a live Blender bridge
-
-[MCP for Blender](https://github.com/ahujasid/mcp-for-blender), by Siddharth
-Ahuja, offers a broader third-party bridge. The supplied setup pins add-on
-commit `8782963ba87a4c90482198bd7c7e17219ac3a0f7` and
-`mcp-for-blender==2.2.6`, retaining its MIT notice in ignored `.tools/`.
-
-```bash
-uv run python setup_blender.py
-uv run python blender_live.py
-```
-
-This opens a separate **disposable** Blender window, binds the add-on to a
-free loopback port, and drives the community server over stdio. Do not open
-personal work in that window. It inspects Sculpture, changes uniform scale
-to 1.5, reinspects, renders and saves `sculpture-live.png/.blend` under
-`.output/blender/`. After looking at the window, press Enter in the terminal
-to stop the client/add-on and close the process. Result JSON must show scale
-`[1.5,1.5,1.5]`, `blender_exit: 0` and `socket_closed: true`.
-
-`get_scene_info` reads live state; the bounded adapter reads a saved inspection.
-`execute_blender_code` runs Python inside Blender and has much broader powers;
-the demo supplies reviewed code only. Telemetry/update checks are disabled;
-asset-generation tools are outside this exercise. The demo resets scale to a
-uniform value, so keep your separate proportion renders if using the extension.
-Tutors can run `uv run python blender_live.py --verify` for automatic closure;
-it still exercises real graphical Blender and needs a working display.
-
-## Route B: GitHub sign-in and a private persistent note
+## Route A: GitHub sign-in and a private persistent note
 
 ### 0-15: copy the template and check it locally
 
@@ -317,13 +157,19 @@ variable **names** and redacted errors, not local-file contents, OAuth codes,
 cookies or secret-bearing screenshots. An agent should not need deployment
 credentials to make or test the small code change below.
 
-### 35-55: an agent change on a branch
+### 35-55: inspect first, then make a real agent change
 
 Follow the [shared workflow](agent-pr-workflow.md#the-shared-workflow).
-Request a small UI change such as clearer save feedback and a visible 2000
-character limit. Preserve sign-in, signed sessions and owner-scoped queries.
-Acceptance: the count tracks typed text, a failed save is shown as a failure,
-and saving remains limited to the signed-in user's note. Read the diff:
+The template already shows save feedback, a 2000-character count and retains
+text after a failed save. Ask the agent to inspect `app/note-editor.tsx`, run
+checks and open the first PR with an evidence note. Do not request those
+existing features again. The worksheet gives the exact request.
+
+The reviewer then requests a **Discard unsaved changes** button: restore the
+last successfully loaded/saved body without a network request. Disable it
+when unchanged or saving. This small new UI behavior must preserve signed
+sessions and owner-scoped queries. Revise the same PR and observe
+edit/discard, save/edit/discard and failed-save/discard.
 
 ```bash
 npm test
@@ -333,10 +179,12 @@ git diff --check
 git diff
 ```
 
-Open a PR with observations and checks. Ask a partner for a concrete revision,
-such as preserving typed text on a failed save. Revise the **same PR** and
-rerun affected checks. Local ownership tests are useful before accounts are
-ready; UI tests alone do not prove real OAuth or two-account isolation.
+Have a partner check the focused diff and visible behavior. Existing server
+tests do not prove the new UI behavior: add focused behavior coverage if your
+copy has a UI test harness, otherwise retain actual browser-check evidence
+and its limits. Record real sign-in or labelled local fixture use. If setup
+blocks deployment, finish this local evidence/revision route and mark live
+sign-in/deployment untested. Keep credentials out of the PR.
 
 ### 55-85: break, repository secrets and deployment
 
@@ -424,6 +272,179 @@ Without credentials, run the local checks, inspect the mocked OAuth tests,
 and make/review your UI change. Pair on a prepared deployment if available.
 Record exactly what you observed and which live checks remain open.
 
+## Route B: a sculpture made with an agent, then used in Godot
+
+### 0-15: render and inspect a baseline
+
+From the PFAD exercise repository root:
+
+```bash
+cd week11
+blender --version
+godot --version
+blender --background --factory-startup -noaudio --python-exit-code 1 --python blender_scene.py -- --scale 1.25 --output .output/blender/before
+```
+
+Keep this directory for the remaining commands. On macOS Blender is commonly
+in `/Applications/Blender.app/Contents/MacOS/`; add its directory to PATH.
+For an executable named `godot4`, check `godot4 --version` instead; the helper
+also accepts `GODOT_PATH` pointing to the standard Godot 4 executable.
+uv uses this week's separate environment. Blender creates a disposable scene,
+without loading personal work. Open `.output/blender/before/sculpture-1.25.png`,
+`inspect.json` and the saved `sculpture.blend`. Expect a terracotta cube on
+a floor, camera `[7,-9,6]`, scale `[1.25,1.25,1.25]` and process exit 0.
+An old PNG does not prove a new run succeeded; retain PATH/render errors
+and pair with a prepared machine if there is no first result by minute 15.
+
+### 15-35: inspect, predict and give a visual goal
+
+Read [blender_scene.py](blender_scene.py). A scene contains objects; a mesh
+holds vertices/faces, its object's transform places it, and a material
+controls surface appearance. Camera/light change the view without changing
+mesh geometry. `bpy.data.objects.get("Sculpture")` finds the named object;
+`target.scale` changes a three-number vector. The cube has side 2, so scale
+1.25 gives dimensions `[2.5,2.5,2.5]`. Centre z is 1.25:
+`bottom_z = centre_z - height/2 = 0`, on the floor.
+
+Assignment, saving the scene and rendering an image are different actions.
+CPU Cycles renders a 640x480 eight-sample check. The optional
+[blender_variants.py](blender_variants.py) loop gives two controlled camera
+views; it is deterministic code, not an agent deciding its next action.
+Predict how a wider, shallower sculpture will look before requesting an edit.
+
+### 35-55: let the agent use Blender
+
+Use the [actual Blender-use prompt](agent-pr-workflow.md#ask-an-agent-to-use-blender).
+The agent may inspect/edit the scene script, run Blender, inspect the saved
+JSON and PNG, and revise after observing the result. Keep the named Sculpture,
+material, camera and floor contact. A bridge is optional; CLI tool use lets
+the agent operate the real application too. Stop with a focused diff and
+actual render evidence. Do not attribute model decisions to a fixed script.
+
+For the first edit use x scale `1.6 * s`, y `0.75 * s`, z `s`. At `s=1.25`
+predict scale `[2.0,0.9375,1.25]`, dimensions `[4,1.875,2.5]`, bottom z 0.
+Open the fresh PNG before accepting the report; inspect unexpected edits
+before running them. Keep separate before/first/revised output folders.
+
+```bash
+blender --background --factory-startup -noaudio --python-exit-code 1 --python blender_scene.py -- --scale 1.25 --output .output/blender/first
+git diff --check
+git diff -- blender_scene.py
+```
+
+Open a practice PR with the goal, observed agent/partner actions, focused diff,
+commands and before/after images. Keep generated scenes/models/caches ignored;
+attach images and an evidence note manually. With no model access a partner
+performs the edit/run/inspection; label it **human-directed fallback**. This
+still practices Python/state/review, but does not demonstrate a model loop.
+
+### 55-85: break, review and revise the same PR
+
+Keep 55-65 as break. A reviewer asks: **keep vertical size, camera, material
+and floor contact; reduce width to `1.3 * s` instead of `1.6 * s`.**
+Pass that request to the agent on the same branch/PR. At `s=1.25` expect
+scale `[1.625,0.9375,1.25]`, dimensions `[3.25,1.875,2.5]` and bottom z 0.
+Have it rerender under `.output/blender/revised`, inspect image/JSON and
+explain whether another revision is needed before stopping.
+
+```bash
+blender --background --factory-startup -noaudio --python-exit-code 1 --python blender_scene.py -- --scale 1.25 --output .output/blender/revised
+git diff --check
+```
+
+A human reviews the result and decides on merging; the practice PR can stay
+open. The worksheet also retains the optional camera-review scenario. Keep
+the camera fixed for a proportion comparison so the cause is explainable.
+
+### 85-100: export the same Sculpture and view it in Godot
+
+Use the **saved revised scene**, rather than silently rebuilding a cube:
+
+```bash
+uv run python asset_handoff.py export .output/blender/revised/sculpture.blend
+uv run python asset_handoff.py check
+uv run python asset_handoff.py play
+```
+
+If you kept the baseline unchanged, substitute
+`.output/blender/before/sculpture.blend` (also the default export source).
+Close the Godot window with its close button. No service/bridge is started.
+Predict revised dimensions in Godot: `[3.25,2.5,1.875]` because Blender Z-up
+becomes Godot Y-up. Inspect `export.json` and `check.json` in `.output/godot3d/`.
+The baseline instead has `[2.5,2.5,2.5]` in both applications.
+
+Read [blender_export.py](blender_export.py): load the saved `.blend`, select
+only the mesh **Sculpture**, put its origin/pivot at the bottom centre in the
+export copy, and bake scale into vertices. Export meshes/materials together
+as `.output/godot3d/sculpture.glb`. The source `.blend` is not rewritten.
+The exporter converts axes; do not add a manual 90-degree rotation too.
+`.blend` is the editable source, `.glb` the portable handoff.
+
+[preview.gd](godot3d/preview.gd) loads the imported GLB as a `PackedScene`,
+instances it under a `Node3D`, then supplies its own floor, camera and light.
+The asset stays at origin with bottom Godot y=0. The existing `godot/` game
+is `Node2D`, so a separate small **3D preview** hosts this mesh. Rendering does
+not create collision: a solid playable object needs a chosen collision shape.
+`check` performs actual engine import and scene instantiation, checking one
+mesh, positive dimensions, floor contact and the terracotta material.
+Lighting differs from Blender; shared material values do not imply pixel parity.
+
+For an actual engine frame:
+
+```bash
+uv run python asset_handoff.py capture
+```
+
+Open `.output/godot3d-preview.png`. This is drawn by the running renderer,
+not the headless checker. Linux uses `xvfb-run` when installed to avoid focus
+changes; otherwise capture needs a working display. Windows/macOS capture is
+untested; `play` is the normal visible acceptance check. No API costs/assets.
+
+Predict a missing-source error, run it, then recover:
+
+```bash
+uv run python asset_handoff.py export .output/blender/MISSING.blend
+uv run python asset_handoff.py export .output/blender/revised/sculpture.blend
+uv run python asset_handoff.py check
+uv run python -m unittest test_asset_handoff -v
+```
+
+First command must exit nonzero with `Source .blend not found`, without
+launching Blender. An earlier GLB is not a new successful export. Restore a
+valid source and rerun. Renaming Sculpture fails export; restore its name.
+If it floats, fix source floor contact rather than rotating/scaling randomly
+in Godot. Commands have timeouts; use Ctrl+C for a stuck process and retain
+the error before retrying. The test exports an isolated baseline, not your
+artwork; it cannot decide if your creative revision is good.
+
+## Optional: inspect a live Blender bridge
+
+[MCP for Blender](https://github.com/ahujasid/mcp-for-blender), by Siddharth
+Ahuja, offers a broader third-party bridge. The supplied setup pins add-on
+commit `8782963ba87a4c90482198bd7c7e17219ac3a0f7` and
+`mcp-for-blender==2.2.6`, retaining its MIT notice in ignored `.tools/`.
+
+```bash
+uv run python setup_blender.py
+uv run python blender_live.py
+```
+
+This opens a separate **disposable** Blender window, binds the add-on to a
+free loopback port, and drives the community server over stdio. Do not open
+personal work in that window. It inspects Sculpture, changes uniform scale
+to 1.5, reinspects, renders and saves `sculpture-live.png/.blend` under
+`.output/blender/`. After looking at the window, press Enter in the terminal
+to stop the client/add-on and close the process. Result JSON must show scale
+`[1.5,1.5,1.5]`, `blender_exit: 0` and `socket_closed: true`.
+
+`get_scene_info` reads live state; the bounded adapter reads a saved inspection.
+`execute_blender_code` runs Python inside Blender and has much broader powers;
+the demo supplies reviewed code only. Telemetry/update checks are disabled;
+asset-generation tools are outside this exercise. The demo resets scale to a
+uniform value, so keep your separate proportion renders if using the extension.
+Tutors can run `uv run python blender_live.py --verify` for automatic closure;
+it still exercises real graphical Blender and needs a working display.
+
 ## 100-120: tutor review and project support
 
 Show your goal, focused diff, actual result, failure/recovery, reviewer request
@@ -446,8 +467,8 @@ or a defence.
 ## Week 12 preparation and optional connections
 
 The earlier Godot world, bridge and recording instructions are retained in
-[Godot preparation for Week 12](godot-week12-preparation.md). Godot is not a
-third Week 11 route. Week 12 provides first-time setup/orientation followed
+[Godot preparation for Week 12](godot-week12-preparation.md). The small 3D preview above belongs to Route B; the 2D world remains
+Week 12 preparation. Week 12 provides first-time setup/orientation followed
 by its bounded agent/check/revise/film sequence; pair if its baseline still
 fails after the allocated setup time.
 
@@ -461,18 +482,23 @@ removed by instructor decision; Week 10 retains handbook embeddings/retrieval.
 
 ## Sources and verification limits
 
-Setup documentation was checked through Context7 on 15 November 2026:
+Authentication/bridge setup documentation was checked through Context7 on 15 November 2026:
 [Blender command line](https://docs.blender.org/manual/en/latest/advanced/command_line/arguments.html),
 [Blender API](https://docs.blender.org/api/current/),
 [creating an OAuth App](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app),
 [Actions secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets),
 and [D1 migrations](https://developers.cloudflare.com/d1/reference/migrations/).
+Blender glTF export and Godot import/movie APIs were checked through Context7
+on 18 November 2026: [Blender glTF](https://docs.blender.org/manual/en/latest/addons/import_export/scene_gltf2.html),
+[Godot 3D import](https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_3d_scenes/index.html)
+and [command line](https://docs.godotengine.org/en/stable/tutorials/editor/command_line_tutorial.html).
 Use the [template README](https://github.com/sd5913/github-oauth-d1-template#readme)
 for tested versions and exact configuration. Blender is GPL-licensed; the
 community bridge/MCP SDK are MIT-licensed. Geometry is original course code;
 no downloaded assets are required.
 
-See [the verification record](verification-20261115.md) for actual Blender
+See [the asset-handoff evidence](asset-handoff-20261118.md) and
+[the earlier verification record](verification-20261115.md) for actual Blender
 commands and limits. Tests, headless renders, a live application bridge and
 a model choosing actions are different evidence. No model episode,
 student-account GitHub login or remote Cloudflare deployment is claimed by
