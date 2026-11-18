@@ -47,6 +47,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # The runner's EC2 mirror took 17 minutes for these packages; use Ubuntu's signed archive.
+          sudo sed -i -E 's|https?://[a-z0-9.-]*ec2.archive.ubuntu.com/ubuntu/?|https://archive.ubuntu.com/ubuntu/|g' /etc/apt/sources.list.d/ubuntu.sources
           sudo apt-get update -qq
           sudo apt-get install -y xvfb libgl1-mesa-dri libegl1 ffmpeg
           mkdir -p "$RUNNER_TEMP/pfad-godot"
@@ -71,7 +73,12 @@ jobs:
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/pfad-blender"
           cd "$RUNNER_TEMP/pfad-blender"
-          curl --fail --location --retry 3 -o blender-5.2.3-linux-x64.tar.xz https://download.blender.org/release/Blender5.2/blender-5.2.3-linux-x64.tar.xz
+          # The primary host can reject runner downloads; both copies must match the pin below.
+          if ! curl --fail --location --retry 3 --connect-timeout 20 --max-time 600 \
+              -o blender-5.2.3-linux-x64.tar.xz https://download.blender.org/release/Blender5.2/blender-5.2.3-linux-x64.tar.xz; then
+            curl --fail --location --retry 3 --connect-timeout 20 --max-time 600 \
+              -o blender-5.2.3-linux-x64.tar.xz https://ftp.nluug.nl/pub/graphics/blender/release/Blender5.2/blender-5.2.3-linux-x64.tar.xz
+          fi
           sha256sum --check <<'CHECKSUM'
           78486c018b4443efe5e75ab54c290ed8c15abafd249b862c2c9ce2530a918eec  blender-5.2.3-linux-x64.tar.xz
           CHECKSUM
