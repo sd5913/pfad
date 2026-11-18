@@ -45,11 +45,22 @@ the tutor if the change needs broader access than the agreed scope.
 
 ## Ask an agent to use Blender
 
+For **direct control of the open application**, first configure
+[Blender Lab MCP and Codex](README.md#connect-blender-lab-mcp-to-codex-before-class),
+then use the [live-edit prompt](README.md#35-55-let-the-agent-use-blender).
+Codex reads the current scene, chooses a tool action and checks a fresh
+application observation. Keep a reproducible source edit and an evidence
+note in the PR: changing live scene memory alone produces no source diff
+and does not save the `.blend` used by Godot. Save separate first/revised
+copies and retain the actual tool/result sequence.
+
+The following request is the **script route** when a live bridge is not
+available. Both routes use the same goal and proportion-review criterion.
 This is an **example request**, not a captured autonomous episode. Give it
 to the coding agent available in your own environment, or ask a partner to
 perform the same work and label that human-directed fallback. The agent can
-use terminal tools to run Blender; the optional live bridge is another route,
-not a prerequisite for operating the application.
+use terminal tools to run Blender; this route does not connect to the open
+Blender window.
 
 > From the PFAD repository root inspect `week11/blender_scene.py`,
 > `week11/blender_export.py` and `week11/asset_handoff.py` first. Then use
