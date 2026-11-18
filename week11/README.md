@@ -20,9 +20,9 @@ history serve other jobs.
 
 | Minutes | Route A: authenticated app | Route B: Blender into Godot |
 | --- | --- | --- |
-| 0-15 | Copy template; local checks and signed-out page | Check tools; render the baseline |
-| 15-35 | Trace identity/session/note; prepare own accounts | Inspect scene/Python, predict size; give a visual goal |
-| 35-55 | Evidence-first PR; a small new UI behavior | Agent edits, renders and inspects; review first result |
+| 0-15 | Copy template; local checks and signed-out page | Render/open baseline; check the MCP connection |
+| 15-35 | Trace identity/session/note; prepare own accounts | Inspect scene/Python and live state; predict size |
+| 35-55 | Evidence-first PR; a small new UI behavior | Codex edits through MCP and inspects the result |
 | 55-65 | Break | Break |
 | 65-85 | Secrets, deployment/sign-in or local fallback | Review request; agent revises/rerenders same PR |
 | 85-100 | Persistence, isolation, failure and recovery | Export same object; import/check/view in Godot |
@@ -58,28 +58,120 @@ cookies, client secrets or `.dev.vars` contents into an agent prompt.
   are substantial downloads. The small local render/export takes seconds.
   Windows/macOS are not rehearsed here. No dedicated
   GPU or downloaded assets are needed. `bpy` runs inside Blender's Python;
-  do not install it into uv's environment.
+  do not install it into uv's environment. For direct control of the open
+  application, configure [Blender Lab MCP and Codex](#connect-blender-lab-mcp-to-codex-before-class)
+  before class. The script/partner route below remains available without it.
 
 Use [the shared PR worksheet](agent-pr-workflow.md) throughout. Its concrete
 Blender reviewer request is a rehearsed scenario, not a transcript of a model
 choosing actions. Retain your own actual agent/partner evidence.
 
 For Route B use a personal PFAD fork/copy for your practice PR; do not target
-the course's repository. While [Week 11 PR #14](https://github.com/sd5913/pfad/pull/14)
-is unmerged, its supplied files are on `plan/week11-companion-activity`,
-not yet `2026`. On GitHub's **Fork** page include all branches (uncheck the
-option to copy only the default branch), then clone your fork's Week 11 branch:
+the course's repository. Week 11 is merged into `2026`. Include that branch
+when forking, then clone it from your personal fork:
 
 ```bash
-git clone --branch plan/week11-companion-activity https://github.com/YOUR-ACCOUNT/pfad.git pfad-week11
+git clone --branch 2026 https://github.com/YOUR-ACCOUNT/pfad.git pfad-week11
 cd pfad-week11
 ```
 
 Replace `YOUR-ACCOUNT` with your account; keep an existing course clone
-separate. The practice PR's base is your own fork's Week 11 branch. Check
+separate. The practice PR's base is your own fork's `2026` branch. Check
 `git remote -v` before pushing. This does not replace the group's required
-`sd5913`-owned project repository. After an authorised course merge, the
-instructor can direct you to `2026` instead.
+`sd5913`-owned project repository.
+
+### Connect Blender Lab MCP to Codex before class
+
+[Blender Lab's MCP guide](https://www.blender.org/lab/mcp-server/) describes
+an add-on inside Blender and a separate MCP server. Its Llama.cpp example is
+one client choice. **Codex can be the MCP client**: it discovers tools, asks
+them to inspect or change the running scene, and receives observations.
+The server uses Blender's Python API to carry out those requests.
+
+```text
+Codex <--- MCP over stdio ---> blender-mcp <--- local TCP ---> Blender add-on
+```
+
+Use the [Blender Lab project](https://projects.blender.org/lab/blender_mcp),
+not the similarly named third-party package in the optional appendix.
+The checked revision is `dbbf836ad4b1025f14a2b3b504c43903f39e0b04`:
+server package `blender-mcp` **1.0.2**, add-on **1.0.0**, requiring Blender
+**5.1 or later**. Have Git, uv and a local Codex installation available.
+First setup downloads the server and its dependencies; do it before the
+15-minute tutorial setup block. Codex/model access uses your own account.
+
+**1. Install and start the Blender add-on.** Open Blender's **Edit >
+Preferences > Get Extensions**. Enable **Allow Online Access** if prompted.
+In the repositories menu add the remote extension repository
+`https://lab.blender.org/`. Search that repository for **MCP**, install it,
+then find **MCP** under **Add-ons** and expand its preferences. Keep the
+bridge on **Host `127.0.0.1`**, **Port `9876`**. Enable online access in
+Preferences > System if Blender reports that it is disabled. Start **MCP
+Bridge Server** if it has not auto-started. The panel must say **Server is
+running**. Keep Blender open. These are the add-on's socket settings.
+
+**2. Register the server in Codex.** Run this single command in a terminal
+on the **same computer as Blender**. It uses uv to launch the pinned server;
+no separate Llama.cpp installation or model download is needed:
+
+```bash
+codex mcp add blender --env BLENDER_MCP_HOST=127.0.0.1 --env BLENDER_MCP_PORT=9876 -- uvx --from "git+https://projects.blender.org/lab/blender_mcp.git@dbbf836ad4b1025f14a2b3b504c43903f39e0b04#subdirectory=mcp" blender-mcp --transport stdio
+codex mcp list
+```
+
+`codex mcp list` should include `blender`. If that name already exists,
+inspect `codex mcp get blender` first and update the existing entry instead
+of installing a second bridge. The equivalent entry in
+`~/.codex/config.toml` is below; use **either** the command **or** the entry:
+
+```toml
+[mcp_servers.blender]
+command = "uvx"
+args = [
+  "--from",
+  "git+https://projects.blender.org/lab/blender_mcp.git@dbbf836ad4b1025f14a2b3b504c43903f39e0b04#subdirectory=mcp",
+  "blender-mcp", "--transport", "stdio",
+]
+env = { BLENDER_MCP_HOST = "127.0.0.1", BLENDER_MCP_PORT = "9876" }
+```
+
+If the Codex app cannot find `uvx`, replace `command` with its absolute
+executable path (`command -v uvx` on macOS/Linux, `where.exe uvx` on Windows).
+The installed server can also be used directly as the command with
+`args = ["--transport", "stdio"]`. The app must run it on the computer that
+can reach Blender. A remote/cloud Codex environment's `127.0.0.1` refers to
+that environment, not your laptop. Keep this exercise local.
+
+**3. Reopen the Codex session and check a read first.** In the CLI,
+`/mcp` shows connected servers and tools. Ask:
+
+> Use the Blender MCP tools to inspect the current scene. Report the scene
+> name and the named objects relevant to our task. Do not change anything.
+
+Expect a real `get_objects_summary` call and names matching Blender's
+Outliner. A listed server alone does not prove that its add-on is connected.
+Then ask for `get_screenshot_of_window_as_image` and compare its returned
+image with the open Blender window. The tool name may have a `blender`
+prefix in your client. A text claim without an actual tool call is not this
+check. Keep another agent's working scene untouched; use your own disposable
+course scene for the edit below.
+
+**If connection fails:** check that Blender is open, the Lab add-on is
+enabled, online access is allowed and its panel says running. Match the
+host/port on both sides. `--transport stdio` describes Codex's connection
+to the MCP process; `BLENDER_MCP_PORT` describes that process's connection
+to Blender. Do not pass `--url http://127.0.0.1:9876` to Codex: the add-on
+socket is not an HTTP MCP endpoint. If the port is already occupied, choose
+one free loopback port in both settings, rather than stopping an unrelated
+session. Restart the Codex client after configuration changes. Do not
+start the optional community bridge on the same port.
+
+When finished with your own session, save your work and use **Stop MCP
+Server** in the add-on preferences. Do not stop a bridge another agent is
+using. The [Codex MCP documentation](https://developers.openai.com/codex/extend/mcp)
+describes the client configuration; the Lab repository documents the
+add-on/server. No Blender preference or Codex setting needs to be committed
+to your course repository.
 
 ## Route A: GitHub sign-in and a private persistent note
 
@@ -328,11 +420,50 @@ Predict how a wider, shallower sculpture will look before requesting an edit.
 
 ### 35-55: let the agent use Blender
 
+**Direct MCP route.** Open the saved baseline
+`.output/blender/before/sculpture.blend` in your own disposable Blender
+window. Check that Codex sees **Sculpture**, **Floor**, the camera and light
+before allowing an edit. Opening a file replaces that window's current
+scene, so save any existing work first. Use this prompt from the PFAD
+`week11` directory:
+
+> Use the connected Blender Lab MCP tools to inspect Sculpture first.
+> Report its transform, dimensions, material and floor contact. Make it
+> wider and shallower: scale (2.0, 0.9375, 1.25), centre z = 1.25. Keep its
+> name, mesh, terracotta material, camera and light. Use the available scene
+> inspection tools and consult the Blender API docs when needed. Apply only
+> the requested change to the live object. Show a fresh screenshot or
+> render and inspect it before deciding whether to revise or stop.
+> Resolve output paths from this repository to absolute paths before
+> sending them to Blender. Save a new copy at
+> .output/blender/first/sculpture.blend and a fresh image in that folder.
+> Record actual tool calls, before/after values and the image observation
+> in week11-mcp-evidence.md. Also make the matching scale change in
+> blender_scene.py so the result can be rebuilt. Stop for review. Do not
+> reset the scene, delete other objects, fetch assets or merge anything.
+
+Expect dimensions `[4,1.875,2.5]`, centre z `1.25` and bottom z `0`.
+`get_objects_summary` and `get_object_detail_summary` inspect the live scene;
+`execute_blender_code` can apply the necessary `bpy` assignments when no
+more specific tool fits. Its code returns structured data by assigning a
+JSON-compatible dictionary to `result`. A screenshot tool returns the
+current application view; a render tool writes an image that the agent must
+open and inspect. The agent chooses the next action from those observations.
+MCP is the tool interface; Python still carries out the change in Blender.
+
+Review the source diff and the actual application result. A live edit alone
+does not change the Python source or save a `.blend`. Keep the reproducible
+source change and evidence note in your practice PR; leave binary outputs
+ignored. Do not rerun the unchanged baseline script over the edited live
+scene and mistake the reset for an agent result.
+
+**Script/partner route.** If MCP setup is unavailable, use the same goal via
+the existing background-Blender command below. It still operates Blender,
+but it does not establish a connection to the open application.
 Use the [actual Blender-use prompt](agent-pr-workflow.md#ask-an-agent-to-use-blender).
 The agent may inspect/edit the scene script, run Blender, inspect the saved
 JSON and PNG, and revise after observing the result. Keep the named Sculpture,
-material, camera and floor contact. A bridge is optional; CLI tool use lets
-the agent operate the real application too. Stop with a focused diff and
+material, camera and floor contact. Stop with a focused diff and
 actual render evidence. Do not attribute model decisions to a fixed script.
 
 For the first edit use x scale `1.6 * s`, y `0.75 * s`, z `s`. At `s=1.25`
@@ -360,6 +491,14 @@ Pass that request to the agent on the same branch/PR. At `s=1.25` expect
 scale `[1.625,0.9375,1.25]`, dimensions `[3.25,1.875,2.5]` and bottom z 0.
 Have it rerender under `.output/blender/revised`, inspect image/JSON and
 explain whether another revision is needed before stopping.
+
+With MCP, send the review to the same Codex session: reinspect the current
+object, set scale to `(1.625, 0.9375, 1.25)`, check the application result
+and save a new copy at the absolute path to
+`.output/blender/revised/sculpture.blend`. Update the source/evidence note
+and the same PR. A live scene, saved scene and reproducible script are
+separate states; check all three. If you use the script route instead,
+the following command rebuilds from the revised source.
 
 ```bash
 blender --background --factory-startup -noaudio --python-exit-code 1 --python blender_scene.py -- --scale 1.25 --output .output/blender/revised
@@ -432,6 +571,11 @@ the error before retrying. The test exports an isolated baseline, not your
 artwork; it cannot decide if your creative revision is good.
 
 ## Optional: inspect a live Blender bridge
+
+This appendix retains the **different community bridge** used by the earlier
+deterministic demo. For the instructor's direct Codex demo, use the
+[Blender Lab setup above](#connect-blender-lab-mcp-to-codex-before-class).
+The two packages/add-ons are not interchangeable.
 
 [MCP for Blender](https://github.com/ahujasid/mcp-for-blender), by Siddharth
 Ahuja, offers a broader third-party bridge. The supplied setup pins add-on
@@ -510,6 +654,17 @@ Use the [template README](https://github.com/sd5913/github-oauth-d1-template#rea
 for tested versions and exact configuration. Blender is GPL-licensed; the
 community bridge/MCP SDK are MIT-licensed. Geometry is original course code;
 no downloaded assets are required.
+
+The Blender Lab source and Codex configuration were checked on **19 November
+2026**: [Lab source](https://projects.blender.org/lab/blender_mcp),
+[Lab MCP guide](https://www.blender.org/lab/mcp-server/) and
+[Codex MCP](https://developers.openai.com/codex/extend/mcp).
+Lab server 1.0.2 and add-on 1.0.0 are GPL-3.0-or-later; the separate community
+bridge retains its own MIT licence. The pinned uv launch was checked, and
+Codex's configured Lab tools successfully inspected a live Blender 5.3.0
+scene and returned its window image. This read-only connection check did not
+alter the scene another agent was using. It does not claim a completed
+Sculpture-edit episode, student installation or Windows/macOS rehearsal.
 
 See [the asset-handoff evidence](asset-handoff-20261118.md) and
 [the earlier verification record](verification-20261115.md) for actual Blender
