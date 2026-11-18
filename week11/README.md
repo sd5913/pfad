@@ -179,12 +179,21 @@ git diff --check
 git diff
 ```
 
-Have a partner check the focused diff and visible behavior. Existing server
-tests do not prove the new UI behavior: add focused behavior coverage if your
-copy has a UI test harness, otherwise retain actual browser-check evidence
-and its limits. Record real sign-in or labelled local fixture use. If setup
-blocks deployment, finish this local evidence/revision route and mark live
-sign-in/deployment untested. Keep credentials out of the PR.
+Have a partner check the focused diff. For visible Discard acceptance, use
+your own real sign-in or a prepared partner machine already signed in and
+running the proposed revision. Take turns typing fictional text, discarding,
+saving, editing and discarding again; check browser Network for no discard
+request, then record the observations in the same PR. The partner keeps
+control of their account/session; do not share passwords, cookies or secrets.
+Existing server tests do not prove this UI behavior, and the template has no
+browser fixture-login route. Add focused behavior coverage if your copy has
+a UI test harness; distinguish that from the actual browser observations.
+
+If neither your own sign-in nor a prepared session is available, inspect the
+code/diff, run the local checks and revise the same PR, marking **Discard UI
+acceptance UNTESTED**, along with any unavailable live sign-in/deployment
+checks. Ask the tutor for a prepared machine, or choose the prepared Blender
+route if available. Local backend fixtures cannot complete the UI check.
 
 ### 55-85: break, repository secrets and deployment
 
@@ -257,9 +266,10 @@ npm run test:local
 This needs no `.dev.vars` or cloud credentials. It starts the built Worker
 with an isolated local D1 database, uses fixture
 signed sessions, checks two-user isolation and restarts against the same
-store. It demonstrates local runtime/persistence behavior, **not GitHub
-sign-in or remote Cloudflare acceptance**. Its fixtures are not credentials
-for your deployed app.
+store, then shuts down. It demonstrates local runtime/persistence behavior,
+**not GitHub sign-in, NoteEditor/Discard UI behavior or remote Cloudflare
+acceptance**. It supplies no browser fixture-login route; its fixtures are
+not credentials for your deployed app.
 
 If sign-in fails, compare callback, `APP_URL` and local/deployed origin;
 do not remove state/cookie checks. If a note disappears after restart, verify
@@ -269,8 +279,12 @@ secret **names**, not values; correct configuration, redeploy and rerun the
 affected check. Do not delete databases as routine recovery.
 
 Without credentials, run the local checks, inspect the mocked OAuth tests,
-and make/review your UI change. Pair on a prepared deployment if available.
-Record exactly what you observed and which live checks remain open.
+and make/review your UI change on the same PR. Use an already signed-in
+prepared partner machine running that revision for the visible check above,
+without sharing credentials. If no prepared session exists, mark **Discard
+UI acceptance UNTESTED**, retain the useful code/diff/test evidence and ask
+the tutor, or choose a prepared Blender route if available. Record exactly
+what you observed and which live checks remain open.
 
 ## Route B: a sculpture made with an agent, then used in Godot
 

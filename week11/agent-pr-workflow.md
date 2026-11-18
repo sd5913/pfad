@@ -215,16 +215,31 @@ After reviewing that first PR, request a concrete new behavior:
 > the last successfully loaded/saved body, clears stale feedback and sends no
 > network request. Disable it while saving or when text is unchanged. Keep
 > sessions, owner-scoped server queries and the save contract unchanged.
-> Revise this same branch/PR. Run checks, inspect the UI and stop with a
-> focused diff and actual evidence. Do not read secrets, deploy or merge.
+> Revise this same branch/PR. Run checks and inspect the UI when an
+> authenticated browser session is available; otherwise mark UI acceptance
+> untested. Stop with a focused diff and actual evidence. Do not read secrets,
+> deploy or merge.
 
 Check: type/discard returns to the loaded body; save/edit/discard returns
 to the last successful save; a failed save does not become the discard target;
-and no discard POST appears in browser Network. Use a labelled local fixture
-or your own real sign-in; record which. Existing server tests do not prove
-the new button works. Add focused UI coverage if a harness is available, or
-retain actual browser evidence with that testing gap explicit. Then complete
-the README's persistence/two-account checks when credentials are available.
+and no discard POST appears in browser Network. Use your own real sign-in,
+or a prepared partner machine already signed in and running this proposed
+revision. Take turns actually editing, discarding, saving and editing/discarding
+again with fictional text; review those observations on the same PR. The
+partner keeps control of their account/session. Do not share passwords,
+cookies or secrets. Record whose prepared machine/session was used without
+including private account data.
+
+The template has no browser fixture-login route. `npm run test:local` sends
+HTTP API requests with fixture sessions and shuts down; it does not display
+NoteEditor or validate the Discard button. Existing server tests do not prove
+the new UI works. Add focused UI coverage if a harness is available, and
+record actual browser observations separately. If no prepared session or
+own sign-in is available, complete the useful code/diff/local-test work and
+same-PR revision, but mark **Discard UI acceptance UNTESTED**. Ask the tutor
+for a prepared machine, or choose the prepared Blender route if available.
+Complete the README's persistence/two-account checks when credentials are
+available; do not report backend-fixture results as visible UI acceptance.
 
 ## A compact evidence note
 
