@@ -79,16 +79,30 @@ def main():
         if not options.verify:
             input("Inspect Sculpture in Blender, then press Enter here to close this disposable session. ")
     finally:
-        if session:
-            session.close()
-        stop.touch()
+        body_failed = sys.exc_info()[0] is not None
+        cleanup_error = None
         try:
-            application.wait(timeout=15)
-        except subprocess.TimeoutExpired:
-            application.terminate()
-            application.wait(timeout=5)
-        log.close()
-        (OUTPUT / "blender-live-trace.json").write_text(json.dumps(trace, indent=2))
+            if session:
+                session.close()
+        except Exception as error:
+            print(f"Bridge cleanup failed: {error}", file=sys.stderr)
+            cleanup_error = error
+        try:
+            stop.touch()
+            try:
+                application.wait(timeout=15)
+            except subprocess.TimeoutExpired:
+                application.terminate()
+                application.wait(timeout=5)
+        except Exception as error:
+            print(f"Blender cleanup failed: {error}", file=sys.stderr)
+            if cleanup_error is None:
+                cleanup_error = error
+        finally:
+            log.close()
+            (OUTPUT / "blender-live-trace.json").write_text(json.dumps(trace, indent=2))
+        if cleanup_error is not None and not body_failed:
+            raise cleanup_error
     with socket.socket() as probe:
         closed = probe.connect_ex(("127.0.0.1", port)) != 0
     result = {**json.loads(result_path.read_text()), "tools":tools, "render":str(render),
