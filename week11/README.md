@@ -114,6 +114,16 @@ running**. Keep Blender open. These are the add-on's socket settings.
 on the **same computer as Blender**. It uses uv to launch the pinned server;
 no separate Llama.cpp installation or model download is needed:
 
+First download and check that server outside Codex, so its first connection
+does not have to wait for Git/package installation:
+
+```bash
+uvx --from "git+https://projects.blender.org/lab/blender_mcp.git@dbbf836ad4b1025f14a2b3b504c43903f39e0b04#subdirectory=mcp" blender-mcp --help
+```
+
+Expect the **MCP server for Blender** usage and `--transport` option. This
+checks the launcher; it does not connect to Blender yet. Then register it:
+
 ```bash
 codex mcp add blender --env BLENDER_MCP_HOST=127.0.0.1 --env BLENDER_MCP_PORT=9876 -- uvx --from "git+https://projects.blender.org/lab/blender_mcp.git@dbbf836ad4b1025f14a2b3b504c43903f39e0b04#subdirectory=mcp" blender-mcp --transport stdio
 codex mcp list
