@@ -111,5 +111,6 @@ can show people. Treat them accordingly.
 | 08 | [Camera interactions — OpenCV, MediaPipe and teamwork (29 October 2026)](week08/README.md) |
 | 09 | [Connected interactions — Thu 5 Nov 2026](week09/README.md) |
 | 10 | [Persistent models and a talking handbook](week10/README.md) |
+| 11 | [Agents, tools and evidence - Blender and authenticated apps (19 November 2026)](week11/README.md) |
 
 More lands each week.
