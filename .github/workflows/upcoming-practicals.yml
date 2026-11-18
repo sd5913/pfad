@@ -74,9 +74,9 @@ jobs:
           mkdir -p "$RUNNER_TEMP/pfad-blender"
           cd "$RUNNER_TEMP/pfad-blender"
           # The primary host can reject runner downloads; both copies must match the pin below.
-          if ! curl --fail --location --retry 3 --connect-timeout 20 --max-time 600 \
+          if ! timeout 600s curl --fail --location --retry 3 --connect-timeout 20 --max-time 600 \
               -o blender-5.2.3-linux-x64.tar.xz https://download.blender.org/release/Blender5.2/blender-5.2.3-linux-x64.tar.xz; then
-            curl --fail --location --retry 3 --connect-timeout 20 --max-time 600 \
+            timeout 600s curl --fail --location --retry 3 --connect-timeout 20 --max-time 600 \
               -o blender-5.2.3-linux-x64.tar.xz https://ftp.nluug.nl/pub/graphics/blender/release/Blender5.2/blender-5.2.3-linux-x64.tar.xz
           fi
           sha256sum --check <<'CHECKSUM'
