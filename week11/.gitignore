@@ -1,0 +1,8 @@
+.tools/
+.output/
+.cache/
+.cache-npm/
+.godot/
+godot/.godot/
+godot/probe.tscn
+__pycache__/

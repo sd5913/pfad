@@ -47,6 +47,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # The runner's EC2 mirror took 17 minutes for these packages; use Ubuntu's signed archive.
+          sudo sed -i -E 's|https?://[a-z0-9.-]*ec2.archive.ubuntu.com/ubuntu/?|https://archive.ubuntu.com/ubuntu/|g' /etc/apt/sources.list.d/ubuntu.sources
           sudo apt-get update -qq
           sudo apt-get install -y xvfb libgl1-mesa-dri libegl1 ffmpeg
           mkdir -p "$RUNNER_TEMP/pfad-godot"
@@ -71,7 +73,12 @@ jobs:
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/pfad-blender"
           cd "$RUNNER_TEMP/pfad-blender"
-          curl --fail --location --retry 3 -o blender-5.2.3-linux-x64.tar.xz https://download.blender.org/release/Blender5.2/blender-5.2.3-linux-x64.tar.xz
+          # The primary host can reject runner downloads; both copies must match the pin below.
+          if ! timeout 600s curl --fail --location --retry 3 --connect-timeout 20 --max-time 600 \
+              -o blender-5.2.3-linux-x64.tar.xz https://download.blender.org/release/Blender5.2/blender-5.2.3-linux-x64.tar.xz; then
+            timeout 600s curl --fail --location --retry 3 --connect-timeout 20 --max-time 600 \
+              -o blender-5.2.3-linux-x64.tar.xz https://ftp.nluug.nl/pub/graphics/blender/release/Blender5.2/blender-5.2.3-linux-x64.tar.xz
+          fi
           sha256sum --check <<'CHECKSUM'
           78486c018b4443efe5e75ab54c290ed8c15abafd249b862c2c9ce2530a918eec  blender-5.2.3-linux-x64.tar.xz
           CHECKSUM
@@ -126,6 +133,16 @@ jobs:
           include-hidden-files: true
           if-no-files-found: warn
           retention-days: 7
+      - name: Install the pinned local D1 demonstration
+        if: ${{ hashFiles('week10/d1/package-lock.json') != '' }}
+        working-directory: week10/d1
+        run: |
+          npm ci
+          uv sync --locked
+      - name: Verify the real Python Worker and local D1 restart
+        if: ${{ hashFiles('week10/d1/check_d1.py') != '' }}
+        working-directory: week10/d1
+        run: python check_d1.py
       - name: Test browser mapping when present
         if: ${{ hashFiles('week11/browser/control.test.cjs') != '' }}
         run: node --test week11/browser/control.test.cjs
@@ -139,7 +156,8 @@ jobs:
         if: ${{ hashFiles('week09/check_browser.cjs') != '' }}
         run: |
           npm install --prefix "$RUNNER_TEMP/week09-browser" --no-save --package-lock=false playwright@1.64.1
-          node "$RUNNER_TEMP/week09-browser/node_modules/playwright/cli.js" install --with-deps chromium
+          # Ubuntu 24.04 runners already provide Chromium's system libraries.
+          node "$RUNNER_TEMP/week09-browser/node_modules/playwright/cli.js" install chromium
           echo "NODE_PATH=$RUNNER_TEMP/week09-browser/node_modules" >> "$GITHUB_ENV"
       - name: Verify two real browsers, stopped server and recovery on port 8009
         if: ${{ hashFiles('week09/check_browser.cjs') != '' }}
