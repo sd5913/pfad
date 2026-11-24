@@ -64,7 +64,7 @@ now, know that they exist and that switching between them is free.
 
 ## Reference
 
-The [Week 12 team review and AMA](week12/README.md) is the current lesson.
+The [Week 12 course review and group AMA](week12/README.md) is the current lesson.
 The [Week 9 connected interactions](week09/README.md) tutorial, [Week 8 camera interactions](week08/README.md) and
 [Week 7 interaction development](week07/README.md) remain available, alongside
 [sound, music and speech](week06/README.md) and
