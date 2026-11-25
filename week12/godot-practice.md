@@ -1,6 +1,6 @@
 # Optional Godot practical · build, check and film a tiny world
 
-**Optional self-study or prepared-pair route (120 minutes).** For Thursday’s class, follow the [team review and AMA](README.md). The real model
+**Optional self-study or prepared-pair route (120 minutes).** For Thursday’s tutorial, follow the [group-project delivery route](README.md). The real model
 adaptation, actual graphical film and Linux operator bootstrap have been
 verified on 29 October; see [evidence/provenance.json](evidence/provenance.json)
 and [verification record](verification.md). A tutor must still preflight the

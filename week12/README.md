@@ -1,24 +1,60 @@
-# Week 12 · Course concepts and your delivery candidate
+# Week 12 · Course review and group-project delivery
 
-**Thursday 26 November 2026, Hong Kong.** The lecture reviews the computing concepts from Weeks 1–11 and ends with a group AMA. This separate two-hour tutorial uses your existing team project and scheduled tutor meeting. Bring the candidate you have, a playtest observation and one question. A saved build, screenshots or a sketch of the last working interaction will do if the network or demo fails. Say which parts someone actually tried.
+**Thursday 26 November 2026, Hong Kong.** The lecture reviews the computing concepts from Weeks 1–11, allows time for eSFQ and ends with an open AMA about the subject material. This separate two-hour tutorial is primarily time to move your group project forward. Focus on delivery: a deployed web app, or automated builds for your project's target platforms. Deployment gives you a version to try and refine over the coming week; it does not mean the project is finished.
+
+By the end, another person should be able to find your URL or build, try one interaction, and give you an observation that informs your next change. Bring your existing team repository, its run instructions, the candidate you have and your main blocker. Use the project's existing tools and accounts; no new engine or model account is needed. If the network or demo fails, use a saved build, screenshots or a sketch of the last working interaction and record which live check remains. The concept prompts and Godot exercise below are light, optional references.
 
 ## Two hours with your team
 
 | Minutes | What to do |
 | --- | --- |
-| 0–15 | Take turns as visitor and observer. The visitor tries the first interaction with only the README or the team’s usual invitation. Where do they hesitate? If the candidate is offline, walk through the last saved version and identify what still needs a live check. |
-| 15–35 | Follow one input to its visible or audible response. Pick two concepts below and answer their prediction prompts. Then locate the corresponding rule, data or boundary in your own project. |
-| 35–55 | Compare the November 19 playtest observation with the candidate. Try the smallest change that might resolve it, or describe the check that would distinguish two possible causes. |
+| 0–15 | Open the team repository and run the last working candidate using its README. Choose one interaction for a visitor to try and the delivery path that suits your project. Identify the missing URL, package or setup step. |
+| 15–35 | Work on that delivery path: deploy the web app, or inspect and run the existing GitHub Actions build workflow. Share the URL or successful run with your team. If blocked, keep the last working version and identify the first failing step. |
+| 35–55 | Try the delivered version on an intended device, following only the README. Compare it with the November 19 playtest observation. Fix one delivery or interaction problem, then deploy/build and check again. |
 | 55–65 | Break. |
-| 65–85 | Swap projects with another group. Ask them to try one ordinary action and one relevant failure or recovery. Explain who owns the state, what should persist and what result they should see. |
-| 85–100 | Group AMA. Take three minutes to prepare a question, ten for questions and follow-ups, and two to choose a next check. Use the short prompt below. |
+| 65–85 | Swap URLs or builds with another group. Let the visitor find the starting point without your explanation. Try one ordinary action and one relevant failure or recovery. Observe what they actually do and distinguish a delivery problem from an interaction problem. |
+| 85–100 | Use that observation to make one small improvement or investigate the main blocker. Recheck the result. Update the README's access instructions and limitations, and choose the next change for the coming week. |
 | 100–120 | Scheduled tutor and project support. Show the usable increment, evidence and main blocker. Record the feedback, next goal and owner in the team’s existing progress record. Finish at minute 120. |
 
-**Group prompt** — “Our visitor tries ___. We saw ___. Should we change ___ or ___, and what would tell us?” One spokesperson asks, another teammate describes the evidence. With no Wi-Fi, write the question on paper or say it aloud, sketch the before/after, and pass it to the next group. If your team is still getting started, use the smallest interaction you can demonstrate and ask what to cut.
+Keep your allocated tutor meeting even if it falls earlier in the session; move the work blocks around it. Show the last working increment and the first failing step if delivery is blocked. If your team is still getting started, deliver the smallest interaction you can demonstrate and ask the tutor what to cut. Today's work adds no separate mark or upload.
 
-## Which concept explains your result?
+## Choose a delivery path
 
-Answer the question for the class example first, then ask what in your candidate behaves the same way. Discuss it from a sketch or an observed result. Each link leads to the original exercise and its run instructions.
+### A · A web app someone can open
+
+Use your project's existing deployment setup. The [Week 11 authenticated-app route](../week11/README.md) revisits the difference between local and deployed configuration. Open the public URL in a fresh browser session or on another device. Does the page load, and does the intended interaction work? If it uses a backend, check the deployed API, database, login callback and configuration too. A page loading is not evidence that saving or signing in works. Keep credentials in the host's secret settings, outside the repository.
+
+Inspect the first failed deployment step or browser/network error before changing code. Make one focused change, deploy again and repeat the same check. If the host or Wi-Fi is unavailable, test the last saved local version using the README and record that public access still needs verification.
+
+### B · GitHub Actions builds people can download
+
+Start with your existing workflow in `.github/workflows/`. Identify its trigger, build/export command, target platforms and artifact-upload step. For Godot teams, compare the course [game template's build workflow](https://github.com/sd5913/godot-game-template/blob/f4e774ce11f0d9e231cb9be229490530cd6ef0fb/.github/workflows/build.yml), which exports Web, Windows and Linux. Choose the platforms appropriate to your project; every platform and app-store publication are not requirements. The [Week 8 teamwork guide](../week08/teamwork.md) explains the shared delivery workflow.
+
+Run your project's documented trigger, open **Actions**, select the run for your commit and inspect each relevant job. A green workflow needs a downloadable result: find **Artifacts**, download the intended package, extract it and launch it on a supported device. GitHub artifact downloads may need sign-in and expire. Link the successful run and explain access and launch steps in the README. Use the project's established release channel if it already has one.
+
+If a job fails, inspect its first meaningful error and the build/export configuration; fix the smallest cause and rerun. If no suitable device or download is available, inspect the job and package contents, try the existing local build and record the missing device check. CI success alone does not establish that the delivered experience works. Keep the last known working build while you iterate.
+
+An installation or another delivery target agreed with your tutor remains valid. Make its setup reproducible and test it with a visitor using the equipment you have.
+
+### Examples from class
+
+These projects are in development, not model answers. Their pages and successful build artifacts were checked on 25 November; links and artifact availability can change.
+
+| Project | Delivery to inspect | What to notice |
+| --- | --- | --- |
+| BothPls | [Web app](https://the-aliien-repo-oqpi.vercel.app) · [source](https://github.com/sd5913/The-Aliien-Repo) | A URL is a direct invitation to try the mobile web interface. Check the interaction separately from page access. |
+| Pixel Paws | [Web game](https://sd5913.github.io/Pixel-Paws/) · [successful build run](https://github.com/sd5913/Pixel-Paws/actions/runs/45406859556) | The run provides web and Android debug packages. Its release job was skipped; artifacts are not a published release. |
+| Monster Staff Access | [Windows build run](https://github.com/sd5913/ae4pa/actions/runs/45606353689) · [source](https://github.com/sd5913/ae4pa) | Download, extract and try the package on Windows. Package presence does not establish complete gameplay or save/reload behavior. |
+
+### Deliver → try → observe → refine
+
+Give a visitor the URL or build and the README. Predict what the chosen interaction should do, then watch without coaching. Record the version/commit, device, action, expected result and actual observation in your existing shared progress record. Pick one small change, name its owner and repeat the check on the next delivery. Keep the README clear about what works and what remains unfinished. Use this loop over the next week rather than waiting for a perfect version before sharing.
+
+**Next Thursday, 3 December: quiz at 10:30 in TU103, followed by the final group-project review.** Bring the usable increment, test/playtest evidence and main blocker. There are only three days from that review to the final repository deadline: **Sunday 6 December 2026, 23:59 HKT**. Follow Canvas for the existing submission instructions.
+
+## Optional · which concept explains your result?
+
+If a concept would help explain your project's behavior, spend up to ten minutes on one prompt, then return to the project. Answer for the class example first and ask what in your candidate behaves the same way. Discuss it from a sketch or an observed result. Each link leads to the original exercise and its run instructions.
 
 | Week and concept | Prediction to discuss |
 | --- | --- |
@@ -46,4 +82,4 @@ The published [group-project brief](../assignments/group-project.md) describes T
 
 The [recorded model episode](model-episode.json) shows speed 125 collecting two lights by tick 180. After observing the failure, the model chose 275; the unchanged engine check reached three lights and the exit at tick 166, and edits stopped. The [four-second film](evidence/model-selected-world.mp4) was captured later by deterministic replay of that final source. Compare the [provenance](evidence/provenance.json) with the [ending still](evidence/frame-end.png). What can the film show about the visitor’s view that the checker cannot?
 
-The [optional Godot practical](godot-practice.md) retains setup, commands and the prepared-partner route for anyone who wants to reproduce the example. Thursday’s team review needs no engine, model account or installation.
+The [optional Godot practical](godot-practice.md) retains setup, commands and the prepared-partner route for anyone who wants to reproduce the example later. It is a longer self-study resource, not today's required tutorial. You can simply inspect the film and trace; today's project work needs no new engine or model account.
