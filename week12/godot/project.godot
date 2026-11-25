@@ -1,0 +1,13 @@
+config_version=5
+
+[application]
+config/name="Three Lights / Week 12"
+run/main_scene="res://world.tscn"
+
+[display]
+window/size/viewport_width=960
+window/size/viewport_height=540
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.08, 0.16, 0.19, 1)

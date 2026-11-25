@@ -1,0 +1,155 @@
+{
+  "kind": "recorded model/tool episode; read-only replay, not a new model run or a film",
+  "provenance": {
+    "client": "authorized Codex CLI tool session",
+    "model": "GPT-6 (assistant identity reported by runtime; exact backend model ID not exposed)",
+    "local_date": "2026-10-29",
+    "timezone": "Asia/Hong_Kong",
+    "raw_timestamp_timezone": "UTC; 2026-10-28T16:xx is 29 October HKT",
+    "engine": "4.7.2.stable.arch_linux.ed1daf0bf",
+    "starter_pfad_commit": "3bbb871d1ba0583c8a2e0391aa286740f4896acb",
+    "recording_helper": "one requested action per call; no retry, repair choice or agent loop",
+    "sanitization": "Only machine-specific Python/project paths replaced; action arguments, reasons, values and engine observations preserved.",
+    "checker_limit": "Recorded checks used the original W11 checker. Current W12 checker adds actual premature-exit probes and stop-after-win tests; these were not part of the recorded model observation.",
+    "private_source_hashes": [
+      {
+        "path": "world.py",
+        "sha256": "467ec53fe4f2dc2619f7d89e4701f60bbf83d1b00841c39d6c2aa8152c7a8656"
+      },
+      {
+        "path": "godot/project.godot",
+        "sha256": "bf037fe27e209185c2d53163704ab9e074237956d2abc4bac3c5ca793267704d"
+      },
+      {
+        "path": "godot/world.gd",
+        "sha256": "1adcf233c9068fc429a4d38322cac27d2102975d3278b8c3caf29c9e704c300f"
+      },
+      {
+        "path": "godot/world.tscn",
+        "sha256": "3a6aad56395add3eccc3e5116f34f5a144becc894bb44976393543491567bfb3"
+      },
+      {
+        "path": "godot/check_world.gd",
+        "sha256": "c9e0da91ab4f7b3460f5d85fd044ea9aad18b272f323f51dc7e4c034d7c0bda1"
+      },
+      {
+        "path": "godot/world.json",
+        "sha256": "070dc0b927da0e4fa5aa9bcffcc9163cfd04c47a5f5152e3c7c98f6d988fc8a6"
+      }
+    ]
+  },
+  "initial_config": {
+    "speed": 125,
+    "pickup_radius": 24,
+    "exit_x": 860
+  },
+  "final_config": {
+    "speed": 275,
+    "pickup_radius": 24,
+    "exit_x": 860
+  },
+  "gate": {
+    "model_adaptation_observed": true,
+    "clip_verified": false,
+    "graphical_bootstrap_timed": false,
+    "full_week12_gate": "incomplete"
+  },
+  "records": [
+    {
+      "time": "2026-10-28T16:46:54.403058+00:00",
+      "step": "inspect",
+      "model_selected_reason": "Inspect the supplied world before deciding which check or edit is needed.",
+      "command": [
+        "python",
+        "world.py",
+        "inspect"
+      ],
+      "returncode": 0,
+      "stdout": "{\n  \"project\": \"<course-project>/godot\",\n  \"scene\": \"World (Node2D)\",\n  \"config\": {\n    \"speed\": 125,\n    \"pickup_radius\": 24,\n    \"exit_x\": 860\n  },\n  \"pickups\": [\n    240,\n    420,\n    600\n  ],\n  \"player_start\": [\n    80,\n    300\n  ],\n  \"file_state_only\": true\n}\n",
+      "stderr": ""
+    },
+    {
+      "time": "2026-10-28T16:47:03.369091+00:00",
+      "step": "baseline-check",
+      "model_selected_reason": "The file shows speed125 and a distant exit, but file inspection is insufficient to judge behavior. Run the real 180-tick Godot check before changing anything.",
+      "command": [
+        "python",
+        "world.py",
+        "check"
+      ],
+      "returncode": 1,
+      "stdout": "{\n  \"returncode\": 1,\n  \"stdout\": \"Godot Engine v4.7.2.stable.arch_linux.ed1daf0bf (2026-08-17 01:18:38 UTC) - https://godotengine.org\\n\\nWORLD_CHECK {\\\"collected\\\":2,\\\"engine\\\":\\\"4.7.2-stable (arch_linux)\\\",\\\"exit_locked_initially\\\":true,\\\"passed\\\":false,\\\"player_x\\\":455.000732421875,\\\"speed\\\":125.0,\\\"ticks\\\":180,\\\"won_by_180_frames\\\":false}\\n\",\n  \"stderr\": \"\",\n  \"checks\": {\n    \"collected\": 2,\n    \"engine\": \"4.7.2-stable (arch_linux)\",\n    \"exit_locked_initially\": true,\n    \"passed\": false,\n    \"player_x\": 455.000732421875,\n    \"speed\": 125.0,\n    \"ticks\": 180,\n    \"won_by_180_frames\": false\n  },\n  \"passed\": false\n}\n",
+      "stderr": ""
+    },
+    {
+      "time": "2026-10-28T16:47:15.070325+00:00",
+      "step": "adapt-speed",
+      "model_selected_reason": "The failed check reached x455 after180ticks and collected only2lights. Movement is375units over3seconds; reaching the exit threshold near840 from80 needs roughly254units per second. Choose speed275 within60..480, leaving pickup radius, exit and checker unchanged.",
+      "command": [
+        "python",
+        "world.py",
+        "set",
+        "speed",
+        "275"
+      ],
+      "returncode": 0,
+      "stdout": "{\n  \"speed\": 275.0,\n  \"pickup_radius\": 24,\n  \"exit_x\": 860\n}\n",
+      "stderr": ""
+    },
+    {
+      "time": "2026-10-28T16:47:22.399917+00:00",
+      "step": "verify-revision",
+      "model_selected_reason": "Verify the model-selected speed275 against the unchanged real-engine checks. A configuration write alone does not show that the player collects all3lights and reaches the exit in time.",
+      "command": [
+        "python",
+        "world.py",
+        "check"
+      ],
+      "returncode": 0,
+      "stdout": "{\n  \"returncode\": 0,\n  \"stdout\": \"Godot Engine v4.7.2.stable.arch_linux.ed1daf0bf (2026-08-17 01:18:38 UTC) - https://godotengine.org\\n\\nWORLD_CHECK {\\\"collected\\\":3,\\\"engine\\\":\\\"4.7.2-stable (arch_linux)\\\",\\\"exit_locked_initially\\\":true,\\\"passed\\\":true,\\\"player_x\\\":840.832336425781,\\\"speed\\\":275.0,\\\"ticks\\\":166,\\\"won_by_180_frames\\\":true}\\n\",\n  \"stderr\": \"\",\n  \"checks\": {\n    \"collected\": 3,\n    \"engine\": \"4.7.2-stable (arch_linux)\",\n    \"exit_locked_initially\": true,\n    \"passed\": true,\n    \"player_x\": 840.832336425781,\n    \"speed\": 275.0,\n    \"ticks\": 166,\n    \"won_by_180_frames\": true\n  },\n  \"passed\": true\n}\n",
+      "stderr": ""
+    },
+    {
+      "time": "2026-10-28T16:48:02.432492+00:00",
+      "step": "capture-prerequisite",
+      "model_selected_reason": "Check display transport availability before attempting film capture; do not repeat an engine crash when the host blocks the prerequisite.",
+      "result": {
+        "allowed": true,
+        "meaning": "Socket creation available; no display connection or rendering was attempted."
+      }
+    },
+    {
+      "time": "2026-10-28T16:48:02.432619+00:00",
+      "step": "stop",
+      "model_selected_reason": "The unchanged real Godot4.7.2 check passes after speed125 to275:3lights and exit reached at166ticks. Stop scene edits. Capture requires a display socket denied by this host, so full build/test/film gate remains incomplete.",
+      "scene_change": {
+        "speed": {
+          "before": 125,
+          "after": 275
+        }
+      },
+      "checks_unchanged": true,
+      "clip_verified": false,
+      "full_week12_gate": "incomplete"
+    },
+    {
+      "time": "2026-10-28T16:48:26.412226+00:00",
+      "step": "display-transport-observation",
+      "model_selected_reason": "Unix socket creation succeeded; check the actual current Wayland transport to distinguish creation from display access.",
+      "result": {
+        "connected": false,
+        "exception": "PermissionError",
+        "errno": 1,
+        "message": "[Errno 1] Operation not permitted"
+      }
+    }
+  ],
+  "later_verification": {
+    "date": "2026-10-29",
+    "evidence": "evidence/provenance.json",
+    "clip": "evidence/model-selected-world.mp4",
+    "scope": "Later deterministic graphical capture of exact final source selected in the recorded model episode, not new model decisions. Original gate/records describe their own earlier moment and are preserved.",
+    "graphical_capture_verified": true,
+    "bootstrap_operator_feasibility_verified": true
+  }
+}

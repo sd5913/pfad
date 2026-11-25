@@ -1,0 +1,16 @@
+{
+  "scope": "Actual original passing model-observed check; declared path-only sanitization. Current stronger probes are separate.",
+  "record": {
+    "time": "2026-10-28T16:47:22.399917+00:00",
+    "step": "verify-revision",
+    "model_selected_reason": "Verify the model-selected speed275 against the unchanged real-engine checks. A configuration write alone does not show that the player collects all3lights and reaches the exit in time.",
+    "command": [
+      "python",
+      "world.py",
+      "check"
+    ],
+    "returncode": 0,
+    "stdout": "{\n  \"returncode\": 0,\n  \"stdout\": \"Godot Engine v4.7.2.stable.arch_linux.ed1daf0bf (2026-08-17 01:18:38 UTC) - https://godotengine.org\\n\\nWORLD_CHECK {\\\"collected\\\":3,\\\"engine\\\":\\\"4.7.2-stable (arch_linux)\\\",\\\"exit_locked_initially\\\":true,\\\"passed\\\":true,\\\"player_x\\\":840.832336425781,\\\"speed\\\":275.0,\\\"ticks\\\":166,\\\"won_by_180_frames\\\":true}\\n\",\n  \"stderr\": \"\",\n  \"checks\": {\n    \"collected\": 3,\n    \"engine\": \"4.7.2-stable (arch_linux)\",\n    \"exit_locked_initially\": true,\n    \"passed\": true,\n    \"player_x\": 840.832336425781,\n    \"speed\": 275.0,\n    \"ticks\": 166,\n    \"won_by_180_frames\": true\n  },\n  \"passed\": true\n}\n",
+    "stderr": ""
+  }
+}

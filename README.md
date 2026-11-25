@@ -18,7 +18,7 @@ runs, so expect it to grow week by week — `git pull` before each class.
 3. **Read [`assignments/01-why-are-we-here.md`](assignments/01-why-are-we-here.md).**
    Your first assignment is due at the end of week 2. Before you submit, run
    [the check](assignments/check.py) inside your repo — it tells you what is missing.
-4. **For the current lesson, go to [Week 9: connected interactions](week09/README.md).**
+4. **For the current lesson, go to [Week 12: course review and group-project delivery](week12/README.md).**
    The [weekly content index](#weekly-content) links to the same material.
 
 ```bash
@@ -64,8 +64,8 @@ now, know that they exist and that switching between them is free.
 
 ## Reference
 
-The [Week 9 connected interactions](week09/README.md) tutorial is the current
-lesson. [Week 8 camera interactions](week08/README.md) and
+The [Week 12 course review and group-project delivery](week12/README.md) is the current lesson.
+The [Week 9 connected interactions](week09/README.md) tutorial, [Week 8 camera interactions](week08/README.md) and
 [Week 7 interaction development](week07/README.md) remain available, alongside
 [sound, music and speech](week06/README.md) and
 [images and frames](week05/README.md) examples.
@@ -112,5 +112,6 @@ can show people. Treat them accordingly.
 | 09 | [Connected interactions — Thu 5 Nov 2026](week09/README.md) |
 | 10 | [Persistent models and a talking handbook](week10/README.md) |
 | 11 | [Agents, tools and evidence - Blender and authenticated apps (19 November 2026)](week11/README.md) |
+| 12 | [Course review and group-project delivery (26 November 2026)](week12/README.md) |
 
 More lands each week.
